@@ -1,8 +1,8 @@
 from ANNarchy import*
 import numpy as np
 
-from .neuronmodels import Izhikevich_neuron, Izhikevich_STR_neuron, STR_FSI_neuron, Integrator_neuron, Poisson_neuronUpDown
-from .sim_params import params
+from BGmodelSST.neuronmodels import Izhikevich_neuron, Izhikevich_STR_neuron, STR_FSI_neuron, Integrator_neuron, Poisson_neuronUpDown
+from BGmodelSST.sim_params import params
 
 ### cortex / input populations
 #cortex-Go

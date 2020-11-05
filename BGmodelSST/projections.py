@@ -1,8 +1,8 @@
 from ANNarchy import*
 
-from .synapsemodels import FactorSynapse
-from .populations import Stoppinput1, Cortex_S, Cortex_G, STR_D1, STR_D2, STN, SNr, GPe_Proto, Thal, Integrator, IntegratorStop, GPeE, SNrE, STNE, STR_FSI, STRE, GPe_Arky, GPe_Arky2, TestThalnoise, GPe_Proto2, EProto1, EProto2, EArky, ED1, ED2, EFSI
-from .sim_params import params
+from BGmodelSST.synapsemodels import FactorSynapse
+from BGmodelSST.populations import Stoppinput1, Cortex_S, Cortex_G, STR_D1, STR_D2, STN, SNr, GPe_Proto, Thal, Integrator, IntegratorStop, GPeE, SNrE, STNE, STR_FSI, STRE, GPe_Arky, GPe_Arky2, TestThalnoise, GPe_Proto2, EProto1, EProto2, EArky, ED1, ED2, EFSI
+from BGmodelSST.sim_params import params
 
 
 ### CortexGo outputs

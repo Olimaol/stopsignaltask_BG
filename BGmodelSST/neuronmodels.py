@@ -1,5 +1,5 @@
 from ANNarchy import*
-from .sim_params import params
+from BGmodelSST.sim_params import params
 
 Izhikevich_neuron = Neuron(
     parameters = """    
