@@ -12,7 +12,6 @@ except:
 try:
     print('Checking for ANNarchy... ', end='')
     import ANNarchy
-    print('OK')
 except:
     print('NO')
     print('Error : Python package "ANNarchy" is required.')

@@ -10,15 +10,18 @@ general_NrConIntrinsic,10.0
 general_dt,0.1
 general_synDelays,10.0
 general_populationSize,100.0
+general_dt,0.1
+general_threads,1.0
+general_msSmooth,20.0
 ### SIMULATION TIME PARAMS,
 t_init,600.0
 t_SSD,250.0
+t_decay,300.0
 t_cortexPauseDuration,5.0
 t_delayGo,75.0
 t_delayGoSD,0.0
 t_delayStopAfterCue,50.0
 t_delayStopAfterAction,50.0
-t_cortexGoDuration,250.0
 t_cortexStopDurationAfterCue,5.0
 t_cortexStopDurationAfterAction,200.0
 ### NEURON MODELS STANDARD PARAMS,
@@ -165,7 +168,7 @@ weights_cortexStop_GPeArky,0.15
 weights_cortexStop_GPeCp,0.065
 weights_StrD1E_StrD1,0.7
 weights_StrD2E_StrD2,0.8
-weights_StrFSI_StrFSI,0.8
+weights_StrFSIE_StrFSI,0.8
 weights_GPeArkyE_GPeArky,0.09
 weights_GPeProtoE_GPeProto,0.1
 weights_SNrE_SNr,0.1
@@ -209,3 +212,10 @@ weights_GPeCp_StrD2,0.01
 weights_GPeCp_StrFSI,0.01
 weights_GPeCp_GPeArky,0.008
 weights_GPeCp_IntStop,0.00095
+### SIGNIFICANCE RATE COMPARISON TEST PARAMS
+sigTestRateComparisonFailedCorrect_tMin,300.0
+sigTestRateComparisonFailedCorrect_tMax,300.0
+sigTestRateComparisonFailedCorrect_binSize,20.0
+sigTestRateComparisonFailedFast_tMin,50.0
+sigTestRateComparisonFailedFast_tMax,550.0
+sigTestRateComparisonFailedFast_binSize,20.0

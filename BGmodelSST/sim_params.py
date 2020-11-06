@@ -51,7 +51,7 @@ def readParams(csvPath,param_ID,integerParams):
 
 
 ### define parameters with other datatype as float
-integerParams = ['general_populationSize', 'GPeArkyCopy_On']
+integerParams = ['general_populationSize', 'GPeArkyCopy_On', 'threads', 'general_id']
 
 ### get parameters from csv file
 csvfilePath = dir_path+'/new_params.csv'
