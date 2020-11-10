@@ -39,31 +39,22 @@ def changeArkyStopOutput(fD1,fD2,fFSI):
     GPe_Arky2STR_FSI.mod_factor    = params['weights_GPeArky_StrFSI']*params['GPeArkyCopy_On']*(1-fFSI)#np.clip((1-fFSI),0,None)
 
 
-### COMPILATION AND DIRECTORY CREATION
+### COMPILATION AND DATA DIRECTORY CREATION
 if len(sys.argv) <= 1:
     print('Network number missing')
 else:
     netNr = str(sys.argv[1])
     compile('Annarchy'+netNr)
     print("\nnetNr = ", netNr)
-    saveFolderPlots='plots/'+netNr+'/'
 
+    dataDir='../data/'+paramsS['saveFolder']
     try:
-        os.mkdir(saveFolderPlots[:-1])
+        os.makedirs(dataDir)
     except:
-        if os.path.isdir(saveFolderPlots[:-1]):
-            print(saveFolderPlots[:-1]+' already exists')
+        if os.path.isdir(dataDir):
+            print(dataDir+' already exists')
         else:
-            print('could not create '+saveFolderPlots[:-1]+' folder')
-            quit()
-
-    try:
-        os.makedirs('data')
-    except:
-        if os.path.isdir('data'):
-            print('data already exists')
-        else:
-            print('could not create data folder')
+            print('could not create '+dataDir+' folder')
             quit()
 
 
@@ -116,8 +107,8 @@ m_Stoppinput1 = Monitor(Stoppinput1,'spike')
 selection = np.zeros(paramsS['trials'])
 timeovertrial = np.zeros(paramsS['trials'])
 
-np.save('data/paramset_id'+str(params['general_id'])+netNr+'.npy', params)
-np.save('data/paramSset_id'+str(params['general_id'])+netNr+'.npy', paramsS)
+np.save('../data/'+paramsS['saveFolder']+'/paramset_id'+str(params['general_id'])+netNr+'.npy', params)
+np.save('../data/'+paramsS['saveFolder']+'/paramSset_id'+str(params['general_id'])+netNr+'.npy', paramsS)
 
 
 ### WHICH PARAMETER VARIATIONS ###
@@ -220,15 +211,15 @@ for i_paramname in range(n_param_vars):
         param_factors = np.array([0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0])
 
     n_loop_cycles = len(param_factors)
-    loop_params = param_factors# * params_orig
+    loop_params = param_factors
     
-    np.save('data/cycle_params_'+paramname+'_id'+str(params['general_id'])+netNr+'.npy', [loop_params, paramname])
+    np.save('../data/'+paramsS['saveFolder']+'/cycle_params_'+paramname+'_id'+str(params['general_id'])+netNr+'.npy', [loop_params, paramname])
     print('\n\nSTART PARAMETER VARIATION')
     print('paramname = '+paramname+', variations:',loop_params,'\n\n') 
 
     ### LOOP OVER PARAMETERVARIATIONS ###
     for i_cycle in range(n_loop_cycles):
-        print('\n\nSTART CYCLE '+paramname+' '+str(i_cycle)+'/'+str(n_loop_cycles),'\n\n')
+        print('\n\nSTART CYCLE '+paramname+' '+str(i_cycle+1)+'/'+str(n_loop_cycles),'\n\n')
 
         ### CHANGE PARAMETER
         if i_paramname == i_cortexGo_rates:             
@@ -455,26 +446,26 @@ for i_paramname in range(n_param_vars):
         
         ### SAVE GO TRIALS DATA
         print('save Go trials data...\n')
-        np.save('data/selection_Go'+netNr+'.npy', selection)
-        np.save('data/Timeovertrials_Go'+netNr+'.npy', timeovertrial)
+        np.save('../data/'+paramsS['saveFolder']+'/selection_Go'+netNr+'.npy', selection)
+        np.save('../data/'+paramsS['saveFolder']+'/Timeovertrials_Go'+netNr+'.npy', timeovertrial)
         mInt_go = m_Int_ampa.get('g_ampa')
-        np.save('data/Integrator_ampa_Go_'+netNr+'_id'+str(params['general_id'])+'.npy', mInt_go)
+        np.save('../data/'+paramsS['saveFolder']+'/Integrator_ampa_Go_'+netNr+'_id'+str(params['general_id'])+'.npy', mInt_go)
         spike_times, ranks = m_Int_ampa.raster_plot(m_Int_ampa.get('spike'))
-        np.save('data/Integrator_spike_Go'+netNr+'_cycle'+str(i_cycle)+'.npy', [spike_times, ranks])
+        np.save('../data/'+paramsS['saveFolder']+'/Integrator_spike_Go'+netNr+'_cycle'+str(i_cycle)+'.npy', [spike_times, ranks])
 
-        np.save('data/SD1_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_SD1_Go, 0), np.nanstd(rate_data_SD1_Go, 0)])
-        np.save('data/SD2_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_SD2_Go, 0), np.nanstd(rate_data_SD2_Go, 0)])
-        np.save('data/FSI_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_FSI_Go, 0), np.nanstd(rate_data_FSI_Go, 0)])
-        np.save('data/STN_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_STN_Go, 0), np.nanstd(rate_data_STN_Go, 0)])
-        np.save('data/GPeProto_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_GPeProto_Go, 0), np.nanstd(rate_data_GPeProto_Go, 0)])
-        np.save('data/GPeProto2_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_GPeProto2_Go, 0), np.nanstd(rate_data_GPeProto2_Go, 0)])            
-        np.save('data/GPeArky_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_GPeArky_Go, 0), np.nanstd(rate_data_GPeArky_Go, 0)])        
-        np.save('data/SNr_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_SNr_Go, 0), np.nanstd(rate_data_SNr_Go, 0)])
-        np.save('data/SNrE_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_SNrE_Go, 0), np.nanstd(rate_data_SNrE_Go, 0)])        
-        np.save('data/Thal_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_Thal_Go, 0), np.nanstd(rate_data_Thal_Go, 0)])        
-        np.save('data/Cortex_G_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_Cortex_G_Go, 0), np.nanstd(rate_data_Cortex_G_Go, 0)])        
-        np.save('data/Cortex_S_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_Cortex_S_Go, 0), np.nanstd(rate_data_Cortex_S_Go, 0)])                
-        np.save('data/Stoppinput1_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_Stoppinput1_Go, 0), np.nanstd(rate_data_Stoppinput1_Go, 0)])                        
+        np.save('../data/'+paramsS['saveFolder']+'/SD1_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_SD1_Go, 0), np.nanstd(rate_data_SD1_Go, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/SD2_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_SD2_Go, 0), np.nanstd(rate_data_SD2_Go, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/FSI_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_FSI_Go, 0), np.nanstd(rate_data_FSI_Go, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_STN_Go, 0), np.nanstd(rate_data_STN_Go, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_GPeProto_Go, 0), np.nanstd(rate_data_GPeProto_Go, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto2_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_GPeProto2_Go, 0), np.nanstd(rate_data_GPeProto2_Go, 0)])            
+        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_GPeArky_Go, 0), np.nanstd(rate_data_GPeArky_Go, 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_SNr_Go, 0), np.nanstd(rate_data_SNr_Go, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/SNrE_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_SNrE_Go, 0), np.nanstd(rate_data_SNrE_Go, 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/Thal_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_Thal_Go, 0), np.nanstd(rate_data_Thal_Go, 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_G_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_Cortex_G_Go, 0), np.nanstd(rate_data_Cortex_G_Go, 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_S_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_Cortex_S_Go, 0), np.nanstd(rate_data_Cortex_S_Go, 0)])                
+        np.save('../data/'+paramsS['saveFolder']+'/Stoppinput1_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_Stoppinput1_Go, 0), np.nanstd(rate_data_Stoppinput1_Go, 0)])                        
 
                     
 
@@ -657,38 +648,38 @@ for i_paramname in range(n_param_vars):
 
         
         ### SAVE DATA OF STOP TRIALS
-        np.save('data/selection_Stop'+netNr+'.npy', selection)
-        np.save('data/Timeovertrials_Stop'+netNr+'.npy', timeovertrial)
+        np.save('../data/'+paramsS['saveFolder']+'/selection_Stop'+netNr+'.npy', selection)
+        np.save('../data/'+paramsS['saveFolder']+'/Timeovertrials_Stop'+netNr+'.npy', timeovertrial)
         mInt_stop = m_Int_ampa.get('g_ampa')
-        np.save('data/Integrator_ampa_Stop_'+netNr+'_id'+str(params['general_id'])+'.npy', mInt_stop)            
+        np.save('../data/'+paramsS['saveFolder']+'/Integrator_ampa_Stop_'+netNr+'_id'+str(params['general_id'])+'.npy', mInt_stop)            
         spike_times, ranks = m_Int_ampa.raster_plot(m_Int_ampa.get('spike'))
-        np.save('data/Integrator_spike_Stop'+netNr+'_cycle'+str(i_cycle)+'.npy', [spike_times, ranks]) 
+        np.save('../data/'+paramsS['saveFolder']+'/Integrator_spike_Stop'+netNr+'_cycle'+str(i_cycle)+'.npy', [spike_times, ranks]) 
 
-        np.save('data/SD1_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_SD1_Stop, 0), np.nanstd(rate_data_SD1_Stop, 0)])
-        np.save('data/SD2_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_SD2_Stop, 0), np.nanstd(rate_data_SD2_Stop, 0)])
-        np.save('data/FSI_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_FSI_Stop, 0), np.nanstd(rate_data_FSI_Stop, 0)])             
-        np.save('data/STN_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_STN_Stop, 0), np.nanstd(rate_data_STN_Stop, 0)])
-        np.save('data/GPeProto_rate_Stop_mean_std'                                      + netNr                      + '.npy', [np.nanmean(rate_data_GPeProto_Stop, 0), np.nanstd(rate_data_GPeProto_Stop, 0)])
-        np.save('data/GPeProto2_rate_Stop_mean_std'                                     + netNr                      + '.npy', [np.nanmean(rate_data_GPeProto2_Stop, 0), np.nanstd(rate_data_GPeProto2_Stop, 0)])            
-        np.save('data/GPeArky_rate_Stop_mean_std'                                       + netNr                      + '.npy', [np.nanmean(rate_data_GPeArky_Stop, 0), np.nanstd(rate_data_GPeArky_Stop, 0)])   
-        np.save('data/SNr_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_SNr_Stop, 0), np.nanstd(rate_data_SNr_Stop, 0)])
-        np.save('data/SNrE_rate_Stop_mean_std'                                          + netNr                      + '.npy', [np.nanmean(rate_data_SNrE_Stop, 0), np.nanstd(rate_data_SNrE_Stop, 0)])        
-        np.save('data/Thal_rate_Stop_mean_std'                                          + netNr                      + '.npy', [np.nanmean(rate_data_Thal_Stop, 0), np.nanstd(rate_data_Thal_Stop, 0)])        
-        np.save('data/Cortex_G_rate_Stop_mean_std'                                      + netNr                      + '.npy', [np.nanmean(rate_data_Cortex_G_Stop, 0), np.nanstd(rate_data_Cortex_G_Stop, 0)])
-        np.save('data/Cortex_S_rate_Stop_mean_std'                                      + netNr                      + '.npy', [np.nanmean(rate_data_Cortex_S_Stop, 0), np.nanstd(rate_data_Cortex_S_Stop, 0)])
-        np.save('data/Stoppinput1_rate_Stop_mean_std'                                   + netNr                      + '.npy', [np.nanmean(rate_data_Stoppinput1_Stop, 0), np.nanstd(rate_data_Stoppinput1_Stop, 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/SD1_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_SD1_Stop, 0), np.nanstd(rate_data_SD1_Stop, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/SD2_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_SD2_Stop, 0), np.nanstd(rate_data_SD2_Stop, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/FSI_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_FSI_Stop, 0), np.nanstd(rate_data_FSI_Stop, 0)])             
+        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_STN_Stop, 0), np.nanstd(rate_data_STN_Stop, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Stop_mean_std'                                      + netNr                      + '.npy', [np.nanmean(rate_data_GPeProto_Stop, 0), np.nanstd(rate_data_GPeProto_Stop, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto2_rate_Stop_mean_std'                                     + netNr                      + '.npy', [np.nanmean(rate_data_GPeProto2_Stop, 0), np.nanstd(rate_data_GPeProto2_Stop, 0)])            
+        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Stop_mean_std'                                       + netNr                      + '.npy', [np.nanmean(rate_data_GPeArky_Stop, 0), np.nanstd(rate_data_GPeArky_Stop, 0)])   
+        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_SNr_Stop, 0), np.nanstd(rate_data_SNr_Stop, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/SNrE_rate_Stop_mean_std'                                          + netNr                      + '.npy', [np.nanmean(rate_data_SNrE_Stop, 0), np.nanstd(rate_data_SNrE_Stop, 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/Thal_rate_Stop_mean_std'                                          + netNr                      + '.npy', [np.nanmean(rate_data_Thal_Stop, 0), np.nanstd(rate_data_Thal_Stop, 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_G_rate_Stop_mean_std'                                      + netNr                      + '.npy', [np.nanmean(rate_data_Cortex_G_Stop, 0), np.nanstd(rate_data_Cortex_G_Stop, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_S_rate_Stop_mean_std'                                      + netNr                      + '.npy', [np.nanmean(rate_data_Cortex_S_Stop, 0), np.nanstd(rate_data_Cortex_S_Stop, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/Stoppinput1_rate_Stop_mean_std'                                   + netNr                      + '.npy', [np.nanmean(rate_data_Stoppinput1_Stop, 0), np.nanstd(rate_data_Stoppinput1_Stop, 0)])        
 
-        np.save('data/STN_rate_Stop_mean_std_'        + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_STN_Stop, 0), np.nanstd(rate_data_STN_Stop, 0)])
-        np.save('data/GPeProto_rate_Stop_mean_std_'   + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_GPeProto_Stop, 0), np.nanstd(rate_data_GPeProto_Stop, 0)])            
-        np.save('data/GPeProto2_rate_Stop_mean_std_'  + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_GPeProto2_Stop, 0), np.nanstd(rate_data_GPeProto2_Stop, 0)])                        
-        np.save('data/GPeArky_rate_Stop_mean_std_'    + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_GPeArky_Stop, 0), np.nanstd(rate_data_GPeArky_Stop, 0)])               
-        np.save('data/SNr_rate_Stop_mean_std_'        + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_SNr_Stop, 0), np.nanstd(rate_data_SNr_Stop, 0)])            
+        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Stop_mean_std_'        + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_STN_Stop, 0), np.nanstd(rate_data_STN_Stop, 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Stop_mean_std_'   + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_GPeProto_Stop, 0), np.nanstd(rate_data_GPeProto_Stop, 0)])            
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto2_rate_Stop_mean_std_'  + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_GPeProto2_Stop, 0), np.nanstd(rate_data_GPeProto2_Stop, 0)])                        
+        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Stop_mean_std_'    + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_GPeArky_Stop, 0), np.nanstd(rate_data_GPeArky_Stop, 0)])               
+        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Stop_mean_std_'        + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_SNr_Stop, 0), np.nanstd(rate_data_SNr_Stop, 0)])            
         
         
-        np.save('data/STN_rate_Stop_alltrials'+netNr+'.npy', rate_data_STN_Stop)         
-        np.save('data/SNr_rate_Stop_alltrials'+netNr+'.npy', rate_data_SNr_Stop) 
-        np.save('data/GPeProto_rate_Stop_alltrials'+netNr+'.npy', rate_data_GPeProto_Stop) 
-        np.save('data/GPeArky_rate_Stop_alltrials'+netNr+'.npy', rate_data_GPeArky_Stop)         
+        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Stop_alltrials'+netNr+'.npy', rate_data_STN_Stop)         
+        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Stop_alltrials'+netNr+'.npy', rate_data_SNr_Stop) 
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Stop_alltrials'+netNr+'.npy', rate_data_GPeProto_Stop) 
+        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Stop_alltrials'+netNr+'.npy', rate_data_GPeArky_Stop)         
 
         ### GET AND SAVE CORRECT AND FAILED STOP DATA
         StrD1_meanrate_FailedStop, StrD1_std_FailedStop, StrD1_meanrate_CorrectStop, StrD1_std_CorrectStop              = calc_meanrate_std_failed_correct(rate_data_SD1_Stop, mInt_stop, Integrator.threshold, paramsS['trials']) 
@@ -705,19 +696,19 @@ for i_paramname in range(n_param_vars):
         Cortex_S_meanrate_FailedStop, Cortex_S_std_FailedStop, Cortex_S_meanrate_CorrectStop, Cortex_S_std_CorrectStop  = calc_meanrate_std_failed_correct(rate_data_Cortex_S_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])
         Stoppinput1_meanrate_FailedStop, Stoppinput1_std_FailedStop, Stoppinput1_meanrate_CorrectStop, Stoppinput1_std_CorrectStop = calc_meanrate_std_failed_correct(rate_data_Stoppinput1_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])        
 
-        np.save('data/SD1_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [StrD1_meanrate_FailedStop, StrD1_std_FailedStop, StrD1_meanrate_CorrectStop, StrD1_std_CorrectStop])
-        np.save('data/SD2_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [StrD2_meanrate_FailedStop, StrD2_std_FailedStop, StrD2_meanrate_CorrectStop, StrD2_std_CorrectStop])
-        np.save('data/FSI_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [StrFSI_meanrate_FailedStop, StrFSI_std_FailedStop, StrFSI_meanrate_CorrectStop, StrFSI_std_CorrectStop])
-        np.save('data/STN_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [STN_meanrate_FailedStop, STN_std_FailedStop, STN_meanrate_CorrectStop, STN_std_CorrectStop])
-        np.save('data/Proto_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Proto_meanrate_FailedStop, Proto_std_FailedStop, Proto_meanrate_CorrectStop, Proto_std_CorrectStop])
-        np.save('data/Proto2_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Proto2_meanrate_FailedStop, Proto2_std_FailedStop, Proto2_meanrate_CorrectStop, Proto2_std_CorrectStop])            
-        np.save('data/Arky_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Arky_meanrate_FailedStop, Arky_std_FailedStop, Arky_meanrate_CorrectStop, Arky_std_CorrectStop])
-        np.save('data/SNr_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [SNr_meanrate_FailedStop, SNr_std_FailedStop, SNr_meanrate_CorrectStop, SNr_std_CorrectStop])
-        np.save('data/SNrE_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [SNrE_meanrate_FailedStop, SNrE_std_FailedStop, SNrE_meanrate_CorrectStop, SNrE_std_CorrectStop])        
-        np.save('data/Thal_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Thal_meanrate_FailedStop, Thal_std_FailedStop, Thal_meanrate_CorrectStop, Thal_std_CorrectStop])        
-        np.save('data/Cortex_G_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Cortex_G_meanrate_FailedStop, Cortex_G_std_FailedStop, Cortex_G_meanrate_CorrectStop, Cortex_G_std_CorrectStop])
-        np.save('data/Cortex_S_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Cortex_S_meanrate_FailedStop, Cortex_S_std_FailedStop, Cortex_S_meanrate_CorrectStop, Cortex_S_std_CorrectStop])        
-        np.save('data/Stoppinput1_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Stoppinput1_meanrate_FailedStop, Stoppinput1_std_FailedStop, Stoppinput1_meanrate_CorrectStop, Stoppinput1_std_CorrectStop])                
+        np.save('../data/'+paramsS['saveFolder']+'/SD1_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [StrD1_meanrate_FailedStop, StrD1_std_FailedStop, StrD1_meanrate_CorrectStop, StrD1_std_CorrectStop])
+        np.save('../data/'+paramsS['saveFolder']+'/SD2_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [StrD2_meanrate_FailedStop, StrD2_std_FailedStop, StrD2_meanrate_CorrectStop, StrD2_std_CorrectStop])
+        np.save('../data/'+paramsS['saveFolder']+'/FSI_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [StrFSI_meanrate_FailedStop, StrFSI_std_FailedStop, StrFSI_meanrate_CorrectStop, StrFSI_std_CorrectStop])
+        np.save('../data/'+paramsS['saveFolder']+'/STN_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [STN_meanrate_FailedStop, STN_std_FailedStop, STN_meanrate_CorrectStop, STN_std_CorrectStop])
+        np.save('../data/'+paramsS['saveFolder']+'/Proto_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Proto_meanrate_FailedStop, Proto_std_FailedStop, Proto_meanrate_CorrectStop, Proto_std_CorrectStop])
+        np.save('../data/'+paramsS['saveFolder']+'/Proto2_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Proto2_meanrate_FailedStop, Proto2_std_FailedStop, Proto2_meanrate_CorrectStop, Proto2_std_CorrectStop])            
+        np.save('../data/'+paramsS['saveFolder']+'/Arky_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Arky_meanrate_FailedStop, Arky_std_FailedStop, Arky_meanrate_CorrectStop, Arky_std_CorrectStop])
+        np.save('../data/'+paramsS['saveFolder']+'/SNr_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [SNr_meanrate_FailedStop, SNr_std_FailedStop, SNr_meanrate_CorrectStop, SNr_std_CorrectStop])
+        np.save('../data/'+paramsS['saveFolder']+'/SNrE_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [SNrE_meanrate_FailedStop, SNrE_std_FailedStop, SNrE_meanrate_CorrectStop, SNrE_std_CorrectStop])        
+        np.save('../data/'+paramsS['saveFolder']+'/Thal_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Thal_meanrate_FailedStop, Thal_std_FailedStop, Thal_meanrate_CorrectStop, Thal_std_CorrectStop])        
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_G_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Cortex_G_meanrate_FailedStop, Cortex_G_std_FailedStop, Cortex_G_meanrate_CorrectStop, Cortex_G_std_CorrectStop])
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_S_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Cortex_S_meanrate_FailedStop, Cortex_S_std_FailedStop, Cortex_S_meanrate_CorrectStop, Cortex_S_std_CorrectStop])        
+        np.save('../data/'+paramsS['saveFolder']+'/Stoppinput1_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Stoppinput1_meanrate_FailedStop, Stoppinput1_std_FailedStop, Stoppinput1_meanrate_CorrectStop, Stoppinput1_std_CorrectStop])                
         
         ### GET AND SAVE FAST AND SLOW GO DATA
         GPe_Arky_meanrate_FastGo,   GPe_Arky_std_FastGo,    GPe_Arky_meanrate_SlowGo,   GPe_Arky_std_SlowGo     = calc_meanrate_std_Fast_Slow(rate_data_GPeArky_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
@@ -733,18 +724,18 @@ for i_paramname in range(n_param_vars):
         Cortex_S_meanrate_FastGo,   Cortex_S_std_FastGo,    Cortex_S_meanrate_SlowGo,   Cortex_S_std_SlowGo     = calc_meanrate_std_Fast_Slow(rate_data_Cortex_S_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])                
         StrFSI_meanrate_FastGo,     StrFSI_std_FastGo,      StrFSI_meanrate_SlowGo,     StrFSI_std_SlowGo       = calc_meanrate_std_Fast_Slow(rate_data_FSI_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])                 
 
-        np.save('data/GPe_Arky_meanrate_std_Fast-Slow_Go'+netNr+'.npy',   [GPe_Arky_meanrate_FastGo,   GPe_Arky_std_FastGo,    GPe_Arky_meanrate_SlowGo,   GPe_Arky_std_SlowGo])
-        np.save('data/GPe_Proto_meanrate_std_Fast-Slow_Go'+netNr+'.npy',  [GPe_Proto_meanrate_FastGo,  GPe_Proto_std_FastGo,   GPe_Proto_meanrate_SlowGo,  GPe_Proto_std_SlowGo])
-        np.save('data/SD1_meanrate_std_Fast-Slow_Go'+netNr+'.npy',        [StrD1_meanrate_FastGo,      StrD1_std_FastGo,       StrD1_meanrate_SlowGo,      StrD1_std_SlowGo])
-        np.save('data/SD2_meanrate_std_Fast-Slow_Go'+netNr+'.npy',        [StrD2_meanrate_FastGo,      StrD2_std_FastGo,       StrD2_meanrate_SlowGo,      StrD2_std_SlowGo])            
-        np.save('data/STN_meanrate_std_Fast-Slow_Go'+netNr+'.npy',        [STN_meanrate_FastGo,        STN_std_FastGo,         STN_meanrate_SlowGo,        STN_std_SlowGo])
-        np.save('data/SNr_meanrate_std_Fast-Slow_Go'+netNr+'.npy',        [SNr_meanrate_FastGo,        SNr_std_FastGo,         SNr_meanrate_SlowGo,        SNr_std_SlowGo])
-        np.save('data/Thal_meanrate_std_Fast-Slow_Go'+netNr+'.npy',       [Thal_meanrate_FastGo,       Thal_std_FastGo,        Thal_meanrate_SlowGo,       Thal_std_SlowGo])
-        np.save('data/Cortex_G_meanrate_std_Fast-Slow_Go'+netNr+'.npy',   [Cortex_G_meanrate_FastGo,   Cortex_G_std_FastGo,    Cortex_G_meanrate_SlowGo,   Cortex_G_std_SlowGo])
-        np.save('data/GPe_Proto2_meanrate_std_Fast-Slow_Go'+netNr+'.npy', [GPe_Proto2_meanrate_FastGo, GPe_Proto2_std_FastGo,  GPe_Proto2_meanrate_SlowGo, GPe_Proto2_std_SlowGo])
-        np.save('data/PauseInput_meanrate_std_Fast-Slow_Go'+netNr+'.npy', [PauseInput_meanrate_FastGo, PauseInput_std_FastGo,  PauseInput_meanrate_SlowGo, PauseInput_std_SlowGo])
-        np.save('data/Cortex_S_meanrate_std_Fast-Slow_Go'+netNr+'.npy',   [Cortex_S_meanrate_FastGo,   Cortex_S_std_FastGo,    Cortex_S_meanrate_SlowGo,   Cortex_S_std_SlowGo])                        
-        np.save('data/FSI_meanrate_std_Fast-Slow_Go'+netNr+'.npy',        [StrFSI_meanrate_FastGo,     StrFSI_std_FastGo,      StrFSI_meanrate_SlowGo,     StrFSI_std_SlowGo])
+        np.save('../data/'+paramsS['saveFolder']+'/GPe_Arky_meanrate_std_Fast-Slow_Go'+netNr+'.npy',   [GPe_Arky_meanrate_FastGo,   GPe_Arky_std_FastGo,    GPe_Arky_meanrate_SlowGo,   GPe_Arky_std_SlowGo])
+        np.save('../data/'+paramsS['saveFolder']+'/GPe_Proto_meanrate_std_Fast-Slow_Go'+netNr+'.npy',  [GPe_Proto_meanrate_FastGo,  GPe_Proto_std_FastGo,   GPe_Proto_meanrate_SlowGo,  GPe_Proto_std_SlowGo])
+        np.save('../data/'+paramsS['saveFolder']+'/SD1_meanrate_std_Fast-Slow_Go'+netNr+'.npy',        [StrD1_meanrate_FastGo,      StrD1_std_FastGo,       StrD1_meanrate_SlowGo,      StrD1_std_SlowGo])
+        np.save('../data/'+paramsS['saveFolder']+'/SD2_meanrate_std_Fast-Slow_Go'+netNr+'.npy',        [StrD2_meanrate_FastGo,      StrD2_std_FastGo,       StrD2_meanrate_SlowGo,      StrD2_std_SlowGo])            
+        np.save('../data/'+paramsS['saveFolder']+'/STN_meanrate_std_Fast-Slow_Go'+netNr+'.npy',        [STN_meanrate_FastGo,        STN_std_FastGo,         STN_meanrate_SlowGo,        STN_std_SlowGo])
+        np.save('../data/'+paramsS['saveFolder']+'/SNr_meanrate_std_Fast-Slow_Go'+netNr+'.npy',        [SNr_meanrate_FastGo,        SNr_std_FastGo,         SNr_meanrate_SlowGo,        SNr_std_SlowGo])
+        np.save('../data/'+paramsS['saveFolder']+'/Thal_meanrate_std_Fast-Slow_Go'+netNr+'.npy',       [Thal_meanrate_FastGo,       Thal_std_FastGo,        Thal_meanrate_SlowGo,       Thal_std_SlowGo])
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_G_meanrate_std_Fast-Slow_Go'+netNr+'.npy',   [Cortex_G_meanrate_FastGo,   Cortex_G_std_FastGo,    Cortex_G_meanrate_SlowGo,   Cortex_G_std_SlowGo])
+        np.save('../data/'+paramsS['saveFolder']+'/GPe_Proto2_meanrate_std_Fast-Slow_Go'+netNr+'.npy', [GPe_Proto2_meanrate_FastGo, GPe_Proto2_std_FastGo,  GPe_Proto2_meanrate_SlowGo, GPe_Proto2_std_SlowGo])
+        np.save('../data/'+paramsS['saveFolder']+'/PauseInput_meanrate_std_Fast-Slow_Go'+netNr+'.npy', [PauseInput_meanrate_FastGo, PauseInput_std_FastGo,  PauseInput_meanrate_SlowGo, PauseInput_std_SlowGo])
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_S_meanrate_std_Fast-Slow_Go'+netNr+'.npy',   [Cortex_S_meanrate_FastGo,   Cortex_S_std_FastGo,    Cortex_S_meanrate_SlowGo,   Cortex_S_std_SlowGo])                        
+        np.save('../data/'+paramsS['saveFolder']+'/FSI_meanrate_std_Fast-Slow_Go'+netNr+'.npy',        [StrFSI_meanrate_FastGo,     StrFSI_std_FastGo,      StrFSI_meanrate_SlowGo,     StrFSI_std_SlowGo])
 
         ### GET RATE DATA AND PVALUES FOR FAILED VS CORRECT STOP
         t_stopCue = int(params['t_init'] + params['t_SSD'])
@@ -777,8 +768,8 @@ for i_paramname in range(n_param_vars):
                                             FSI_rates_FailedStop, FSI_rates_CorrectStop, \
                                             pvalue_times, dt(), 'test')
   
-        #p_ind_arky, p_ind_SD1, p_ind_STN, p_ind_Proto, p_ind_Proto2, p_ind_SNr, p_ind_thal, p_ind_SD2, p_ind_CortexG, p_ind_CortexS, p_ind_FSI = range(11)  
-        np.save('data/p_value_list_times_'+str(params['general_id'])+netNr+'.npy', [pval_all, pvalue_times], allow_pickle=True)
+        #p_ind_arky, p_ind_SD1, p_ind_STN, p_ind_Proto, p_ind_Proto2, p_ind_SNr, p_ind_thal, p_ind_SD2, p_ind_CortexG, p_ind_CortexS, p_ind_FSI = range(11) TODO: this list is important for the Figures with pvalues it is defined in the function analysis.calc_KW_stats_all
+        np.save('../data/'+paramsS['saveFolder']+'/p_value_list_times_'+str(params['general_id'])+netNr+'.npy', [pval_all, pvalue_times], allow_pickle=True)
 
         ### GET RATE DATA AND PVALUES FOR FAILED STOP VS FAST GO
         t_stopCue = int(params['t_init'] + params['t_SSD'])
@@ -819,18 +810,18 @@ for i_paramname in range(n_param_vars):
                                                     GroupA[10], GroupB[10], \
                                                     pvalue_times, dt(), nameList[Groups_Idx])
 
-            np.save('data/p_value_list_'+nameList[Groups_Idx]+'_times_'+str(params['general_id'])+netNr+'.npy', [pval_all, pvalue_times], allow_pickle=True)
+            np.save('../data/'+paramsS['saveFolder']+'/p_value_list_'+nameList[Groups_Idx]+'_times_'+str(params['general_id'])+netNr+'.npy', [pval_all, pvalue_times], allow_pickle=True)
 
-        ### SAVE MEAN RATES 200ms AFTER STOP CUE
-        np.save('data/SD1_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_SD1_Stop[:, t_stopCue : t_stopCue + 200], 1))
-        np.save('data/SD2_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_SD2_Stop[:, t_stopCue : t_stopCue + 200], 1))
-        np.save('data/STN_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_STN_Stop[:, t_stopCue : t_stopCue + 200], 1))
-        np.save('data/GPeProto_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_GPeProto_Stop[:, t_stopCue : t_stopCue + 200], 1))        
-        np.save('data/GPeArky_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_GPeArky_Stop[:, t_stopCue : t_stopCue + 200], 1))        
-        np.save('data/SNr_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_SNr_Stop[:, t_stopCue : t_stopCue + 200], 1))
-        np.save('data/Thal_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_Thal_Stop[:, t_stopCue : t_stopCue + 200], 1))        
-        np.save('data/Cortex_G_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_Cortex_G_Stop[:, t_stopCue : t_stopCue + 200], 1))        
-        np.save('data/Cortex_S_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_Cortex_S_Stop[:, t_stopCue : t_stopCue + 200], 1))                
+        ### SAVE MEAN RATES 200ms AFTER STOP CUE TODO: is this needed anymore?
+        np.save('../data/'+paramsS['saveFolder']+'/SD1_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_SD1_Stop[:, t_stopCue : t_stopCue + 200], 1))
+        np.save('../data/'+paramsS['saveFolder']+'/SD2_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_SD2_Stop[:, t_stopCue : t_stopCue + 200], 1))
+        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_STN_Stop[:, t_stopCue : t_stopCue + 200], 1))
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_GPeProto_Stop[:, t_stopCue : t_stopCue + 200], 1))        
+        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_GPeArky_Stop[:, t_stopCue : t_stopCue + 200], 1))        
+        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_SNr_Stop[:, t_stopCue : t_stopCue + 200], 1))
+        np.save('../data/'+paramsS['saveFolder']+'/Thal_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_Thal_Stop[:, t_stopCue : t_stopCue + 200], 1))        
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_G_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_Cortex_G_Stop[:, t_stopCue : t_stopCue + 200], 1))        
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_S_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_Cortex_S_Stop[:, t_stopCue : t_stopCue + 200], 1))                
 
         ### GET FAILED AND CORRECT GO AND STOP TRIALS, SAVE REAKTION TIME DATA
         print("Calculating reaction times...")
@@ -868,7 +859,7 @@ for i_paramname in range(n_param_vars):
         results_RT['meanRT_CorrectGo'] = mean_CorrectGo
         results_RT['meanRT_FailedStop'] = mean_FailedStop
 
-        np.save('data/resultsRT_'+netNr+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(params['general_id'])+'.npy', results_RT) 
+        np.save('../data/'+paramsS['saveFolder']+'/resultsRT_'+netNr+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(params['general_id'])+'.npy', results_RT) 
 
         ### RESET ALL MODIFIED PARAMETERS BEFOR NEW CYCLE
         params['cortexGo_rates'] = params_orig_CortexGo
@@ -886,10 +877,6 @@ for i_paramname in range(n_param_vars):
         STNSNr.mod_factor = params['weights_STN_SNr']  
         changeArkyStopOutput(1,1,1)
 
-        print('\n')
-        print(Cortex_SGPe_Arky.mod_factor[0], params['cortexPause_ratesSecondRespMod'], Cortex_SGPe_Proto2.mod_factor[0])
-        changeStopMechanism(0.5,0.5,0.5)
-        print(Cortex_SGPe_Arky.mod_factor[0], params['cortexPause_ratesSecondRespMod'], Cortex_SGPe_Proto2.mod_factor[0])
         
 
 
