@@ -5,6 +5,149 @@ import scipy.stats as st
 from ANNarchy import population_rate
 import matplotlib.lines as mlines
 
+
+def calc_KW_stats_all(GPe_Arky_rates_FailedStop, GPe_Arky_rates_CorrectStop, \
+                      SD1_rates_FailedStop, SD1_rates_CorrectStop, \
+                      SD2_rates_FailedStop, SD2_rates_CorrectStop, \
+                      STN_rates_FailedStop, STN_rates_CorrectStop, \
+                      GPe_Proto_rates_FailedStop, GPe_Proto_rates_CorrectStop, \
+                      GPe_Proto2_rates_FailedStop, GPe_Proto2_rates_CorrectStop, \
+                      SNr_rates_FailedStop, SNr_rates_CorrectStop, \
+                      Thal_rates_FailedStop, Thal_rates_CorrectStop, \
+                      CortexG_rates_FailedStop, CortexG_rates_CorrectStop, \
+                      CortexS_rates_FailedStop, CortexS_rates_CorrectStop, \
+                      FSI_rates_FailedStop, FSI_rates_CorrectStop, \
+                      pvalue_times, dt, name=''):
+                          
+    # Input: Raw population rates across trials. Dims: [trials, timesteps]
+                          
+    Hstat_all = [] # np.nan * np.ones(2)
+    pval_all = [] # np.nan * np.ones(2)    
+
+    H, p = calc_KruskalWallis(GPe_Arky_rates_FailedStop, GPe_Arky_rates_CorrectStop, pvalue_times, dt, 0, name)
+    Hstat_all.append(H)
+    pval_all.append(p)  
+
+    H, p = calc_KruskalWallis(SD1_rates_FailedStop, SD1_rates_CorrectStop, pvalue_times, dt, 1, name)
+    Hstat_all.append(H)
+    pval_all.append(p)    
+
+    H, p = calc_KruskalWallis(STN_rates_FailedStop, STN_rates_CorrectStop, pvalue_times, dt, 2, name)
+    Hstat_all.append(H)
+    pval_all.append(p) 
+
+    H, p = calc_KruskalWallis(GPe_Proto_rates_FailedStop, GPe_Proto_rates_CorrectStop, pvalue_times, dt, 3, name)
+    Hstat_all.append(H)
+    pval_all.append(p)  
+
+    H, p = calc_KruskalWallis(GPe_Proto2_rates_FailedStop, GPe_Proto2_rates_CorrectStop, pvalue_times, dt, 4, name)
+    Hstat_all.append(H)
+    pval_all.append(p) 
+
+    H, p = calc_KruskalWallis(SNr_rates_FailedStop, SNr_rates_CorrectStop, pvalue_times, dt, 5, name)
+    Hstat_all.append(H)
+    pval_all.append(p) 
+
+    H, p = calc_KruskalWallis(Thal_rates_FailedStop, Thal_rates_CorrectStop, pvalue_times, dt, 6, name)
+    Hstat_all.append(H)
+    pval_all.append(p)        
+    
+    H, p = calc_KruskalWallis(SD2_rates_FailedStop, SD2_rates_CorrectStop, pvalue_times, dt, 7, name)
+    Hstat_all.append(H)
+    pval_all.append(p)
+    
+    H, p = calc_KruskalWallis(CortexG_rates_FailedStop, CortexG_rates_CorrectStop, pvalue_times, dt, 8, name)
+    Hstat_all.append(H)
+    pval_all.append(p)        
+
+    H, p = calc_KruskalWallis(CortexS_rates_FailedStop, CortexS_rates_CorrectStop, pvalue_times, dt, 9, name)
+    Hstat_all.append(H)
+    pval_all.append(p)        
+    
+    H, p = calc_KruskalWallis(FSI_rates_FailedStop, FSI_rates_CorrectStop, pvalue_times, dt, 10, name)
+    Hstat_all.append(H)
+    pval_all.append(p)     
+
+    return Hstat_all, pval_all
+
+
+def calc_KruskalWallis(rates_FailedStop, rates_CorrectStop, pvalue_times, dt, number, name, printout = True):
+    # Input:
+    # rates_FailedStop, rates_CorrectStop:
+    # Raw population rates across trials in ALL time bins
+    # I would need an AVERAGE across TIME STEPS withion each bin, not an average across TRIALS!
+    n_bins = len(pvalue_times) - 1    
+    Hstat = np.nan * np.ones(n_bins)
+    pval = np.nan * np.ones(n_bins)      
+    boxlen = int(1.0 / dt)
+    if printout: print(name, number)
+    for i_bin in range(n_bins):
+        meanrate_FailedStop_bin = np.nanmean(rates_FailedStop[:, pvalue_times[i_bin] : pvalue_times[i_bin+1]], 1) # Average across time steps
+        meanrate_CorrectStop_bin = np.nanmean(rates_CorrectStop[:, pvalue_times[i_bin] : pvalue_times[i_bin+1]], 1) # Average across time steps
+        meanrate_FailedStop_bin = meanrate_FailedStop_bin[np.nonzero(np.isnan(meanrate_FailedStop_bin)==False)[0]] # Exclude nan values        
+        meanrate_CorrectStop_bin = meanrate_CorrectStop_bin[np.nonzero(np.isnan(meanrate_CorrectStop_bin)==False)[0]]         
+        if np.sum(np.isnan(meanrate_CorrectStop_bin)==False) > 1:
+            if (np.sum(meanrate_FailedStop_bin > 0) > 0 or np.sum(meanrate_CorrectStop_bin) > 0) and not(np.array_equal(meanrate_FailedStop_bin,meanrate_CorrectStop_bin)): # Avoid comparing two equal (e.g., zero) arrays                
+                Hstat[i_bin], pval[i_bin] = st.kruskal(meanrate_FailedStop_bin, meanrate_CorrectStop_bin)
+        if printout: 
+            print('Bin %i: np.nanmean(meanrate_FailedStop_bin) = %.3f, np.nanmean(meanrate_CorrectStop_bin) = %.3f' %(i_bin, np.nanmean(meanrate_FailedStop_bin), np.nanmean(meanrate_CorrectStop_bin)))            
+            print('Bin %i: p = %.3f' %(i_bin, pval[i_bin]))
+    return Hstat, pval
+
+
+def calc_meanrate_std_failed_correct(rate_data_Stop, mInt_stop, threshold, n_trials):
+    # Input:     
+    # rate_data_Stop: Raw population rate. Dims: [trials, timesteps]
+    # Output:     
+    # meanrate_FailedStop, meanrate_CorrectStop: 
+    # Trial-averaged population rates. Dim: [timesteps]
+    nz_FailedStop, nz_CorrectStop = get_correct_failed_stop_trials(mInt_stop, threshold, n_trials)
+    meanrate_FailedStop = np.nanmean(rate_data_Stop[nz_FailedStop, :], 0)
+    std_FailedStop = np.nanstd(rate_data_Stop[nz_FailedStop, :], 0)    
+    meanrate_CorrectStop = np.nanmean(rate_data_Stop[nz_CorrectStop, :], 0)            
+    std_CorrectStop = np.nanstd(rate_data_Stop[nz_CorrectStop, :], 0)                
+    return meanrate_FailedStop, std_FailedStop, meanrate_CorrectStop, std_CorrectStop
+
+
+def get_correct_failed_stop_trials(mInt_stop, threshold, n_trials):
+    rsp_mInt_stop = np.reshape(mInt_stop, [int(mInt_stop.shape[0] / float(n_trials)), n_trials], order='F')    
+    mInt_maxpertrial = np.nanmax(rsp_mInt_stop, 0)
+    nz_FailedStop = np.nonzero(mInt_maxpertrial >= threshold)[0]
+    nz_CorrectStop = np.nonzero(mInt_maxpertrial < threshold)[0]
+    return nz_FailedStop, nz_CorrectStop
+
+
+def get_rates_failed_correct(rate_data_Stop, mInt_stop, threshold, n_trials):
+    # Input:     
+    # rate_data_Stop: Raw population rate. Dims: [trials, timesteps]    
+    nz_FailedStop, nz_CorrectStop = get_correct_failed_stop_trials(mInt_stop, threshold, n_trials)
+    rates_FailedStop = rate_data_Stop[nz_FailedStop, :]
+    rates_CorrectStop = rate_data_Stop[nz_CorrectStop, :]
+    # Output:     
+    # rates_FailedStop, rates_CorrectStop: Raw population rate. Dims: [trials, timesteps]        
+    return rates_FailedStop, rates_CorrectStop
+
+
+def get_poprate_aligned_onset(mon, spikes, poprate, ratedata_currtrial, dt):
+    te, ne = mon.raster_plot(spikes)
+    if len(te) > 0:
+        i_te_min = np.argmin(te)
+        i_te_max = np.argmax(te)
+        te_min = int( te[i_te_min] / dt )
+        te_max = int( te[i_te_max] / dt )        
+        len_ratedata = len(ratedata_currtrial[1:])               
+        #poprate[te_min : te_min + len_ratedata] = ratedata_currtrial[1:] # Works, but often a large spike at onset                        
+        shift = 0#int(2 / dt) # 2 works for Cortex_Stop and Go ## 100 is drastic - works, but errors with p-values?!
+        #shift = int(20 / dt) # test for t_smooth_ms = 5.0 ms - Ok         
+        #shift = int(50 / dt) # test for t_smooth_ms = 10.0 - still some errors for shift=40/dt, shift=50/dt is OK
+        poprate[te_min + shift : te_min + len_ratedata] = ratedata_currtrial[1+shift: ] #        
+        poprate[0 : te_min + shift] = np.zeros(te_min + shift)       
+        poprate[te_min + len_ratedata : ] = 0
+
+        
+    return poprate
+
+
 def custom_poprate(mon, pop_spikes, t_smooth_ms):
     t_mines = []
     for neuron in pop_spikes.keys():
@@ -23,6 +166,99 @@ def custom_poprate(mon, pop_spikes, t_smooth_ms):
     del pop_spikes[list(pop_spikes.keys())[0]][0]
     
     return rate_data_currtrial
+
+
+def calc_meanrate_std_Fast_Slow(rate_data_Go, mInt_Go, mInt_Stop, threshold, n_trials):
+    # Input:     
+    # rate_data_Stop: Raw population rate. Dims: [trials, timesteps]
+    # Output:     
+    # meanrate_FastGo, std_FastGo, meanrate_SlowGo, std_SlowGo
+    # Trial-averaged population rates. Dim: [timesteps]
+    nz_FastGo, nz_SlowGo = get_fast_slow_go_trials(mInt_Go, mInt_Stop, threshold, n_trials)
+    meanrate_FastGo = np.nanmean(rate_data_Go[nz_FastGo, :], 0)
+    std_FastGo = np.nanstd(rate_data_Go[nz_FastGo, :], 0)    
+    meanrate_SlowGo = np.nanmean(rate_data_Go[nz_SlowGo, :], 0)
+    std_SlowGo = np.nanstd(rate_data_Go[nz_SlowGo, :], 0)    
+
+    return meanrate_FastGo, std_FastGo, meanrate_SlowGo, std_SlowGo
+
+
+def get_fast_slow_go_trials(mInt_go, mInt_stop, threshold, n_trials):
+    rsp_mInt_go = np.reshape(mInt_go, [int(mInt_go.shape[0] / float(n_trials)), n_trials], order='F')    
+    RT_Go = np.nan * np.ones(n_trials)
+    for i_trial in range(n_trials):
+        if np.nanmax(rsp_mInt_go[:, i_trial]) >= threshold: 
+            RT_Go[i_trial] = np.nonzero(rsp_mInt_go[:, i_trial] >= threshold)[0][0]
+
+    rsp_mInt_stop = np.reshape(mInt_stop, [int(mInt_stop.shape[0] / float(n_trials)), n_trials], order='F')    
+    RT_Stop = np.nan * np.ones(n_trials)
+    for i_trial in range(n_trials):
+        if np.nanmax(rsp_mInt_stop[:, i_trial]) >= threshold: 
+            RT_Stop[i_trial] = np.nonzero(rsp_mInt_stop[:, i_trial] >= threshold)[0][0]
+
+    RT_Stop_95 = np.nanquantile(RT_Stop,0.95)
+    #median_RT = np.nanmedian(RT_Go)
+    #nz_FastGo = np.nonzero(RT_Go < median_RT)[0]
+    #nz_SlowGo = np.nonzero(RT_Go >= median_RT)[0]
+    nz_FastGo = np.nonzero(RT_Go < RT_Stop_95)[0]
+    nz_SlowGo = np.nonzero(RT_Go >= RT_Stop_95)[0]
+    return nz_FastGo, nz_SlowGo
+
+
+def get_rates_allGo_fastGo_slowGo(rate_data_Go, mInt_go, mInt_stop, threshold, n_trials):
+    # Input:     
+    # rate_data_Go: Raw population rate. Dims: [trials, timesteps]
+    nz_FastGo, nz_SlowGo = get_fast_slow_go_trials(mInt_go, mInt_stop, threshold, n_trials)
+    nz_CorrectGo = np.concatenate([nz_FastGo, nz_SlowGo])
+
+    rates_allGo = rate_data_Go[nz_CorrectGo, :]
+    rates_fastGo = rate_data_Go[nz_FastGo, :]
+    rates_slowGo = rate_data_Go[nz_SlowGo, :]
+    # Output:     
+    # rates_allGo, rates_fastGo, rates_slowGo: Raw population rate. Dims: [trials, timesteps]        
+    return rates_allGo, rates_fastGo, rates_slowGo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def get_peak_response_time(STN_poprate_Stop_alltrials, SNr_poprate_Stop_alltrials, Proto_poprate_Stop_alltrials, Arky_poprate_Stop_alltrials, t_min, t_max, dt, param_id, n_trials, i_cycle, i_netw_rep, paramname):
     STN_counts, STN_bins, STN_median_peak, STN_P25, STN_P75 = get_peak_response_time_hist(STN_poprate_Stop_alltrials, t_min, t_max, dt, 'STN')
@@ -94,24 +330,7 @@ def get_peak_response_time_hist(poprate_Stop_alltrials, t_min, t_max, dt, label)
     return counts, bins, median_peak, P25, P75
 
 
-def get_poprate_aligned_onset(mon, spikes, poprate, ratedata_currtrial, dt):
-    te, ne = mon.raster_plot(spikes)
-    if len(te) > 0:
-        i_te_min = np.argmin(te)
-        i_te_max = np.argmax(te)
-        te_min = int( te[i_te_min] / dt )
-        te_max = int( te[i_te_max] / dt )        
-        len_ratedata = len(ratedata_currtrial[1:])               
-        #poprate[te_min : te_min + len_ratedata] = ratedata_currtrial[1:] # Works, but often a large spike at onset                        
-        shift = 0#int(2 / dt) # 2 works for Cortex_Stop and Go ## 100 is drastic - works, but errors with p-values?!
-        #shift = int(20 / dt) # test for t_smooth_ms = 5.0 ms - Ok         
-        #shift = int(50 / dt) # test for t_smooth_ms = 10.0 - still some errors for shift=40/dt, shift=50/dt is OK
-        poprate[te_min + shift : te_min + len_ratedata] = ratedata_currtrial[1+shift: ] #        
-        poprate[0 : te_min + shift] = np.zeros(te_min + shift)       
-        poprate[te_min + len_ratedata : ] = 0
 
-        
-    return poprate
 
 
 def get_syn_mon(mon, str_popname):
@@ -167,84 +386,16 @@ def box_smooth(data, boxlen):
     smoothed = np.append(np.nan * np.ones(boxlen-1), smoothed)
     return smoothed
 
-def get_rates_failed_correct(rate_data_Stop, mInt_stop, threshold, n_trials):
-    # Input:     
-    # rate_data_Stop: Raw population rate. Dims: [trials, timesteps]    
-    nz_FailedStop, nz_CorrectStop = get_correct_failed_stop_trials(mInt_stop, threshold, n_trials)
-    rates_FailedStop = rate_data_Stop[nz_FailedStop, :]
-    rates_CorrectStop = rate_data_Stop[nz_CorrectStop, :]
-    # Output:     
-    # rates_FailedStop, rates_CorrectStop: Raw population rate. Dims: [trials, timesteps]        
-    return rates_FailedStop, rates_CorrectStop
-
-def get_rates_allGo_fastGo_slowGo(rate_data_Go, mInt_go, mInt_stop, threshold, n_trials):
-    # Input:     
-    # rate_data_Go: Raw population rate. Dims: [trials, timesteps]
-    nz_FastGo, nz_SlowGo = get_fast_slow_go_trials(mInt_go, mInt_stop, threshold, n_trials)
-    nz_CorrectGo = np.concatenate([nz_FastGo, nz_SlowGo])
-
-    rates_allGo = rate_data_Go[nz_CorrectGo, :]
-    rates_fastGo = rate_data_Go[nz_FastGo, :]
-    rates_slowGo = rate_data_Go[nz_SlowGo, :]
-    # Output:     
-    # rates_allGo, rates_fastGo, rates_slowGo: Raw population rate. Dims: [trials, timesteps]        
-    return rates_allGo, rates_fastGo, rates_slowGo
-
-def calc_meanrate_std_failed_correct(rate_data_Stop, mInt_stop, threshold, n_trials):
-    # Input:     
-    # rate_data_Stop: Raw population rate. Dims: [trials, timesteps]
-    # Output:     
-    # meanrate_FailedStop, meanrate_CorrectStop: 
-    # Trial-averaged population rates. Dim: [timesteps]
-    nz_FailedStop, nz_CorrectStop = get_correct_failed_stop_trials(mInt_stop, threshold, n_trials)
-    meanrate_FailedStop = np.nanmean(rate_data_Stop[nz_FailedStop, :], 0)
-    std_FailedStop = np.nanstd(rate_data_Stop[nz_FailedStop, :], 0)    
-    meanrate_CorrectStop = np.nanmean(rate_data_Stop[nz_CorrectStop, :], 0)            
-    std_CorrectStop = np.nanstd(rate_data_Stop[nz_CorrectStop, :], 0)                
-    return meanrate_FailedStop, std_FailedStop, meanrate_CorrectStop, std_CorrectStop
-
-def get_correct_failed_stop_trials(mInt_stop, threshold, n_trials):
-    rsp_mInt_stop = np.reshape(mInt_stop, [int(mInt_stop.shape[0] / float(n_trials)), n_trials], order='F')    
-    mInt_maxpertrial = np.nanmax(rsp_mInt_stop, 0)
-    nz_FailedStop = np.nonzero(mInt_maxpertrial >= threshold)[0]
-    nz_CorrectStop = np.nonzero(mInt_maxpertrial < threshold)[0]
-    return nz_FailedStop, nz_CorrectStop
 
 
-def calc_meanrate_std_Fast_Slow(rate_data_Go, mInt_Go, mInt_Stop, threshold, n_trials):
-    # Input:     
-    # rate_data_Stop: Raw population rate. Dims: [trials, timesteps]
-    # Output:     
-    # meanrate_FastGo, std_FastGo, meanrate_SlowGo, std_SlowGo
-    # Trial-averaged population rates. Dim: [timesteps]
-    nz_FastGo, nz_SlowGo = get_fast_slow_go_trials(mInt_Go, mInt_Stop, threshold, n_trials)
-    meanrate_FastGo = np.nanmean(rate_data_Go[nz_FastGo, :], 0)
-    std_FastGo = np.nanstd(rate_data_Go[nz_FastGo, :], 0)    
-    meanrate_SlowGo = np.nanmean(rate_data_Go[nz_SlowGo, :], 0)
-    std_SlowGo = np.nanstd(rate_data_Go[nz_SlowGo, :], 0)    
 
-    return meanrate_FastGo, std_FastGo, meanrate_SlowGo, std_SlowGo
 
-def get_fast_slow_go_trials(mInt_go, mInt_stop, threshold, n_trials):
-    rsp_mInt_go = np.reshape(mInt_go, [int(mInt_go.shape[0] / float(n_trials)), n_trials], order='F')    
-    RT_Go = np.nan * np.ones(n_trials)
-    for i_trial in range(n_trials):
-        if np.nanmax(rsp_mInt_go[:, i_trial]) >= threshold: 
-            RT_Go[i_trial] = np.nonzero(rsp_mInt_go[:, i_trial] >= threshold)[0][0]
 
-    rsp_mInt_stop = np.reshape(mInt_stop, [int(mInt_stop.shape[0] / float(n_trials)), n_trials], order='F')    
-    RT_Stop = np.nan * np.ones(n_trials)
-    for i_trial in range(n_trials):
-        if np.nanmax(rsp_mInt_stop[:, i_trial]) >= threshold: 
-            RT_Stop[i_trial] = np.nonzero(rsp_mInt_stop[:, i_trial] >= threshold)[0][0]
 
-    RT_Stop_95 = np.nanquantile(RT_Stop,0.95)
-    #median_RT = np.nanmedian(RT_Go)
-    #nz_FastGo = np.nonzero(RT_Go < median_RT)[0]
-    #nz_SlowGo = np.nonzero(RT_Go >= median_RT)[0]
-    nz_FastGo = np.nonzero(RT_Go < RT_Stop_95)[0]
-    nz_SlowGo = np.nonzero(RT_Go >= RT_Stop_95)[0]
-    return nz_FastGo, nz_SlowGo
+
+
+
+
 
 def get_fastest_slowest_action(mInt, nz, n_trials, threshold):
     rsp_mInt = np.reshape(mInt, [int(mInt.shape[0] / float(n_trials)), n_trials], order='F')    
@@ -790,92 +941,7 @@ def plot_correl_rates_Intmax(GPe_Arky_ratepertrial_Stop, GPe_Proto_ratepertrial_
     plt.savefig('plots/correl_rates_Intmax_paramsid'+str(int(param_id))+'_'+str(trials)+'trials.png', dpi=300)
     plt.show()
 
-def calc_KW_stats_all(GPe_Arky_rates_FailedStop, GPe_Arky_rates_CorrectStop, \
-                      SD1_rates_FailedStop, SD1_rates_CorrectStop, \
-                      SD2_rates_FailedStop, SD2_rates_CorrectStop, \
-                      STN_rates_FailedStop, STN_rates_CorrectStop, \
-                      GPe_Proto_rates_FailedStop, GPe_Proto_rates_CorrectStop, \
-                      GPe_Proto2_rates_FailedStop, GPe_Proto2_rates_CorrectStop, \
-                      SNr_rates_FailedStop, SNr_rates_CorrectStop, \
-                      Thal_rates_FailedStop, Thal_rates_CorrectStop, \
-                      CortexG_rates_FailedStop, CortexG_rates_CorrectStop, \
-                      CortexS_rates_FailedStop, CortexS_rates_CorrectStop, \
-                      FSI_rates_FailedStop, FSI_rates_CorrectStop, \
-                      pvalue_times, dt, name=''):
-                          
-    # Input: Raw population rates across trials. Dims: [trials, timesteps]
-                          
-    Hstat_all = [] # np.nan * np.ones(2)
-    pval_all = [] # np.nan * np.ones(2)    
 
-    H, p = calc_KruskalWallis(GPe_Arky_rates_FailedStop, GPe_Arky_rates_CorrectStop, pvalue_times, dt, 0, name)
-    Hstat_all.append(H)
-    pval_all.append(p)  
-
-    H, p = calc_KruskalWallis(SD1_rates_FailedStop, SD1_rates_CorrectStop, pvalue_times, dt, 1, name)
-    Hstat_all.append(H)
-    pval_all.append(p)    
-
-    H, p = calc_KruskalWallis(STN_rates_FailedStop, STN_rates_CorrectStop, pvalue_times, dt, 2, name)
-    Hstat_all.append(H)
-    pval_all.append(p) 
-
-    H, p = calc_KruskalWallis(GPe_Proto_rates_FailedStop, GPe_Proto_rates_CorrectStop, pvalue_times, dt, 3, name)
-    Hstat_all.append(H)
-    pval_all.append(p)  
-
-    H, p = calc_KruskalWallis(GPe_Proto2_rates_FailedStop, GPe_Proto2_rates_CorrectStop, pvalue_times, dt, 4, name)
-    Hstat_all.append(H)
-    pval_all.append(p) 
-
-    H, p = calc_KruskalWallis(SNr_rates_FailedStop, SNr_rates_CorrectStop, pvalue_times, dt, 5, name)
-    Hstat_all.append(H)
-    pval_all.append(p) 
-
-    H, p = calc_KruskalWallis(Thal_rates_FailedStop, Thal_rates_CorrectStop, pvalue_times, dt, 6, name)
-    Hstat_all.append(H)
-    pval_all.append(p)        
-    
-    H, p = calc_KruskalWallis(SD2_rates_FailedStop, SD2_rates_CorrectStop, pvalue_times, dt, 7, name)
-    Hstat_all.append(H)
-    pval_all.append(p)
-    
-    H, p = calc_KruskalWallis(CortexG_rates_FailedStop, CortexG_rates_CorrectStop, pvalue_times, dt, 8, name)
-    Hstat_all.append(H)
-    pval_all.append(p)        
-
-    H, p = calc_KruskalWallis(CortexS_rates_FailedStop, CortexS_rates_CorrectStop, pvalue_times, dt, 9, name)
-    Hstat_all.append(H)
-    pval_all.append(p)        
-    
-    H, p = calc_KruskalWallis(FSI_rates_FailedStop, FSI_rates_CorrectStop, pvalue_times, dt, 10, name)
-    Hstat_all.append(H)
-    pval_all.append(p)     
-
-    return Hstat_all, pval_all
-
-def calc_KruskalWallis(rates_FailedStop, rates_CorrectStop, pvalue_times, dt, number, name, printout = True):
-    # Input:
-    # rates_FailedStop, rates_CorrectStop:
-    # Raw population rates across trials in ALL time bins
-    # I would need an AVERAGE across TIME STEPS withion each bin, not an average across TRIALS!
-    n_bins = len(pvalue_times) - 1    
-    Hstat = np.nan * np.ones(n_bins)
-    pval = np.nan * np.ones(n_bins)      
-    boxlen = int(1.0 / dt)
-    if printout: print(name, number)
-    for i_bin in range(n_bins):
-        meanrate_FailedStop_bin = np.nanmean(rates_FailedStop[:, pvalue_times[i_bin] : pvalue_times[i_bin+1]], 1) # Average across time steps
-        meanrate_CorrectStop_bin = np.nanmean(rates_CorrectStop[:, pvalue_times[i_bin] : pvalue_times[i_bin+1]], 1) # Average across time steps
-        meanrate_FailedStop_bin = meanrate_FailedStop_bin[np.nonzero(np.isnan(meanrate_FailedStop_bin)==False)[0]] # Exclude nan values        
-        meanrate_CorrectStop_bin = meanrate_CorrectStop_bin[np.nonzero(np.isnan(meanrate_CorrectStop_bin)==False)[0]]         
-        if np.sum(np.isnan(meanrate_CorrectStop_bin)==False) > 1:
-            if (np.sum(meanrate_FailedStop_bin > 0) > 0 or np.sum(meanrate_CorrectStop_bin) > 0) and not(np.array_equal(meanrate_FailedStop_bin,meanrate_CorrectStop_bin)): # Avoid comparing two equal (e.g., zero) arrays                
-                Hstat[i_bin], pval[i_bin] = st.kruskal(meanrate_FailedStop_bin, meanrate_CorrectStop_bin)
-        if printout: 
-            print('Bin %i: np.nanmean(meanrate_FailedStop_bin) = %.3f, np.nanmean(meanrate_CorrectStop_bin) = %.3f' %(i_bin, np.nanmean(meanrate_FailedStop_bin), np.nanmean(meanrate_CorrectStop_bin)))            
-            print('Bin %i: p = %.3f' %(i_bin, pval[i_bin]))
-    return Hstat, pval
 
 def plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, pval_ind=0, show_axis=True):
 

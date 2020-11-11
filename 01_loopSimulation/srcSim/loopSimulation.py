@@ -42,6 +42,7 @@ def changeArkyStopOutput(fD1,fD2,fFSI):
 ### COMPILATION AND DATA DIRECTORY CREATION
 if len(sys.argv) <= 1:
     print('Network number missing')
+    quit()
 else:
     netNr = str(sys.argv[1])
     compile('Annarchy'+netNr)
@@ -107,8 +108,8 @@ m_Stoppinput1 = Monitor(Stoppinput1,'spike')
 selection = np.zeros(paramsS['trials'])
 timeovertrial = np.zeros(paramsS['trials'])
 
-np.save('../data/'+paramsS['saveFolder']+'/paramset_id'+str(params['general_id'])+netNr+'.npy', params)
-np.save('../data/'+paramsS['saveFolder']+'/paramSset_id'+str(params['general_id'])+netNr+'.npy', paramsS)
+np.save('../data/'+paramsS['saveFolder']+'/paramset_id'+str(params['general_id'])+netNr+'.npy', np.array([params]))#TODO: remove general_id
+np.save('../data/'+paramsS['saveFolder']+'/paramSset_id'+str(params['general_id'])+netNr+'.npy', np.array([paramsS]))
 
 
 ### WHICH PARAMETER VARIATIONS ###
