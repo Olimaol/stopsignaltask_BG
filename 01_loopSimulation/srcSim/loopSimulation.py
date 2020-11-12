@@ -773,11 +773,8 @@ for i_paramname in range(n_param_vars):
         np.save('../data/'+paramsS['saveFolder']+'/p_value_list_times_'+str(params['general_id'])+netNr+'.npy', [pval_all, pvalue_times], allow_pickle=True)
 
         ### GET RATE DATA AND PVALUES FOR FAILED STOP VS FAST GO
-        t_stopCue = int(params['t_init'] + params['t_SSD'])
         t_min = int((params['t_init'] - params['sigTestRateComparisonFailedFast_tMin'])/dt())   
-        t_max = int((params['t_init'] + params['sigTestRateComparisonFailedFast_tMax'])/dt()) 
-        binsize_ms = int(params['sigTestRateComparisonFailedFast_binSize'] / dt())
-        pvalue_times = range(t_min, t_max + 1, binsize_ms) 
+        t_max = int((params['t_init'] + params['sigTestRateComparisonFailedFast_tMax'])/dt())
         SD1_rates_allGo,        SD1_rates_fastGo,           SD1_rates_slowGo        = get_rates_allGo_fastGo_slowGo(rate_data_SD1_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
         SD2_rates_allGo,        SD2_rates_fastGo,           SD2_rates_slowGo        = get_rates_allGo_fastGo_slowGo(rate_data_SD2_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
         STN_rates_allGo,        STN_rates_fastGo,           STN_rates_slowGo        = get_rates_allGo_fastGo_slowGo(rate_data_STN_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])

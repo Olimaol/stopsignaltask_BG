@@ -50,13 +50,17 @@ def readParams(csvPath,param_ID,integerParams):
     return params
 
 
-### define parameters with other datatype as float
+### DEFINE PARAMETERS WITH OTHER DATATYPE THAN FLOAT
 integerParams = ['general_populationSize', 'GPeArkyCopy_On', 'threads', 'general_id']
 
-### get parameters from csv file
+### GET PARAMETERS FROM CSV FILE
 csvfilePath = dir_path+'/new_params.csv'
 params = readParams(csvfilePath,curr_ID,integerParams)
 
+### ADD SPECIFIC PARAMETERS
+params['toRGB'] = {'blue':np.array([3,67,223])/255., 'cyan':np.array([0,255,255])/255., 'gold':np.array([219,180,12])/255., 'orange':np.array([249,115,6])/255., 'red':np.array([229,0,0])/255., 'purple':np.array([126,30,156])/255., 'grey':np.array([146,149,145])/255., 'light brown':np.array([173,129,80])/255., 'lime':np.array([170,255,50])/255., 'green':np.array([21,176,26])/255., 'yellow':np.array([255,255,20])/255., 'lightgrey':np.array([216,220,214])/255.}
+
+### SOME OUTDATED PARAMETERS TODO: remove them
 #params['tau_syn_factor'] = 1.0
 #params['TrialType'] = 2.0
 #params['ratesProto1vs2'] = 0.7
