@@ -3,179 +3,8 @@ import pylab as plt
 import numpy as np
 import scipy.stats as st
 from scipy import interpolate
-import csv
-from analysis import plot_zscore_stopVsGo, custom_zscore
-from sim_params import params
-from lg_populations_BA_BG import Integrator
+from BGmodelSST.sim_params import params
 
-
-def plot_STR_stop(param_id):
-    param_id = float(param_id)
-    STR_D1_Stop_mean = np.load('plots/plotdata/STR_D1_Stop_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-    STR_D1_Go_mean = np.load('plots/plotdata/STR_D1_Go_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-    STR_D2_Stop_mean = np.load('plots/plotdata/STR_D2_Stop_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-    STR_D2_Go_mean = np.load('plots/plotdata/STR_D2_Go_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-    STR_FSI_Stop_mean = np.load('plots/plotdata/STR_FSI_Stop_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-    STR_FSI_Go_mean = np.load('plots/plotdata/STR_FSI_Go_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-    GPe_Arky_mean_Stop = np.load('plots/plotdata/Arky_Stop_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-    GPe_Arky_mean_Go = np.load('plots/plotdata/Arky_Go_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-    GPe_Proto_mean_Stop = np.load('plots/plotdata/Proto_Stop_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-    GPe_Proto_mean_Go = np.load('plots/plotdata/Proto_Go_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-    STN_mean_Stop = np.load('plots/plotdata/STN_Stop_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-    STN_mean_Go = np.load('plots/plotdata/STN_Go_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-    SNr_mean_Stop = np.load('plots/plotdata/SNr_Stop_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-    SNr_mean_Go = np.load('plots/plotdata/SNr_Go_mean_id'+str(param_id)+'.npy', allow_pickle=True)
-
-    t_init = 300
-    t_SSD = 250
-    trials = 100
-
-    #plot_zscore_stopVsGo(STN_mean_Stop, STN_mean_Go, SNr_mean_Stop, SNr_mean_Go, GPe_Arky_mean_Stop, GPe_Arky_mean_Go, GPe_Proto_mean_Stop, GPe_Proto_mean_Go, t_init, t_SSD, param_id, trials)
-
-    plot_stop_rates(STN_mean_Stop, 'STN Stop', 'orange', \
-                    SNr_mean_Stop, 'SNr Stop', 'tomato', \
-                    GPe_Arky_mean_Stop, 'Arky Stop', 'cyan', \
-                    GPe_Proto_mean_Stop, 'Proto', 'blue',
-                    'Stop_detail', param_id, trials, t_init + t_SSD - 50, t_init + t_SSD + 150, -0.05, 0.15, 250) # 200)
-
-    plot_stop_rates(STR_FSI_Stop_mean, 'FSI Stop', 'k', \
-                    STR_FSI_Go_mean, 'FSI Go', '0.6', \
-                    STR_D2_Stop_mean, 'Str D2 Stop', 'pink', \
-                    STR_D2_Go_mean, 'Str D2 Go', 'purple',
-                    'FSI_D2', param_id, trials, t_init + t_SSD - 200, t_init + t_SSD + 400, -0.2, 0.4, 150)
-
-    plot_stop_rates(STR_D1_Stop_mean, 'Str D1 Stop', 'red', \
-                    STR_D1_Go_mean, 'Str D1 Go', 'green', \
-                    GPe_Arky_mean_Stop, 'Arky Stop', 'cyan', \
-                    GPe_Proto_mean_Stop, 'Proto', 'blue',
-                    'D1_Arky', param_id, trials, t_init + t_SSD - 200, t_init + t_SSD + 400, -0.2, 0.4, 150)
-
-def plot_stop_rates(pop1_stop_mean, pop1name, pop1col, \
-                    pop2_stop_mean, pop2name, pop2col, \
-                    pop3_stop_mean, pop3name, pop3col, \
-                    pop4_stop_mean, pop4name, pop4col,
-                    filename, param_id, trials, tmin, tmax, tminlabel, tmaxlabel, ymax):
-    plt.ion()
-    plt.figure(figsize=(3.5,4), dpi=300)
-    t_init = 300
-    t_SSD = 250
-    fsize = 12 # 15
-    ax = plt.gca()
-    plt.plot(pop1_stop_mean, lw=3, color = pop1col, label= pop1name)
-    plt.plot(pop2_stop_mean, lw=3, color = pop2col, label= pop2name)
-    plt.plot(pop3_stop_mean, lw=3, color = pop3col, label= pop3name)
-    plt.plot(pop4_stop_mean, lw=3, color = pop4col, label= pop4name)
-    #ax.axis([t_init + t_SSD - 200, t_init + t_SSD + 400, max(0, ax.axis()[2]), 150]) 
-    ax.axis([tmin, tmax, max(0, ax.axis()[2]), ymax]) # 150
-    plt.plot((t_init + t_SSD) * np.ones(2), [0, plt.axis()[3]], 'k--', lw=1.5, label='Stop cue')
-    #ax.set_xticks([t_init + t_SSD - 200, t_init + t_SSD, t_init + t_SSD + 400]) 
-    ax.set_xticks([tmin, t_init + t_SSD, tmax]) 
-    #ax.set_xticklabels([-0.2, 0, 0.4]) 
-    ax.set_xticklabels([tminlabel, 0, tmaxlabel])
-    plt.xlabel('Time from Stop cue [sec]', fontsize=fsize)
-    plt.ylabel('Firing rate [spk/s]', fontsize=fsize)
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    plt.legend(fontsize=10) # 6
-    plt.tight_layout()
-    plt.savefig('plots/mean_rate_paramsid'+str(param_id)+'_'+str(trials)+'trials_'+filename+'.png', dpi=300) #         
-    plt.ioff()
-    plt.show()
-    
-
-def plot_percent_correctGo_vs_GoRate_cycles(param_id, network_array):
-    paramname = 'CortexGo_rates'	
-    loop_params, paramname = np.load('data/cycle_params_'+paramname+'_id'+str(int(param_id))+'.npy', allow_pickle=True)
-    loaded_data = np.load('data/cycle_params_'+paramname+'_id'+str(int(param_id))+'.npy', allow_pickle=True)    
-    print('loaded_data     = ', loaded_data)
-    loop_params, paramname = loaded_data[0], loaded_data[1]   
-    print("paramname, param_id, loop_params = ", paramname, param_id, loop_params)
-    n_loop_cycles = len(loop_params)
-    pct_corr_Go = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    pct_corr_Stop = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    Ctx_Go_rates = np.nan * np.ones(n_loop_cycles)    
-    #for i_netw_rep in range(n_networks):
-    for i_netw_rep in network_array:
-        for i_cycle in range(n_loop_cycles):
-            #results_RT = np.load('data/resultsRT_'+str(i_netw_rep+1)+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(int(param_id))+'.npy', allow_pickle=True)
-            results_RT = np.load('data/resultsRT_'+str(i_netw_rep)+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(int(param_id))+'.npy', allow_pickle=True)            
-            print('results_RT = ', results_RT)
-            pct_corr_Go[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectGoTrials'] / float(results_RT.item()['nCorrectGoTrials'] + results_RT.item()['nFailedGoTrials'] )
-            pct_corr_Stop[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectStopTrials'] / float( results_RT.item()['nCorrectStopTrials'] + results_RT.item()['nFailedStopTrials'] )
-            params, wf = read_paramfile(param_id)
-            Ctx_Go_rates[i_cycle] = loop_params[i_cycle] # params['CortexGo_rates']
-    i_sorted = np.argsort(Ctx_Go_rates)
-    #standard_plot(Ctx_Go_rates[i_sorted], np.nanmean(pct_corr_Go, 1)[i_sorted], 'Cortex Go input rate [spikes/s]', '% Correct Go trials', 'plots/summary_percent_correct_vs_GoRate_cycles_'+str(param_id)+'.png', 10)
-    standard_plot_2lines_std(Ctx_Go_rates[i_sorted], np.nanmean(pct_corr_Go, 1)[i_sorted], np.nanstd(pct_corr_Go, 1)[i_sorted], 'Correct Go', \
-                         Ctx_Go_rates[i_sorted], np.nanmean(pct_corr_Stop, 1)[i_sorted], np.nanstd(pct_corr_Stop, 1)[i_sorted], 'Correct Stop', \
-                        'Cortex Go rates', '% correct trials', 'plots/CorrectGoStopTrials_vs_CortexGo_'+str(param_id)+'.png', 10, ymin=0, ymax=100) # sem # np.nanstd
-
-
-def plot_percent_correctGo_vs_StopRate_cycles(param_id, network_array):
-    paramname = 'CortexStop_rates'
-    loop_params, paramname = np.load('data/cycle_params_'+paramname+'_id'+str(int(param_id))+'.npy', allow_pickle=True)
-    print("paramname, param_id, loop_params = ", paramname, param_id, loop_params)
-    n_loop_cycles = len(loop_params)
-    pct_corr_Go = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    pct_corr_Stop = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    Ctx_Stop_rates = np.nan * np.ones(n_loop_cycles)    
-    #for i_netw_rep in range(n_networks):
-    for i_netw_rep in network_array:
-        for i_cycle in range(n_loop_cycles):
-            #results_RT = np.load('data/resultsRT_'+str(i_netw_rep+1)+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(int(param_id))+'.npy', allow_pickle=True)
-            results_RT = np.load('data/resultsRT_'+str(i_netw_rep)+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(int(param_id))+'.npy', allow_pickle=True)            
-            #print('results_RT = ', results_RT)
-            pct_corr_Go[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectGoTrials'] / float(results_RT.item()['nCorrectGoTrials'] + results_RT.item()['nFailedGoTrials'] )
-            pct_corr_Stop[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectStopTrials'] / float( results_RT.item()['nCorrectStopTrials'] + results_RT.item()['nFailedStopTrials'] )
-            params, wf = read_paramfile(param_id)
-            Ctx_Stop_rates[i_cycle] = loop_params[i_cycle] # params['CortexGo_rates']
-    i_sorted = np.argsort(Ctx_Stop_rates)
-    standard_plot_2lines_std(Ctx_Stop_rates[i_sorted], np.nanmean(pct_corr_Go, 1)[i_sorted], np.nanstd(pct_corr_Go, 1)[i_sorted], 'Correct Go', \
-                         Ctx_Stop_rates[i_sorted], np.nanmean(pct_corr_Stop, 1)[i_sorted], np.nanstd(pct_corr_Stop, 1)[i_sorted], 'Correct Stop', \
-                        'Cortex Stop rates', '% correct trials', 'plots/CorrectGoStopTrials_vs_CortexStop_'+str(param_id)+'.png', 10, ymin=0, ymax=100) # sem # np.nanstd
-
-def plot_percent_correctGo_vs_CortexPauseRate_cycles(param_id, network_array):
-    paramname = 'Stop1rates'
-    loop_params, paramname = np.load('data/cycle_params_'+paramname+'_id'+str(int(param_id))+'.npy', allow_pickle=True)
-    print("paramname, param_id, loop_params = ", paramname, param_id, loop_params)
-    n_loop_cycles = len(loop_params)
-    pct_corr_Go = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    pct_corr_Stop = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    Ctx_Stop_rates = np.nan * np.ones(n_loop_cycles)    
-    #for i_netw_rep in range(n_networks):
-    for i_netw_rep in network_array:
-        for i_cycle in range(n_loop_cycles):
-            #results_RT = np.load('data/resultsRT_'+str(i_netw_rep+1)+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(int(param_id))+'.npy', allow_pickle=True)
-            results_RT = np.load('data/resultsRT_'+str(i_netw_rep)+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(int(param_id))+'.npy', allow_pickle=True)            
-            pct_corr_Go[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectGoTrials'] / float(results_RT.item()['nCorrectGoTrials'] + results_RT.item()['nFailedGoTrials'] )
-            pct_corr_Stop[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectStopTrials'] / float( results_RT.item()['nCorrectStopTrials'] + results_RT.item()['nFailedStopTrials'] )
-            params, wf = read_paramfile(param_id)
-            Ctx_Stop_rates[i_cycle] = loop_params[i_cycle] # params['CortexGo_rates']
-    i_sorted = np.argsort(Ctx_Stop_rates)
-    standard_plot_2lines_std(Ctx_Stop_rates[i_sorted], np.nanmean(pct_corr_Go, 1)[i_sorted], np.nanstd(pct_corr_Go, 1)[i_sorted], 'Correct Go', \
-                         Ctx_Stop_rates[i_sorted], np.nanmean(pct_corr_Stop, 1)[i_sorted], np.nanstd(pct_corr_Stop, 1)[i_sorted], 'Correct Stop', \
-                        'Cortex Pause rates', '% correct trials', 'plots/CorrectGoStopTrials_vs_CortexPause_'+str(param_id)+'.png', 10, ymin=0, ymax=100) # sem # np.nanstd
-
-def plot_percent_correctGo_vs_weight_cycles(param_id, network_array, paramname):
-    loop_params, paramname = np.load('data/cycle_params_'+paramname+'_id'+str(int(param_id))+'.npy', allow_pickle=True) # new   
-    print("paramname, param_id, loop_params = ", paramname, param_id, loop_params)
-    n_loop_cycles = len(loop_params)
-    pct_corr_Go = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    pct_corr_Stop = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    weights = np.nan * np.ones(n_loop_cycles)    
-    for i_netw_rep in network_array:
-        for i_cycle in range(n_loop_cycles):
-            #results_RT = np.load('data/resultsRT_'+str(i_netw_rep+1)+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(int(param_id))+'.npy', allow_pickle=True) # old
-            results_RT = np.load('data/resultsRT_'+str(i_netw_rep)+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(int(param_id))+'.npy', allow_pickle=True)      
-            #print('results_RT = ', results_RT)            
-            pct_corr_Go[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectGoTrials'] / float(results_RT.item()['nCorrectGoTrials'] + results_RT.item()['nFailedGoTrials'] )
-            pct_corr_Stop[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectStopTrials'] / float( results_RT.item()['nCorrectStopTrials'] + results_RT.item()['nFailedStopTrials'] )
-            params, wf = read_paramfile(param_id)
-            weights[i_cycle] = loop_params[i_cycle] # params['CortexGo_rates']
-    i_sorted = np.argsort(weights)
-    standard_plot_2lines_std(weights[i_sorted], np.nanmean(pct_corr_Go, 1)[i_sorted], np.nanstd(pct_corr_Go, 1)[i_sorted], 'Correct Go', \
-                         weights[i_sorted], np.nanmean(pct_corr_Stop, 1)[i_sorted], np.nanstd(pct_corr_Stop, 1)[i_sorted], 'Correct Stop', \
-                        paramname+' weights', '% correct trials', 'plots/CorrectGoStopTrials_vs_'+paramname+'_'+str(param_id)+'.png', 8, ymin=0, ymax=100) # 10
 
 def plot_pctcorrect_timing_RT_vs_weight_cycles(param_id, network_array, paramname, loadFolder, loop_paramsSoll, saveFormat):
     n_loop_cycles = len(loop_paramsSoll)
@@ -197,19 +26,12 @@ def plot_pctcorrect_timing_RT_vs_weight_cycles(param_id, network_array, paramnam
             results_RT = np.load(loadFolder+'resultsRT_'+str(netw_rep)+'_param_'+paramname+'_cycle'+str(cycle)+'id'+str(int(param_id))+'.npy', allow_pickle=True)      
             pct_corr_Go[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectGoTrials'] / float(results_RT.item()['nCorrectGoTrials'] + results_RT.item()['nFailedGoTrials'] )
             pct_corr_Stop[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectStopTrials'] / float( results_RT.item()['nCorrectStopTrials'] + results_RT.item()['nFailedStopTrials'] )
-            #results_StopTiming = np.load('data/Stop_timing_'+str(i_netw_rep)+'_param_'+paramname+'_cycle'+str(i_cycle)+'_id'+str(int(param_id))+'.npy', allow_pickle=True)                  
-            params, wf = read_paramfile(param_id)   
-            t_StopCue = params['t_init'] + params['t_SSD']                       
-            """STN_Timing[i_cycle, i_netw_rep] = params['dt'] * results_StopTiming[0] - t_StopCue           
-            SNr_Timing[i_cycle, i_netw_rep] = params['dt'] * results_StopTiming[1] - t_StopCue                                   
-            Proto_Timing[i_cycle, i_netw_rep] = params['dt'] * results_StopTiming[2] - t_StopCue           
-            Arky_Timing[i_cycle, i_netw_rep] = params['dt'] * results_StopTiming[3] - t_StopCue"""           
+            t_StopCue = params['t_init'] + params['t_SSD']
             RT_corrGo[i_cycle, i_netw_rep] = results_RT.item()['meanRT_CorrectGo']
             RT_failedStop[i_cycle, i_netw_rep] = results_RT.item()['meanRT_FailedStop']                  
-            weights[i_cycle] = loop_params[cycle] # params['CortexGo_rates']
+            weights[i_cycle] = loop_params[cycle]
     i_sorted = np.argsort(weights)
-    plt.ion()    
-    #plt.figure(figsize=(3.2,4), dpi=300)
+    plt.ion()
     plt.figure(figsize=(2, 4), dpi=300)
  
     def changeParamName(paramname): 
@@ -223,199 +45,40 @@ def plot_pctcorrect_timing_RT_vs_weight_cycles(param_id, network_array, paramnam
                          weights[i_sorted], np.nanmean(pct_corr_Stop, 1)[i_sorted], np.nanstd(pct_corr_Stop, 1)[i_sorted], 'correct Stop', \
                         changeParamName(paramname)+[' weights',''][int(paramname[-5:]=='rates')], '% correct trials', 'plots/CorrectGoStopTrials_vs_'+paramname+'_'+str(param_id)+'.png', 6, ymin=-5, ymax=105, xmin=loop_paramsSoll[0], xmax=loop_paramsSoll[-1])
 
-    """timing_plot_4lines_std_subplot(312, weights[i_sorted], np.nanmean(STN_Timing, 1)[i_sorted], np.nanstd(STN_Timing, 1)[i_sorted], 'STN', \
-                           weights[i_sorted], np.nanmean(SNr_Timing, 1)[i_sorted], np.nanstd(SNr_Timing, 1)[i_sorted], 'SNr', \
-                           weights[i_sorted], np.nanmean(Proto_Timing, 1)[i_sorted], np.nanstd(Proto_Timing, 1)[i_sorted], 'Proto', \
-                           weights[i_sorted], np.nanmean(Arky_Timing, 1)[i_sorted], np.nanstd(Arky_Timing, 1)[i_sorted], 'Arky', \
-                        t_StopCue, paramname+' weights', 'Timing', 'plots/StopTiming_vs_'+paramname+'_'+str(param_id)+'.png', 6, ymin=0, ymax=200)"""
-
     standard_plot_2lines_std_subplot(212, weights[i_sorted], np.nanmean(RT_corrGo, 1)[i_sorted], np.nanstd(RT_corrGo, 1)[i_sorted], 'correct Go', \
                          weights[i_sorted], np.nanmean(RT_failedStop, 1)[i_sorted], np.nanstd(RT_failedStop, 1)[i_sorted], 'failed Stop', \
                         changeParamName(paramname)+[' weights',''][int(paramname[-5:]=='rates')], 'Reaction time [ms]', 'plots/summary_RT_vs_w_'+paramname+'_'+str(param_id)+'.png', 6, ymin=0, ymax=600, xmin=loop_paramsSoll[0], xmax=loop_paramsSoll[-1]) # sem # np.nanstd
                         
-    plt.tight_layout()                        
+    plt.tight_layout()
 
-    saveFolder='plots/multiloops/'+str(param_id)+'/'
+    saveFolder='../results/parametervariations/'+str(param_id)
     try:
-        os.mkdir(saveFolder)
+        os.makedirs(saveFolder)
     except:
-        print(saveFolder+' not created')
-    plt.savefig(saveFolder+'pctcorrect_timing_RT_vs_'+paramname+'_weight_paramsid'+str(param_id)+'.'+saveFormat, dpi=300)
+        if os.path.isdir(saveFolder):
+            print(saveFolder+' already exists')
+        else:
+            print('could not create '+saveFolder+' folder')
+            quit()
+
+    plt.savefig(saveFolder+'/pctcorrect_timing_RT_vs_'+paramname+'_weight_paramsid'+str(param_id)+'.'+saveFormat, dpi=300)
          
     plt.ioff()                        
-    plt.show()    
-
-
-
-def plot_StopTiming_vs_weight_cycles(param_id, network_array, paramname):    
-    #loop_params, paramname = np.load('data/cycle_params_'+paramname+'_id'+str(int(param_id))+'.npy', allow_pickle=True) # old
-    loop_params, paramname = np.load('data/cycle_params_'+paramname+'_id'+str(int(param_id))+'.npy', allow_pickle=True) # new   
-    print("paramname, param_id, loop_params = ", paramname, param_id, loop_params)
-    n_loop_cycles = len(loop_params)
-    STN_Timing = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    SNr_Timing = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    Proto_Timing = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])    
-    Arky_Timing = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    weights = np.nan * np.ones(n_loop_cycles)    
-    params, wf = read_paramfile(param_id)            
-    t_StopCue = params['t_init'] + params['t_SSD']            
-    #for i_netw_rep in range(n_networks):
-    for i_netw_rep in network_array:        
-        for i_cycle in range(n_loop_cycles):
-            #print("i_cycle = ", i_cycle)
-            results_StopTiming = np.load('data/Stop_timing_'+str(i_netw_rep)+'_param_'+paramname+'_cycle'+str(i_cycle)+'_id'+str(int(param_id))+'.npy', allow_pickle=True)      
-            #results_StopTiming = np.load('data/Stop_timing_'+str(i_netw_rep)+'_cycle'+str(i_cycle)+'_id'+str(int(param_id))+'.npy', allow_pickle=True)                  
-            #print('results_StopTiming = ', results_StopTiming)            
-            # [STN_median_peak, SNr_median_peak, Proto_median_peak, Arky_median_peak]
-            STN_Timing[i_cycle, i_netw_rep] = params['dt'] * results_StopTiming[0] - t_StopCue           
-            SNr_Timing[i_cycle, i_netw_rep] = params['dt'] * results_StopTiming[1] - t_StopCue                                   
-            Proto_Timing[i_cycle, i_netw_rep] = params['dt'] * results_StopTiming[2] - t_StopCue           
-            Arky_Timing[i_cycle, i_netw_rep] = params['dt'] * results_StopTiming[3] - t_StopCue     
-            weights[i_cycle] = loop_params[i_cycle] # params['CortexGo_rates']
-    i_sorted = np.argsort(weights)
-    timing_plot_4lines_std(weights[i_sorted], np.nanmean(STN_Timing, 1)[i_sorted], np.nanstd(STN_Timing, 1)[i_sorted], 'STN', \
-                           weights[i_sorted], np.nanmean(SNr_Timing, 1)[i_sorted], np.nanstd(SNr_Timing, 1)[i_sorted], 'SNr', \
-                           weights[i_sorted], np.nanmean(Proto_Timing, 1)[i_sorted], np.nanstd(Proto_Timing, 1)[i_sorted], 'Proto', \
-                           weights[i_sorted], np.nanmean(Arky_Timing, 1)[i_sorted], np.nanstd(Arky_Timing, 1)[i_sorted], 'Arky', \
-                        t_StopCue, paramname+' weights', 'Timing', 'plots/StopTiming_vs_'+paramname+'_'+str(param_id)+'.png', 8, ymin=0, ymax=200) # 10
-
-
-def plot_RT_vs_weight_cycles(param_id, network_array, paramname):    
-    loop_params, paramname = np.load('data/cycle_params_'+paramname+'_id'+str(int(param_id))+'.npy', allow_pickle=True)
-    print("paramname, param_id, loop_params = ", paramname, param_id, loop_params)
-    n_loop_cycles = len(loop_params)
-    RT_corrGo = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    RT_failedStop = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    weights = np.nan * np.ones(n_loop_cycles)    
-    #for i_netw_rep in range(n_networks):
-    for i_netw_rep in network_array:            
-        for i_cycle in range(n_loop_cycles):
-            #results_RT = np.load('data/resultsRT_'+str(i_netw_rep+1)+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(int(param_id))+'.npy', allow_pickle=True)
-            results_RT = np.load('data/resultsRT_'+str(i_netw_rep)+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(int(param_id))+'.npy', allow_pickle=True)            
-            RT_corrGo[i_cycle, i_netw_rep] = results_RT.item()['meanRT_CorrectGo']
-            RT_failedStop[i_cycle, i_netw_rep] = results_RT.item()['meanRT_FailedStop']
-            params, wf = read_paramfile(param_id)
-            weights[i_cycle] = loop_params[i_cycle] # params['CortexGo_rates']
-    i_sorted = np.argsort(weights)
-    standard_plot_2lines_std(weights[i_sorted], np.nanmean(RT_corrGo, 1)[i_sorted], np.nanstd(RT_corrGo, 1)[i_sorted], 'Correct Go', \
-                         weights[i_sorted], np.nanmean(RT_failedStop, 1)[i_sorted], np.nanstd(RT_failedStop, 1)[i_sorted], 'Failed Stop', \
-                        paramname+' weights', 'Reaction time [ms]', 'plots/summary_RT_vs_w_'+paramname+'_'+str(param_id)+'.png', 10, ymin=0, ymax=400) # sem # np.nanstd
-
-
-
-def plot_percent_correctGo_vs_prob_cycles(param_id, n_networks, paramname):
-    loop_params, paramname = np.load('data/cycle_params_'+paramname+'_id'+str(int(param_id))+'.npy', allow_pickle=True)
-    print("paramname, param_id, loop_params = ", paramname, param_id, loop_params)
-    #print("paramname, param_id, loop_params = ", paramname, param_id, loop_params[0])
-    n_loop_cycles = len(loop_params)
-    #n_loop_cycles = len(loop_params[0])
-    pct_corr_Go = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    pct_corr_Stop = np.nan * np.ones([n_loop_cycles, network_array[-1]+1])
-    p_trans = np.nan * np.ones(n_loop_cycles)    
-    for i_netw_rep in range(n_networks):
-        for i_cycle in range(n_loop_cycles):
-            results_RT = np.load('data/resultsRT_'+str(i_netw_rep+1)+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(int(param_id))+'.npy', allow_pickle=True)
-            #pct_corr_Go[i_cycle, i_netw_rep] = results_RT.item()['nCorrectGoTrials']
-            #pct_corr_Stop[i_cycle, i_netw_rep] = results_RT.item()['nCorrectStopTrials']
-            pct_corr_Go[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectGoTrials'] / float(results_RT.item()['nCorrectGoTrials'] + results_RT.item()['nFailedGoTrials'] )
-            pct_corr_Stop[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectStopTrials'] / float( results_RT.item()['nCorrectStopTrials'] + results_RT.item()['nFailedStopTrials'] )
-            params, wf = read_paramfile(param_id)
-            #print("loop_params[i_cycle] = ", loop_params[i_cycle][i_cycle])
-            p_trans[i_cycle] = loop_params[i_cycle]#[i_cycle] # params['CortexGo_rates']
-    i_sorted = np.argsort(p_trans)
-    print("np.nanmean(pct_corr_Go, 1)[i_sorted] = ", np.nanmean(pct_corr_Go, 1)[i_sorted])
-    print("p_trans[i_sorted] = ", p_trans[i_sorted])
-    standard_plot_2lines_std(100*p_trans[i_sorted], np.nanmean(pct_corr_Go, 1)[i_sorted], np.nanstd(pct_corr_Go, 1)[i_sorted], 'Correct Go', \
-                         100*p_trans[i_sorted], np.nanmean(pct_corr_Stop, 1)[i_sorted], np.nanstd(pct_corr_Stop, 1)[i_sorted], 'Correct Stop', \
-                        'Residual Arkypallidal activity [%]', '% correct trials', 'plots/CorrectGoStopTrials_vs_'+paramname+'_'+str(param_id)+'.png', 8, ymin=0, ymax=100) # 10
-
-
-
-
-def plot_percent_correct_vs_StopRate(param_range):
-    pct_corr_stop = np.nan * np.ones(len(param_range))
-    Ctx_Stop_rates = np.nan * np.ones(len(param_range))    
-    for i_param in range(len(param_range)):
-        results_RT = np.load('data/resultsRT_id'+str(float(param_range[i_param]))+'.npy', allow_pickle=True)
-        #pct_corr_stop[i_param] = results_RT.item()['nCorrectStopTrials']
-        pct_corr_stop[i_param] = 100 * results_RT.item()['nCorrectStopTrials'] / float( results_RT.item()['nCorrectStopTrials'] + results_RT.item()['nFailedStopTrials'] )
-        params, wf = read_paramfile(param_range[i_param])
-        Ctx_Stop_rates[i_param] = params['CortexStop_rates']
-    i_sorted = np.argsort(Ctx_Stop_rates)
-    standard_plot(Ctx_Stop_rates[i_sorted], pct_corr_stop[i_sorted], 'Cortex Stop input rate [spikes/s]', '% Correct Stop trials', 'plots/summary_percent_correct_vs_StopRate_'+str(param_range[0])+'-'+str(param_range[-1])+'.png', 10)
-
-
-def plot_percent_correct_vs_weight(param_range, keystr, projname_str): 
-    pct_corr_stop = np.nan * np.ones(len(param_range))
-    weight_values = np.nan * np.ones(len(param_range))    
-    for i_param in range(len(param_range)):
-        results_RT = np.load('data/resultsRT_id'+str(float(param_range[i_param]))+'.npy', allow_pickle=True)
-        #pct_corr_stop[i_param] = results_RT.item()['nCorrectStopTrials']
-        pct_corr_stop[i_param] = 100 * results_RT.item()['nCorrectStopTrials'] / float( results_RT.item()['nCorrectStopTrials'] + results_RT.item()['nFailedStopTrials'] )        
-        params, wf = read_paramfile(param_range[i_param])
-        weight_values[i_param] = wf[keystr]
-    i_sorted = np.argsort(weight_values)
-    standard_plot(weight_values[i_sorted], pct_corr_stop[i_sorted], projname_str, '% Correct Stop trials', 'plots/summary_percent_correct_vs_w_'+keystr+'_'+str(param_range[0])+'-'+str(param_range[-1])+'.png', 10)
-
-
-def plot_RT_vs_weight(param_range, keystr, projname_str): 
-    weight_values = np.nan * np.ones(len(param_range))    
-    RT_corrGo = np.nan * np.ones(len(param_range))    
-    RT_failedStop = np.nan * np.ones(len(param_range))    
-    for i_param in range(len(param_range)):
-        results_RT = np.load('data/resultsRT_id'+str(float(param_range[i_param]))+'.npy', allow_pickle=True)
-        RT_corrGo[i_param] = results_RT.item()['meanRT_CorrectGo']
-        RT_failedStop[i_param] = results_RT.item()['meanRT_FailedStop']
-        params, wf = read_paramfile(param_range[i_param])
-        weight_values[i_param] = wf[keystr]
-    i_sorted = np.argsort(weight_values)
-    standard_plot_2lines(weight_values[i_sorted], RT_corrGo[i_sorted], 'Correct Go', weight_values[i_sorted], RT_failedStop[i_sorted], 'Failed Stop', projname_str, 'Reaction time [ms]', 'plots/summary_RT_vs_w_'+keystr+'_'+str(param_range[0])+'-'+str(param_range[-1])+'.png', 10, ymin=0, ymax=350)
-
-
-
-
-def standard_plot(xdata, ydata, xlabel_text, ylabel_text, filename, fsize, ymin=0.0, ymax=100.0):
-    plt.ion()
-    plt.figure(figsize=(3,3), dpi=300)
-    plt.plot(xdata, ydata, '.-')
-    plt.xlabel(xlabel_text, fontsize=fsize)
-    plt.ylabel(ylabel_text, fontsize=fsize)
-    plt.axis([plt.axis()[0], plt.axis()[1], ymin, ymax])
-    plt.tight_layout()
-    plt.ioff()
-    plt.savefig(filename, dpi=300)
     plt.show()
 
-def standard_plot_2lines(xdata1, ydata1, label1, xdata2, ydata2, label2, xlabel_text, ylabel_text, filename, fsize, ymin=0.0, ymax=100.0):
-    plt.ion()
-    plt.figure(figsize=(3,3), dpi=300)
-    plt.plot(xdata1, ydata1, '.-', label=label1)
-    plt.plot(xdata2, ydata2, '.-', label=label2)
-    plt.xlabel(xlabel_text, fontsize=fsize)
-    plt.ylabel(ylabel_text, fontsize=fsize)
-    plt.axis([plt.axis()[0], plt.axis()[1], ymin, ymax])
-    plt.legend(fontsize=fsize)
-    plt.tight_layout()
-    plt.ioff()
-    plt.savefig(filename, dpi=300)
-    plt.show()
 
-def standard_plot_2lines_std(xdata1, ydata1, yerr1, label1, xdata2, ydata2, yerr2, label2, xlabel_text, ylabel_text, filename, fsize, ymin=0.0, ymax=100.0):
-    plt.ion()
-    plt.figure(figsize=(3,3), dpi=300)
-    plt.errorbar(xdata1, ydata1, yerr=yerr1, label=label1)
-    plt.errorbar(xdata2, ydata2, yerr=yerr2, label=label2)
+def standard_plot_2lines_std_subplot(subplotind, xdata1, ydata1, yerr1, label1, xdata2, ydata2, yerr2, label2, xlabel_text, ylabel_text, filename, fsize, ymin=0.0, ymax=100.0, xmin=0.0, xmax=1.0):
+    plt.subplot(subplotind)  
+    colorOfLabel = {'correct Stop':'purple', 'failed Stop':'tomato', 'correct Go':np.array([107,139,164])/255.}  
+    plt.errorbar(xdata1, ydata1, yerr=yerr1, label=label1, color=colorOfLabel[label1])
+    plt.errorbar(xdata2, ydata2, yerr=yerr2, label=label2, color=colorOfLabel[label2])
     plt.xlabel(xlabel_text, fontsize=fsize)
     plt.ylabel(ylabel_text, fontsize=fsize)
     ax = plt.gca()
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)
-    plt.axis([plt.axis()[0], plt.axis()[1], ymin, ymax])
+    plt.axis([xmin-(xmax-xmin)*0.02, xmax+(xmax-xmin)*0.02, ymin, ymax])
     plt.legend(fontsize=fsize)
-    plt.tight_layout()
-    plt.ioff()
-    plt.savefig(filename, dpi=300)
-    plt.show()
 
 
 def plot_pctcorrect_timing_RT_vs_weight_cycles_FOURINAROW(param_id, network_array, paramname, loadFolder, loop_paramsSoll, paramIdx):
@@ -438,16 +101,10 @@ def plot_pctcorrect_timing_RT_vs_weight_cycles_FOURINAROW(param_id, network_arra
             results_RT = np.load(loadFolder+'resultsRT_'+str(netw_rep)+'_param_'+paramname+'_cycle'+str(cycle)+'id'+str(int(param_id))+'.npy', allow_pickle=True)      
             pct_corr_Go[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectGoTrials'] / float(results_RT.item()['nCorrectGoTrials'] + results_RT.item()['nFailedGoTrials'] )
             pct_corr_Stop[i_cycle, i_netw_rep] = 100 * results_RT.item()['nCorrectStopTrials'] / float( results_RT.item()['nCorrectStopTrials'] + results_RT.item()['nFailedStopTrials'] )
-            #results_StopTiming = np.load('data/Stop_timing_'+str(i_netw_rep)+'_param_'+paramname+'_cycle'+str(i_cycle)+'_id'+str(int(param_id))+'.npy', allow_pickle=True)                  
-            params, wf = read_paramfile(param_id)   
             t_StopCue = params['t_init'] + params['t_SSD']                       
-            """STN_Timing[i_cycle, i_netw_rep] = params['dt'] * results_StopTiming[0] - t_StopCue           
-            SNr_Timing[i_cycle, i_netw_rep] = params['dt'] * results_StopTiming[1] - t_StopCue                                   
-            Proto_Timing[i_cycle, i_netw_rep] = params['dt'] * results_StopTiming[2] - t_StopCue           
-            Arky_Timing[i_cycle, i_netw_rep] = params['dt'] * results_StopTiming[3] - t_StopCue"""           
             RT_corrGo[i_cycle, i_netw_rep] = results_RT.item()['meanRT_CorrectGo']
             RT_failedStop[i_cycle, i_netw_rep] = results_RT.item()['meanRT_FailedStop']                  
-            weights[i_cycle] = loop_params[cycle] # params['CortexGo_rates']
+            weights[i_cycle] = loop_params[cycle]
     i_sorted = np.argsort(weights)
 
 
@@ -472,12 +129,6 @@ def plot_pctcorrect_timing_RT_vs_weight_cycles_FOURINAROW(param_id, network_arra
                          weights[i_sorted], np.nanmean(pct_corr_Stop, 1)[i_sorted], np.nanstd(pct_corr_Stop, 1)[i_sorted], 'correct Stop', \
                         changeParamName(paramname)+[' weights',''][int(paramname[-5:]=='rates')], '% correct trials', 'plots/CorrectGoStopTrials_vs_'+paramname+'_'+str(param_id)+'.png', 9, ymin=-5, ymax=105, xmin=loop_paramsSoll[0], xmax=loop_paramsSoll[-1])
 
-    """timing_plot_4lines_std_subplot(312, weights[i_sorted], np.nanmean(STN_Timing, 1)[i_sorted], np.nanstd(STN_Timing, 1)[i_sorted], 'STN', \
-                           weights[i_sorted], np.nanmean(SNr_Timing, 1)[i_sorted], np.nanstd(SNr_Timing, 1)[i_sorted], 'SNr', \
-                           weights[i_sorted], np.nanmean(Proto_Timing, 1)[i_sorted], np.nanstd(Proto_Timing, 1)[i_sorted], 'Proto', \
-                           weights[i_sorted], np.nanmean(Arky_Timing, 1)[i_sorted], np.nanstd(Arky_Timing, 1)[i_sorted], 'Arky', \
-                        t_StopCue, paramname+' weights', 'Timing', 'plots/StopTiming_vs_'+paramname+'_'+str(param_id)+'.png', 6, ymin=0, ymax=200)"""
-
     ### significance of first and last value
     group1=RT_corrGo[0,:]
     group2=RT_corrGo[5,:]
@@ -496,18 +147,20 @@ def plot_pctcorrect_timing_RT_vs_weight_cycles_FOURINAROW(param_id, network_arra
         left=plt.gcf().axes[0].get_position().x0
         right=plt.gcf().axes[7].get_position().x1
         plt.text(0.5*(left+right),0.03,'relative weight',fontsize=9, va='center', ha='center', transform=plt.gcf().transFigure)
-        saveFolder='plots/multiloops/'
+        saveFolder='../results/parametervariations'
         try:
-            os.mkdir(saveFolder)
+            os.makedirs(saveFolder)
         except:
-            print(saveFolder+' not created')
-        plt.savefig(saveFolder+'FourParameterVariations.svg', dpi=300)
-        plt.ioff() 
+            if os.path.isdir(saveFolder):
+                print(saveFolder+' already exists')
+            else:
+                print('could not create '+saveFolder+' folder')
+                quit()
+        plt.savefig(saveFolder+'/FourParameterVariations.svg', dpi=300)
+        plt.ioff()
 
 
 def standard_plot_2lines_std_subplot_FOURINAROW(sig,subplotind, xdata1, ydata1, yerr1, label1, xdata2, ydata2, yerr2, label2, xlabel_text, ylabel_text, filename, fsize, ymin=0.0, ymax=100.0, xmin=0.0, xmax=1.0):
-    #plt.ion()
-    #plt.figure(figsize=(3,3), dpi=300)
     changeName = {'Cortex_SGPe_Arky weights':'cortex-Stop - GPe-Arky', 'ArkyD1Stop weights':'GPe-Arky - StrD1', 'ArkyD2Stop weights':'GPe-Arky - StrD2', 'ArkyFSIStop weights':'GPe-Arky - StrFSI'}
     nr=subplotind[2]
     plt.subplot(subplotind[0],subplotind[1],subplotind[2])  
@@ -519,7 +172,7 @@ def standard_plot_2lines_std_subplot_FOURINAROW(sig,subplotind, xdata1, ydata1, 
         fileopen='w'
     else:
         fileopen='a'
-    with open('plots/multiloops/ArkyStop.txt', fileopen) as f:
+    with open('../results/parametervariations/ArkyStop.txt', fileopen) as f:
         print(changeName[xlabel_text], file=f)
         if nr>4:
             print('correct Go RT: M(0) =',ydata1[0],'SD(0) =',yerr1[0],'M(1) =',ydata1[len(ydata1)-1],'SD(1) =',yerr1[len(yerr1)-1],'H = ',sig[0][0],'p = ',sig[0][1],'sig = ',sig[0][1]<(0.05/12.), file=f)
@@ -529,7 +182,6 @@ def standard_plot_2lines_std_subplot_FOURINAROW(sig,subplotind, xdata1, ydata1, 
             print('correct Stop %: M(0) =',ydata2[0],'SD(0) =',yerr2[0],'M(1) =',ydata2[len(ydata2)-1],'SD(1) =',yerr2[len(yerr2)-1],'H = ',sig[0],'p = ',sig[1],'sig = ',sig[1]<(0.05/12.), file=f)
             
 
-    #plt.xlabel(xlabel_text, fontsize=fsize)
     if paramIdx==0:
         plt.ylabel(ylabel_text, fontsize=fsize)
     ax = plt.gca()
@@ -554,173 +206,7 @@ def standard_plot_2lines_std_subplot_FOURINAROW(sig,subplotind, xdata1, ydata1, 
         plt.legend(fontsize=fsize, loc='lower center')
     if nr<=4:
         plt.title(changeName[xlabel_text], fontsize=fsize)
-        
 
-
-def standard_plot_2lines_std_subplot(subplotind, xdata1, ydata1, yerr1, label1, xdata2, ydata2, yerr2, label2, xlabel_text, ylabel_text, filename, fsize, ymin=0.0, ymax=100.0, xmin=0.0, xmax=1.0):
-    #plt.ion()
-    #plt.figure(figsize=(3,3), dpi=300)
-    plt.subplot(subplotind)  
-    colorOfLabel = {'correct Stop':'purple', 'failed Stop':'tomato', 'correct Go':np.array([107,139,164])/255.}  
-    plt.errorbar(xdata1, ydata1, yerr=yerr1, label=label1, color=colorOfLabel[label1])
-    plt.errorbar(xdata2, ydata2, yerr=yerr2, label=label2, color=colorOfLabel[label2])
-    plt.xlabel(xlabel_text, fontsize=fsize)
-    plt.ylabel(ylabel_text, fontsize=fsize)
-    ax = plt.gca()
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    plt.axis([xmin-(xmax-xmin)*0.02, xmax+(xmax-xmin)*0.02, ymin, ymax])
-    plt.legend(fontsize=fsize)
-    #plt.tight_layout()
-    #plt.ioff()
-    #plt.savefig(filename, dpi=300)
-    #plt.show()
-
-
-def timing_plot_4lines_std(xdata1, ydata1, yerr1, label1, \
-                           xdata2, ydata2, yerr2, label2, \
-                           xdata3, ydata3, yerr3, label3, \
-                           xdata4, ydata4, yerr4, label4, \
-                           t_StopCue, xlabel_text, ylabel_text, filename, fsize, ymin=0.0, ymax=100.0):
-    plt.ion()
-    plt.figure(figsize=(3,3), dpi=300)
-    plt.errorbar(xdata1, ydata1, yerr=yerr1, label=label1)
-    plt.errorbar(xdata2, ydata2, yerr=yerr2, label=label2)
-    plt.errorbar(xdata3, ydata3, yerr=yerr1, label=label3)
-    plt.errorbar(xdata4, ydata4, yerr=yerr2, label=label4)    
-    plt.xlabel(xlabel_text, fontsize=fsize)
-    plt.ylabel(ylabel_text, fontsize=fsize)
-    ax = plt.gca()
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    plt.axis([plt.axis()[0], plt.axis()[1], ymin, ymax])
-    plt.legend(fontsize=fsize)
-    plt.tight_layout()
-    plt.ioff()
-    plt.savefig(filename, dpi=300)
-    plt.show()
-
-def timing_plot_4lines_std_subplot(subplotind, xdata1, ydata1, yerr1, label1, \
-                           xdata2, ydata2, yerr2, label2, \
-                           xdata3, ydata3, yerr3, label3, \
-                           xdata4, ydata4, yerr4, label4, \
-                           t_StopCue, xlabel_text, ylabel_text, filename, fsize, ymin=0.0, ymax=100.0):
-    #plt.ion()
-    #plt.figure(figsize=(3,3), dpi=300)
-    plt.subplot(subplotind)    
-    plt.errorbar(xdata1, ydata1, yerr=yerr1, label=label1)
-    plt.errorbar(xdata2, ydata2, yerr=yerr2, label=label2)
-    plt.errorbar(xdata3, ydata3, yerr=yerr1, label=label3)
-    plt.errorbar(xdata4, ydata4, yerr=yerr2, label=label4)    
-    plt.xlabel(xlabel_text, fontsize=fsize)
-    plt.ylabel(ylabel_text, fontsize=fsize)
-    ax = plt.gca()
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    plt.axis([plt.axis()[0], plt.axis()[1], ymin, ymax])
-    plt.legend(fontsize=fsize)
-    #plt.tight_layout()
-    #plt.ioff()
-    #plt.savefig(filename, dpi=300)
-    #plt.show()
-
-def sem(data, dim):
-    N = len( np.nonzero(np.isnan(data)==False)[0] )
-    return np.nanstd(data, dim) / np.sqrt(N)
-
-
-def read_paramfile(curr_ID):
-    file_rows = {}
-    wf = {}
-    params = {}
-    #with open('sim_param_file.csv', 'rb') as csvfile: # Python 2
-    with open('sim_param_file.csv', newline='') as csvfile:    # Python 3        
-        reader = csv.reader(csvfile, delimiter=',')
-        for row in reader:
-            file_rows[str(int(reader.line_num))] = row
-            if file_rows[str(int(reader.line_num))][0] == "params['id']":
-                param_names = file_rows[str(int(reader.line_num))]
-            if file_rows[str(int(reader.line_num))][0] == str(curr_ID):
-                paramset = file_rows[str(int(reader.line_num))]
-        for i_param in range(len(paramset)):
-            strsplit_params = param_names[i_param].split('params')
-            strsplit_wf = param_names[i_param].split('wf')
-            strsplit_apostr = param_names[i_param].split("'")
-            if len(strsplit_params) > 1: # name contains 'params'
-                params[strsplit_apostr[1]] = float(paramset[i_param])
-            elif len(strsplit_wf) > 1: # name contains 'wf'
-                wf[strsplit_apostr[1]] = float(paramset[i_param])
-    return params, wf
-
-
-def plot_timing(param_id, network_array, paramname, loadFolder):
-    #loop_params, paramname = np.load('data/cycle_params_'+paramname+'_id'+str(int(param_id))+'.npy', allow_pickle=True) # new   
-    loop_params, paramname = np.load(loadFolder+'cycle_params_'+paramname+'_id'+str(int(param_id))+str(0)+'.npy', allow_pickle=True)
-
-    print("paramname, param_id, loop_params = ", paramname, param_id, loop_params)
-    n_loop_cycles = len(loop_params)
-
-    STN_Stop_mean_0_0, STN_Stop_sem_0_0 = np.load('data/STN_rate_Stop_mean_std_'+ str(int(param_id))+'_'+str(network_array[0])+'_'+str(0)+'.npy')
-    STN_mean_Stop = np.nan * np.ones([n_loop_cycles, len(network_array), len(STN_Stop_mean_0_0)])
-    SNr_mean_Stop = np.nan * np.ones([n_loop_cycles, len(network_array), len(STN_Stop_mean_0_0)])    
-    Arky_mean_Stop = np.nan * np.ones([n_loop_cycles, len(network_array), len(STN_Stop_mean_0_0)])        
-    Proto_mean_Stop = np.nan * np.ones([n_loop_cycles, len(network_array), len(STN_Stop_mean_0_0)])    
-    weights = np.nan * np.ones(n_loop_cycles)        
-
-    plt.figure(figsize=(3.5,4), dpi=300)
-    params, wf = read_paramfile(param_id)    
-    t_init = params['t_init'] # 100
-    t_SSD = params['t_SSD']    
-    dt = float(params['dt'])
-    itmin = int((t_init + t_SSD - 50)/dt)
-    itmax = int((t_init + t_SSD + 150)/dt)
-    fsize = 6
-    ax = plt.gca()    
-
-    for i_cycle in range(n_loop_cycles):
-        for i_netw_rep in network_array:
-            STN_mean_Stop[i_cycle, i_netw_rep, : ], STN_sem_stop = np.load(loadFolder+'STN_rate_Stop_mean_std_'+ str(int(param_id))+'_'+str(i_netw_rep)+'_'+str(i_cycle)+'.npy')
-            SNr_mean_Stop[i_cycle, i_netw_rep, : ], SNr_sem_stop = np.load(loadFolder+'SNr_rate_Stop_mean_std_'+ str(int(param_id))+'_'+str(i_netw_rep)+'_'+str(i_cycle)+'.npy')            
-            Arky_mean_Stop[i_cycle, i_netw_rep, : ], Arky_sem_stop = np.load(loadFolder+'GPeArky_rate_Stop_mean_std_'+ str(int(param_id))+'_'+str(i_netw_rep)+'_'+str(i_cycle)+'.npy')            
-            Proto_mean_Stop[i_cycle, i_netw_rep, : ], Arky_sem_stop = np.load(loadFolder+'GPeProto_rate_Stop_mean_std_'+ str(int(param_id))+'_'+str(i_netw_rep)+'_'+str(i_cycle)+'.npy')                        
-            weights[i_cycle] = loop_params[i_cycle] # params['CortexGo_rates']
-        #norm_zsc_STN = custom_zscore(STN_mean_Stop[i_cycle, i_netw_rep, itmin : itmax], STN_mean_Stop[0, 0, itmin : itmax]) # <
-        norm_zsc_STN = custom_zscore( np.nanmean(STN_mean_Stop[i_cycle, :, itmin : itmax], 0),  np.nanmean(STN_mean_Stop[i_cycle, :, itmin : itmax], 0)) # <        
-        norm_zsc_STN -= np.nanmin(norm_zsc_STN)
-        norm_zsc_STN /= np.nanmax(norm_zsc_STN) 
-        norm_zsc_SNr = custom_zscore( np.nanmean(SNr_mean_Stop[i_cycle, :, itmin : itmax], 0), np.nanmean(SNr_mean_Stop[i_cycle, :, itmin : itmax], 0))
-        norm_zsc_SNr -= np.nanmin(norm_zsc_SNr)
-        norm_zsc_SNr /= np.nanmax(norm_zsc_SNr)    
-        norm_zsc_Arky = custom_zscore( np.nanmean(Arky_mean_Stop[i_cycle, :, itmin : itmax], 0), np.nanmean(Arky_mean_Stop[i_cycle, :, itmin : itmax], 0))
-        norm_zsc_Arky -= np.nanmin(norm_zsc_Arky)
-        norm_zsc_Arky /= np.nanmax(norm_zsc_Arky)        
-        norm_zsc_Proto = custom_zscore( np.nanmean(Proto_mean_Stop[i_cycle, :, itmin : itmax], 0), np.nanmean(Proto_mean_Stop[i_cycle, :, itmin : itmax], 0))
-        norm_zsc_Proto -= np.nanmin(norm_zsc_Proto)               
-        norm_zsc_Proto /= np.nanmax(norm_zsc_Proto) 
-        yshift = i_cycle * 2                        
-        plt.plot(range(len(norm_zsc_STN)), yshift + norm_zsc_STN, color='orange', lw=1)     
-        plt.plot(range(len(norm_zsc_SNr)), yshift + norm_zsc_SNr, color='tomato', lw=1)              
-        plt.plot(range(len(norm_zsc_Arky)), yshift + norm_zsc_Arky, color='cyan', lw=1)                  
-        plt.plot(range(len(norm_zsc_Proto)), yshift + norm_zsc_Proto, color='blue', lw=1)   
-    i_sorted = np.argsort(weights)
-
-    ax=plt.gca()
-    ax.set_xticks([0, 50/dt, 100/dt, 150/dt])    
-    ax.set_xticklabels([-0.05, 0, 0.05, 0.1])
-    plt.xlabel('Time from Stop cue [s]', fontsize=fsize)
-    ax.set_yticks(2 * np.arange(n_loop_cycles))        
-    ax.set_yticklabels(weights[i_sorted])        
-    plt.ylabel('Parameter value', fontsize=fsize)
-    plt.tight_layout()  
-
-    saveFolder='plots/multiloops/'+str(param_id)+'/'
-    try:
-        os.mkdir(saveFolder)
-    except:
-        print(saveFolder+' not created')
-    plt.savefig(saveFolder+'StopTiming_paramsid'+str(int(param_id))+'_'+str(paramname)+'.png')
-    plt.show()    
-    #'''        
 
 def plot_RT_distributions_correctStop():
     param_id_list = ['8007', '8008', '8009', '8010', '8011', '8012','8013'] # 8008-8013
@@ -728,7 +214,7 @@ def plot_RT_distributions_correctStop():
     n_networks = len(network_IDs)
     trials = 200 
     t_init = params['t_init'] # 100
-    dt = float(params['dt'])
+    dt = float(params['general_dt'])
 
     RT_Go = {
                     '8007' : np.nan * np.ones([n_networks, trials]),
@@ -831,7 +317,7 @@ def plot_RT_distributions_correctStop():
 
     for param_id in param_id_list: 
         for i_netw, netw in enumerate(network_IDs):        
-            datapath = 'data/'#'/media/lorenz/Volume/Lorenz_AFS/data_Oliver/'
+            datapath = '../data/parametervariations/'
             mInt_stop = np.load(datapath+'Integrator_ampa_Stop_'+str(netw)+'_id'+str(int(param_id))+'.npy')    
             mInt_go = np.load(datapath+'Integrator_ampa_Go_'+str(netw)+'_id'+str(int(param_id))+'.npy')     
             results_RT = np.load(datapath+'resultsRT_'+str(netw)+'_param_'+'CortexStop_rates'+'_cycle'+str(0)+'id'+str(int(param_id))+'.npy', allow_pickle=True) 
@@ -841,16 +327,15 @@ def plot_RT_distributions_correctStop():
             pct_FailedStop[param_id][i_netw] = 100 * results_RT.item()['nFailedStopTrials'] / float(n_StopTrials)
             pct_CorrectGo[param_id][i_netw] = 100 * results_RT.item()['nCorrectGoTrials'] / float(n_GoTrials)
             pct_FailedGo[param_id][i_netw] = 100 * results_RT.item()['nFailedGoTrials'] / float(n_GoTrials)
-            #print('pct_CorrectStop[param_id][i_netw] = ', pct_CorrectStop[param_id][i_netw])
             rsp_mInt_stop = np.reshape(mInt_stop, [int(mInt_stop.shape[0] / float(trials)), trials], order='F')
             rsp_mInt_go = np.reshape(mInt_go, [int(mInt_go.shape[0] / float(trials)), trials], order='F')
             mInt_maxpertrial = np.nanmax(rsp_mInt_go, 0)
             mInt_maxpertrial = np.nanmax(rsp_mInt_stop, 0)
             for i_trial in range(trials):
-                if np.nanmax(rsp_mInt_go[:, i_trial]) >= Integrator.threshold: 
-                    RT_Go[param_id][i_netw, i_trial] = np.nonzero(rsp_mInt_go[:, i_trial] >= Integrator.threshold)[0][0]            
-                if np.nanmax(rsp_mInt_stop[:, i_trial]) >= Integrator.threshold: 
-                    RT_Stop[param_id][i_netw, i_trial] = np.nonzero(rsp_mInt_stop[:, i_trial] >= Integrator.threshold)[0][0] # Correct
+                if np.nanmax(rsp_mInt_go[:, i_trial]) >= params['IntegratorNeuron_threshold']: 
+                    RT_Go[param_id][i_netw, i_trial] = np.nonzero(rsp_mInt_go[:, i_trial] >= params['IntegratorNeuron_threshold'])[0][0]            
+                if np.nanmax(rsp_mInt_stop[:, i_trial]) >= params['IntegratorNeuron_threshold']: 
+                    RT_Stop[param_id][i_netw, i_trial] = np.nonzero(rsp_mInt_stop[:, i_trial] >= params['IntegratorNeuron_threshold'])[0][0] # Correct
 
         rsp_RT_Go[param_id] = np.reshape(RT_Go[param_id], n_networks * trials)
         rsp_RT_Stop[param_id] = np.reshape(RT_Stop[param_id], n_networks * trials)    
@@ -861,11 +346,6 @@ def plot_RT_distributions_correctStop():
 
     mean_CorrectGo = np.round( (np.nanmean(rsp_RT_Go[param_id][nz_Go[param_id]]) - t_init/dt)*dt, 1)    
     mean_FailedStop = np.round( (np.nanmean(rsp_RT_Stop[param_id][nz_Stop[param_id]]) - t_init/dt)*dt, 1)
-
-    #if counts_Go.max() > 0:
-    #    plt.bar(bins_Go[:-1], np.array(counts_Go) * (1.0/counts_Go.max()), width=np.diff(bins_Go)[0], alpha=0.5, color='b') #
-    #if counts_Stop.max() > 0: 
-    #    plt.bar(bins_Stop[:-1], np.array(counts_Stop) * (1.0/counts_Stop.max()), width=np.diff(bins_Stop)[0], alpha=0.5, color='g') # 
 
     plt.ion()
 
@@ -912,7 +392,7 @@ def plot_RT_distributions_correctStop():
     figBar['ytickNames']    = [0,20,40,60,80,100]
     
     ### SIGNIFICANCE
-    with open('plots/multiloops/stopComponents.txt', 'w') as f:
+    with open('../results/parametervariations/stopComponents.txt', 'w') as f:
         sig = {}
         for modeIdx, mode in enumerate(fig['modeList']):
             paramIDList = fig['paramIDList'][modeIdx][1:]
@@ -968,7 +448,7 @@ def plot_RT_distributions_correctStop():
         plotsBottom=plt.gcf().axes[len(plt.gcf().axes)-1].get_position().y0
         plotsTop=plt.gcf().axes[0].get_position().y1
         plt.text(0.05,0.5*(plotsTop+plotsBottom),figRT['ylabel'],ha='center',va='center',transform=plt.gcf().transFigure, rotation=90, **font["axLabel"])
-        plt.savefig('plots/multiloops/RT_DISTRIBUTIONS_'+mode+'.png', dpi=300)
+        plt.savefig('../results/parametervariations/RT_DISTRIBUTIONS_'+mode+'.png', dpi=300)
         plt.close()
 
 
@@ -1013,7 +493,6 @@ def plot_RT_distributions_correctStop():
                 plt.plot([x1,x1],[yMax,y1],color='k',lw=1)
                 plt.text(0.5*(x0+x1),yMax-1.5,'*',va='bottom',ha='center', **font["axLabel"])
 
-        #plt.xlim(figRT['xlim'][0]+t_init,figRT['xlim'][1]+t_init)
         if max(yMaxList)>figBar['ylim'][1]:
             ylimMax = max(yMaxList)+3.5
         else:
@@ -1025,176 +504,64 @@ def plot_RT_distributions_correctStop():
         plt.xlabel(figBar['xlabel'][modeIdx], **font["axLabel"])
         plt.ylabel(figBar['ylabel'][modeIdx], **font["axLabel"])
         plt.subplots_adjust(bottom = figRT['bottom'], top = figRT['top'], right = figRT['right'], left = figRT['left'], hspace = figRT['hspace'])
-        plt.savefig('plots/multiloops/PERFORMANCE_'+mode+'.png', dpi=300)
+        plt.savefig('../results/parametervariations/PERFORMANCE_'+mode+'.png', dpi=300)
         plt.close()
-
-       
-
 
 
 if __name__ == '__main__':
-    #plot_percent_correctGo_vs_GoRate_cycles(5111, 5) # 5111 # 5112
-    #plot_percent_correctGo_vs_StopRate_cycles(5111, 5) # 5111 # 5112
-    #plot_percent_correctGo_vs_weight_cycles(5111, 5, 'Proto-to-Arky')
-    #plot_percent_correctGo_vs_weight_cycles(5111, 5, 'Proto-to-SNr')
-    #plot_RT_vs_weight_cycles(5111, 5, 'Proto-to-SNr')
-    #plot_percent_correctGo_vs_weight_cycles(5111, 5, 'STN-to-SNr')
-    #plot_percent_correctGo_vs_weight_cycles(5111, 5, 'FSI-to-StrD1D2')
-    #plot_percent_correctGo_vs_weight_cycles(5111, 5, 'GPe_ArkySTR_FSI')
-    #plot_percent_correctGo_vs_weight_cycles(5111, 5, 'GPe_ArkySTR_D1')
-    #plot_percent_correctGo_vs_weight_cycles(5111, 5, 'STR_D1SNr')
-    #plot_percent_correctGo_vs_prob_cycles(5111, 5, 'GPe_Arky_spikeprob')
-    #plot_STR_stop(5111)
 
-    """
-    FINAL RESULTS DATA:
-
-    vary Arky-SD1 (id 8014, with tonic compensation): 
-        - hinton:data/ArkyOutputs_gyrus_and_striatum/; network_array = [1,2,3,4,5,6,7,8,9,10]; X = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0]
-        - hinton:data/ArkyOutputs_gyrus_and_striatum/; network_array = [11,12,13,14,15,16,17,18,19,20]; X = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
-    vary Arky-SD2 (id 8014, with tonic compensation): 
-        - hinton:data/ArkyOutputs_gyrus_and_striatum/; network_array = [1,2,3,4,5,6,7,8,9,10]; X = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0]
-        - hinton:data/ArkyOutputs_gyrus_and_striatum/; network_array = [11,12,13,14,15,16,17,18,19,20]; X = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
-    vary Arky-FSI (id 8014, with tonic compensation): 
-        - hinton:data/ArkyOutputs_gyrus_and_striatum/; network_array = [1,2,3,4,5,6,7,8,9,10]; X = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0]
-        - hinton:data/ArkyOutputs_gyrus_and_striatum/; network_array = [11,12,13,14,15,16,17,18,19,20]; X = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
-    vary CorStop-Arky (id 8007): 
-        - preliminar data: hinton:data/; network_array = [0,11,12,13,14,20]; X = [0.0, 0.5, 1.0, 1.5, 2.0]
-        TODO: run network_array = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]; X = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
-    vary Go rate (id 8007):
-        - preliminar data: hinton:data/; network_array = [11,12,13,14]; X = [0.5, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.5]
-        TODO: run network_array = [1,2,3,4,5,6,7,8,9,10,15,16,17,18,19,20]; X = [0.5, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.5]
-    vary Stop rate (id 8007):
-        - preliminar data: hinton:data/; network_array = [11,12,13,14]; X = [0.0, 0.5, 1.0, 1.5, 2.0]
-        TODO: run network_array = [1,2,3,4,5,6,7,8,9,10,15,16,17,18,19,20]; X = [0.0, 0.5, 1.0, 1.5, 2.0]
-
-    first plot = [CorStop-Arky, Arky-SD1, Arky-SD2, Arky-FSI]
-    second plot = [Go rate, Stop rate]
-    """
-
-
-    #n_networks = 20#10#6 # 2
-    #network_array = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]#[1,2,3,4,5,6,7,8,9,10]#[11,12,13,14] # [1] # range(n_networks) # [1,2,3,4] #  [0,2,3,4] #    [0]
-    #params_id = 8014#8007 # 6097 # 6083
-    #loadFolder = '/scratch/olmai/parameterVariationData/orig/'#'data/ArkyOutputs_gyrus_and_striatum/'#'data/'
-
-    #plot_percent_correctGo_vs_GoRate_cycles(params_id, network_array) # Useful
-    #plot_percent_correctGo_vs_StopRate_cycles(params_id, network_array) # Useful
-    #plot_percent_correctGo_vs_CortexPauseRate_cycles(params_id, network_array) # Weird - counterintuitive?!  
-
-    #paramNameList = ['ArkyD1Stop', 'ArkyD2Stop', 'ArkyFSIStop']#['Cortex_SGPe_Arky']#['CortexGo_rates','CortexStop_rates','Cortex_SGPe_Arky']#['CortexGo_rates', 'CortexStop_rates', 'Stop1rates', 'Cortex_SGPe_Arky', 'Stop_Proto2', 'STR_D2GPe_Arky', 'D2_Proto2', 'GPe_ArkySTR_D1', 'GPe_ArkySTR_D2', 'Proto2_Int', 'GPe_ProtoSTR_FSI', 'STN_SNr']
-
-    paramNameList = ['Cortex_SGPe_Arky', 'ArkyD1Stop', 'ArkyD2Stop', 'ArkyFSIStop', 'CortexGo_rates']
+    ### PARAMETERS FOR PARAMETERVARIATION PLOTS
+    ## NETWORKNUMBERS OF PARAMETERVARIATION SIMULATIONS
     network_array = {
                     'Cortex_SGPe_Arky' : [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
                     'ArkyD1Stop'       : [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], 
                     'ArkyD2Stop'       : [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], 
                     'ArkyFSIStop'      : [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], 
-                    'CortexGo_rates'   : [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
-                    'CortexStop_rates' : [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+                    'CortexGo_rates'   : [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
                     }
+    ## GENERAL_ID OF PARAMETERVARIATION SIMULATIONS
     param_id =      {
                     'Cortex_SGPe_Arky' : 8007,
                     'ArkyD1Stop'       : 8014, 
                     'ArkyD2Stop'       : 8014, 
                     'ArkyFSIStop'      : 8014, 
-                    'CortexGo_rates'   : 8007, 
-                    'CortexStop_rates' : 8007
+                    'CortexGo_rates'   : 8007
                     }
+    ## DATAFOLDER OF PARAMETERVARIATION SIMULATIONS
     loadFolder =    {
-                    'Cortex_SGPe_Arky' : 'data/',
-                    'ArkyD1Stop'       : 'data/ArkyOutputs_gyrus_and_striatum/', 
-                    'ArkyD2Stop'       : 'data/ArkyOutputs_gyrus_and_striatum/', 
-                    'ArkyFSIStop'      : 'data/ArkyOutputs_gyrus_and_striatum/', 
-                    'CortexGo_rates'   : 'data/', 
-                    'CortexStop_rates' : 'data/'
+                    'Cortex_SGPe_Arky' : '../data/parametervariations/',
+                    'ArkyD1Stop'       : '../data/parametervariations/', 
+                    'ArkyD2Stop'       : '../data/parametervariations/', 
+                    'ArkyFSIStop'      : '../data/parametervariations/', 
+                    'CortexGo_rates'   : '../data/parametervariations/'
                     }
+    ## PARAMETERVARIATIONS OF PARAMETERVARIATION SIMULATIONS
     variations =    {
                     'Cortex_SGPe_Arky' : [0, 0.2, 0.4, 0.6, 0.8, 1.0],
                     'ArkyD1Stop'       : [0, 0.2, 0.4, 0.6, 0.8, 1.0], 
                     'ArkyD2Stop'       : [0, 0.2, 0.4, 0.6, 0.8, 1.0], 
                     'ArkyFSIStop'      : [0, 0.2, 0.4, 0.6, 0.8, 1.0], 
-                    'CortexGo_rates'   : [0.5, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.5], 
-                    'CortexStop_rates' : [0.0, 0.5, 1.0, 1.5, 2.0]
+                    'CortexGo_rates'   : [0.5, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.5]
                     }
+    ## FORMAT FOR RESULT FIGURE
     saveFormat =    {
                     'Cortex_SGPe_Arky' : 'png',
                     'ArkyD1Stop'       : 'png', 
                     'ArkyD2Stop'       : 'png', 
                     'ArkyFSIStop'      : 'png', 
-                    'CortexGo_rates'   : 'svg', 
-                    'CortexStop_rates' : 'svg'
+                    'CortexGo_rates'   : 'svg'
                     }
+
     
-    # part of FIGURE 4 in manuscript
+    ### FIGURE 4C,D IN MANUSCRIPT
     for paramIdx, paramname in enumerate(['CortexGo_rates']):
         plot_pctcorrect_timing_RT_vs_weight_cycles(param_id[paramname], network_array[paramname], paramname, loadFolder[paramname], variations[paramname], saveFormat[paramname])
 
-    # FIGURE 10 in manuscript
+    # FIGURE 10 IN MANUSCRIPT
     for paramIdx, paramname in enumerate(['Cortex_SGPe_Arky', 'ArkyD1Stop', 'ArkyD2Stop', 'ArkyFSIStop']):
         plot_pctcorrect_timing_RT_vs_weight_cycles_FOURINAROW(param_id[paramname], network_array[paramname], paramname, loadFolder[paramname], variations[paramname], paramIdx)             
    
-    # FIGURE 8 in manuscript
+    # FIGURE 8 IN MANUSCRIPT
     plot_RT_distributions_correctStop()        
 
-    '''#    
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'Cortex_SGPe_Arky') # TODO: Repeat at higher resolution   
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'Cortex_SGPe_Proto') # Unclear
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'STR_D1STR_D2')    
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'STR_D2STR_D1')        
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'STR_FSISTR_D1') #        
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'STR_FSISTR_D2') # 
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'STR_D2GPe_Arky')
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'STR_D2GPe_Proto')
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'GPe_ArkySTR_D1')
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'GPe_ArkySTR_D2')    
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'GPe_ArkySTR_FSI')  
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'GPe_ArkyGPe_Proto')        
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'GPe_ArkyCortex_G')       
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'GPe_ProtoSTR_FSI')    
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'GPe_ProtoGPe_Arky')            
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'GPe_ProtoSTN')  
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'STNGPe_Arky') 
-    plot_percent_correctGo_vs_weight_cycles(params_id, network_array, 'STN_SNr')     
-    '''
-    '''#
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'Cortex_SGPe_Arky')    
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'Cortex_SGPe_Proto')    
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'STR_D1STR_D2')    
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'STR_D2STR_D1')    
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'STR_FSISTR_D1')    
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'STR_FSISTR_D2')    
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'STR_D2GPe_Arky')    
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'STR_D2GPe_Proto')    
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'GPe_ArkySTR_D1')
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'GPe_ArkySTR_D2')    
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'GPe_ArkySTR_FSI')   
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'GPe_ArkyGPe_Proto')        
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'GPe_ArkyCortex_G')
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'GPe_ProtoSTR_FSI')    
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'GPe_ProtoGPe_Arky')            
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'GPe_ProtoSTN')        
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'STNGPe_Arky')       
-    plot_StopTiming_vs_weight_cycles(params_id, network_array, 'STN_SNr')     
-    '''
-    '''# Most results above somewhat unclear - increase param. range?
-    plot_RT_vs_weight_cycles(params_id, network_array, 'Cortex_SGPe_Arky')       
-    plot_RT_vs_weight_cycles(params_id, network_array, 'Cortex_SGPe_Proto')    
-    plot_RT_vs_weight_cycles(params_id, network_array, 'STR_D1STR_D2')    
-    plot_RT_vs_weight_cycles(params_id, network_array, 'STR_D2STR_D1')    
-    plot_RT_vs_weight_cycles(params_id, network_array, 'STR_FSISTR_D1')    
-    plot_RT_vs_weight_cycles(params_id, network_array, 'STR_FSISTR_D2')    
-    plot_RT_vs_weight_cycles(params_id, network_array, 'STR_D2GPe_Arky')    
-    plot_RT_vs_weight_cycles(params_id, network_array, 'STR_D2GPe_Proto')    
-    plot_RT_vs_weight_cycles(params_id, network_array, 'GPe_ArkySTR_D1')
-    plot_RT_vs_weight_cycles(params_id, network_array, 'GPe_ArkySTR_D2')    
-    plot_RT_vs_weight_cycles(params_id, network_array, 'GPe_ArkySTR_FSI')   
-    plot_RT_vs_weight_cycles(params_id, network_array, 'GPe_ArkyGPe_Proto')        
-    plot_RT_vs_weight_cycles(params_id, network_array, 'GPe_ArkyCortex_G')
-    plot_RT_vs_weight_cycles(params_id, network_array, 'GPe_ProtoSTR_FSI')    
-    plot_RT_vs_weight_cycles(params_id, network_array, 'GPe_ProtoGPe_Arky')            
-    plot_RT_vs_weight_cycles(params_id, network_array, 'GPe_ProtoSTN')        
-    plot_RT_vs_weight_cycles(params_id, network_array, 'STNGPe_Arky')                
-    plot_RT_vs_weight_cycles(params_id, network_array, 'STN_SNr')       
-    '''    
     
