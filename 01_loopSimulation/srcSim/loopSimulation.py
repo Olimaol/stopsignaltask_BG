@@ -61,49 +61,31 @@ else:
 
 ### POPULATIONS RATE DATA FOR EACH TRIAL OF GO AND STOP CUE ###
 simlen = params['t_SSD'] + params['t_delayStopAfterCue'] + params['t_cortexStopDurationAfterCue'] + params['t_decay'] + params['t_init']
-rate_data_SD1_Go = np.nan*np.ones([paramsS['trials'], int(simlen / dt())])
-rate_data_SD1_Stop = np.nan*np.ones([paramsS['trials'], int(simlen / dt())])
-rate_data_SD2_Go = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_SD2_Stop = np.nan*np.ones([paramsS['trials'], int(simlen / dt())])
-rate_data_FSI_Go = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_FSI_Stop = np.nan*np.ones([paramsS['trials'], int(simlen / dt())])
-rate_data_STN_Go = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_STN_Stop = np.nan*np.ones([paramsS['trials'], int(simlen / dt())])
-rate_data_GPeProto_Go = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_GPeProto2_Go = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_GPeProto_Stop = np.nan*np.ones([paramsS['trials'], int(simlen / dt())])
-rate_data_GPeProto2_Stop = np.nan*np.ones([paramsS['trials'], int(simlen / dt())])
-rate_data_GPeArky_Go = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_GPeArky_Stop = np.nan*np.ones([paramsS['trials'], int(simlen / dt())])
-rate_data_SNr_Go = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_SNr_Stop = np.nan*np.ones([paramsS['trials'], int(simlen / dt())])
-rate_data_SNrE_Go = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_SNrE_Stop = np.nan*np.ones([paramsS['trials'], int(simlen / dt())])
-rate_data_Thal_Go = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_Thal_Stop = np.nan*np.ones([paramsS['trials'], int(simlen / dt())])
-rate_data_Cortex_G_Go = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_Cortex_G_Stop = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_Cortex_S_Go = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_Cortex_S_Stop = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_Stoppinput1_Go = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
-rate_data_Stoppinput1_Stop = np.nan*np.ones([paramsS['trials'], int(simlen / dt())]) 
+rateData_Go   = {}
+rateData_Stop = {}
+for pop in ['StrD1', 'StrD2', 'StrFSI', 'STN', 'GPeProto', 'GPeCp', 'GPeArky', 'SNr', 'SNrE', 'Thal', 'cortexGo', 'cortexStop', 'cortexPause']:
+    rateData_Go[pop]   = np.nan*np.ones([paramsS['trials'], int(simlen / dt())])
+    rateData_Stop[pop] = np.nan*np.ones([paramsS['trials'], int(simlen / dt())])
 
 
 ### MONITORS ###
-m_Int_ampa    = Monitor(Integrator, ['g_ampa', 'spike'])
-m_STR_D1      = Monitor(STR_D1, ['spike'])
-m_STR_D2      = Monitor(STR_D2, ['spike'])
-m_STR_FSI     = Monitor(STR_FSI, ['spike'])
-m_STN         = Monitor(STN,['spike'])
-m_GPe_Proto   = Monitor(GPe_Proto,['spike']) 
-m_GPe_Proto2  = Monitor(GPe_Proto2,['spike']) 
-m_GPe_Arky    = Monitor(GPe_Arky,['spike']) 
-m_SNr         = Monitor(SNr,['spike'])
-m_SNrE        = Monitor(SNrE,['spike'])
-m_Thal        = Monitor(Thal,['spike'])
-m_Cortex_G    = Monitor(Cortex_G,'spike') 
-m_Cortex_S    = Monitor(Cortex_S,'spike') 
-m_Stoppinput1 = Monitor(Stoppinput1,'spike')
+mon = {}
+for pop in ['IntegratorGo', 'StrD1', 'StrD2', 'StrFSI', 'STN', 'GPeProto', 'GPeCp', 'GPeArky', 'SNr', 'SNrE', 'Thal', 'cortexGo', 'cortexStop', 'cortexPause']:
+    devineMonitorsHereAfterPopulationNamesChecked = None
+mon['IntegratorGo']    = Monitor(Integrator, ['g_ampa', 'spike'])
+mon['StrD1']      = Monitor(STR_D1, ['spike'])
+mon['StrD2']      = Monitor(STR_D2, ['spike'])
+mon['StrFSI']     = Monitor(STR_FSI, ['spike'])
+mon['STN']         = Monitor(STN,['spike'])
+mon['GPeProto']   = Monitor(GPe_Proto,['spike']) 
+mon['GPeCp']  = Monitor(GPe_Proto2,['spike']) 
+mon['GPeArky']    = Monitor(GPe_Arky,['spike']) 
+mon['SNr']         = Monitor(SNr,['spike'])
+mon['SNrE']        = Monitor(SNrE,['spike'])
+mon['Thal']        = Monitor(Thal,['spike'])
+mon['cortexGo']    = Monitor(Cortex_G,'spike') 
+mon['cortexStop']    = Monitor(Cortex_S,'spike') 
+mon['cortexPause'] = Monitor(Stoppinput1,'spike')
 
 selection = np.zeros(paramsS['trials'])
 timeovertrial = np.zeros(paramsS['trials'])
@@ -387,49 +369,49 @@ for i_paramname in range(n_param_vars):
             print('TRIAL END, store trial data...')
 
             ### GET SPIKE DATA OF TRIAL
-            SD1_spikes = m_STR_D1.get('spike')
-            SD2_spikes = m_STR_D2.get('spike')
-            FSI_spikes = m_STR_FSI.get('spike')
-            STN_spikes = m_STN.get('spike')
-            Proto_spikes = m_GPe_Proto.get('spike')
-            Proto2_spikes = m_GPe_Proto2.get('spike')
-            Arky_spikes = m_GPe_Arky.get('spike')
-            SNr_spikes = m_SNr.get('spike')
-            SNrE_spikes = m_SNrE.get('spike')
-            Thal_spikes = m_Thal.get('spike')
-            Cortex_G_spikes = m_Cortex_G.get('spike')
-            Cortex_S_spikes = m_Cortex_S.get('spike')
-            Stoppinput1_spikes = m_Stoppinput1.get('spike')
+            SD1_spikes = mon['StrD1'].get('spike')
+            SD2_spikes = mon['StrD2'].get('spike')
+            FSI_spikes = mon['StrFSI'].get('spike')
+            STN_spikes = mon['STN'].get('spike')
+            Proto_spikes = mon['GPeProto'].get('spike')
+            Proto2_spikes = mon['GPeCp'].get('spike')
+            Arky_spikes = mon['GPeArky'].get('spike')
+            SNr_spikes = mon['SNr'].get('spike')
+            SNrE_spikes = mon['SNrE'].get('spike')
+            Thal_spikes = mon['Thal'].get('spike')
+            Cortex_G_spikes = mon['cortexGo'].get('spike')
+            Cortex_S_spikes = mon['cortexStop'].get('spike')
+            Stoppinput1_spikes = mon['cortexPause'].get('spike')
 
             ### GET POPULATIONS RATE DATA OF TRIAL
-            rate_data_SD1_currtrial = custom_poprate(m_STR_D1, SD1_spikes, params['general_msSmooth'] )
-            rate_data_SD2_currtrial = custom_poprate(m_STR_D2, SD2_spikes, params['general_msSmooth'])
-            rate_data_FSI_currtrial = custom_poprate(m_STR_FSI, FSI_spikes, params['general_msSmooth'])
-            rate_data_STN_currtrial = custom_poprate(m_STN, STN_spikes, params['general_msSmooth'])
-            rate_data_GPeProto2_currtrial = custom_poprate(m_GPe_Proto2, Proto2_spikes, params['general_msSmooth'])
-            rate_data_GPeProto_currtrial = custom_poprate(m_GPe_Proto, Proto_spikes, params['general_msSmooth'])
-            rate_data_GPeArky_currtrial = custom_poprate(m_GPe_Arky, Arky_spikes, params['general_msSmooth'])
-            rate_data_SNr_currtrial = custom_poprate(m_SNr, SNr_spikes, params['general_msSmooth'])
-            rate_data_SNrE_currtrial = custom_poprate(m_SNrE, SNrE_spikes, params['general_msSmooth'])
-            rate_data_Thal_currtrial = custom_poprate(m_Thal, Thal_spikes, params['general_msSmooth'])
-            rate_data_Cortex_G_currtrial = custom_poprate(m_Cortex_G, Cortex_G_spikes, params['general_msSmooth'])
-            rate_data_Cortex_S_currtrial = custom_poprate(m_Cortex_S, Cortex_S_spikes, params['general_msSmooth'])
-            rate_data_Stoppinput1_currtrial = custom_poprate(m_Stoppinput1, Stoppinput1_spikes, params['general_msSmooth'])
+            rate_data_SD1_currtrial = custom_poprate(mon['StrD1'], SD1_spikes, params['general_msSmooth'] )
+            rate_data_SD2_currtrial = custom_poprate(mon['StrD2'], SD2_spikes, params['general_msSmooth'])
+            rate_data_FSI_currtrial = custom_poprate(mon['StrFSI'], FSI_spikes, params['general_msSmooth'])
+            rate_data_STN_currtrial = custom_poprate(mon['STN'], STN_spikes, params['general_msSmooth'])
+            rate_data_GPeProto2_currtrial = custom_poprate(mon['GPeCp'], Proto2_spikes, params['general_msSmooth'])
+            rate_data_GPeProto_currtrial = custom_poprate(mon['GPeProto'], Proto_spikes, params['general_msSmooth'])
+            rate_data_GPeArky_currtrial = custom_poprate(mon['GPeArky'], Arky_spikes, params['general_msSmooth'])
+            rate_data_SNr_currtrial = custom_poprate(mon['SNr'], SNr_spikes, params['general_msSmooth'])
+            rate_data_SNrE_currtrial = custom_poprate(mon['SNrE'], SNrE_spikes, params['general_msSmooth'])
+            rate_data_Thal_currtrial = custom_poprate(mon['Thal'], Thal_spikes, params['general_msSmooth'])
+            rate_data_Cortex_G_currtrial = custom_poprate(mon['cortexGo'], Cortex_G_spikes, params['general_msSmooth'])
+            rate_data_Cortex_S_currtrial = custom_poprate(mon['cortexStop'], Cortex_S_spikes, params['general_msSmooth'])
+            rate_data_Stoppinput1_currtrial = custom_poprate(mon['cortexPause'], Stoppinput1_spikes, params['general_msSmooth'])
 
             ### ADD RATE DATA OF TRIAL TO RATE DATA OF ALL GO TRIALS            
-            rate_data_SD1_Go[i, : ] = get_poprate_aligned_onset(m_STR_D1, SD1_spikes, rate_data_SD1_Go[i, : ], rate_data_SD1_currtrial, dt())            
-            rate_data_SD2_Go[i, : ] = get_poprate_aligned_onset(m_STR_D2, SD2_spikes, rate_data_SD2_Go[i, : ], rate_data_SD2_currtrial, dt())                        
-            rate_data_FSI_Go[i, : ] = get_poprate_aligned_onset(m_STR_FSI, FSI_spikes, rate_data_FSI_Go[i, : ], rate_data_FSI_currtrial, dt())                        
-            rate_data_STN_Go[i, : ] = get_poprate_aligned_onset(m_STN, STN_spikes, rate_data_STN_Go[i, : ], rate_data_STN_currtrial, dt())                                    
-            rate_data_GPeProto_Go[i, : ] = get_poprate_aligned_onset(m_GPe_Proto, Proto_spikes, rate_data_GPeProto_Go[i, : ], rate_data_GPeProto_currtrial, dt())             
-            rate_data_GPeProto2_Go[i, : ] = get_poprate_aligned_onset(m_GPe_Proto2, Proto2_spikes, rate_data_GPeProto2_Go[i, : ], rate_data_GPeProto2_currtrial, dt())
-            rate_data_GPeArky_Go[i, : ] = get_poprate_aligned_onset(m_GPe_Arky, Arky_spikes, rate_data_GPeArky_Go[i, : ], rate_data_GPeArky_currtrial, dt())            
-            rate_data_SNr_Go[i, : ] = get_poprate_aligned_onset(m_SNr, SNr_spikes, rate_data_SNr_Go[i, : ], rate_data_SNr_currtrial, dt())                                                
-            rate_data_SNrE_Go[i, : ] = get_poprate_aligned_onset(m_SNrE, SNrE_spikes, rate_data_SNrE_Go[i, : ], rate_data_SNrE_currtrial, dt())                                                            
-            rate_data_Thal_Go[i, : ] = get_poprate_aligned_onset(m_Thal, Thal_spikes, rate_data_Thal_Go[i, : ], rate_data_Thal_currtrial, dt())                         
-            rate_data_Cortex_G_Go[i, : ] = get_poprate_aligned_onset(m_Cortex_G, Cortex_G_spikes, rate_data_Cortex_G_Go[i, : ], rate_data_Cortex_G_currtrial, dt())
-            rate_data_Cortex_S_Go[i, : ] = get_poprate_aligned_onset(m_Cortex_S, Cortex_S_spikes, rate_data_Cortex_S_Go[i, : ], rate_data_Cortex_S_currtrial, dt())
-            rate_data_Stoppinput1_Go[i, : ] = get_poprate_aligned_onset(m_Stoppinput1, Stoppinput1_spikes, rate_data_Stoppinput1_Go[i, : ], rate_data_Stoppinput1_currtrial, dt())            
+            rateData_Go['StrD1'][i, : ] = get_poprate_aligned_onset(mon['StrD1'], SD1_spikes, rateData_Go['StrD1'][i, : ], rate_data_SD1_currtrial, dt())            
+            rateData_Go['StrD2'][i, : ] = get_poprate_aligned_onset(mon['StrD2'], SD2_spikes, rateData_Go['StrD2'][i, : ], rate_data_SD2_currtrial, dt())                        
+            rateData_Go['StrFSI'][i, : ] = get_poprate_aligned_onset(mon['StrFSI'], FSI_spikes, rateData_Go['StrFSI'][i, : ], rate_data_FSI_currtrial, dt())                        
+            rateData_Go['STN'][i, : ] = get_poprate_aligned_onset(mon['STN'], STN_spikes, rateData_Go['STN'][i, : ], rate_data_STN_currtrial, dt())                                    
+            rateData_Go['GPeProto'][i, : ] = get_poprate_aligned_onset(mon['GPeProto'], Proto_spikes, rateData_Go['GPeProto'][i, : ], rate_data_GPeProto_currtrial, dt())             
+            rateData_Go['GPeCp'][i, : ] = get_poprate_aligned_onset(mon['GPeCp'], Proto2_spikes, rateData_Go['GPeCp'][i, : ], rate_data_GPeProto2_currtrial, dt())
+            rateData_Go['GPeArky'][i, : ] = get_poprate_aligned_onset(mon['GPeArky'], Arky_spikes, rateData_Go['GPeArky'][i, : ], rate_data_GPeArky_currtrial, dt())            
+            rateData_Go['SNr'][i, : ] = get_poprate_aligned_onset(mon['SNr'], SNr_spikes, rateData_Go['SNr'][i, : ], rate_data_SNr_currtrial, dt())                                                
+            rateData_Go['SNrE'][i, : ] = get_poprate_aligned_onset(mon['SNrE'], SNrE_spikes, rateData_Go['SNrE'][i, : ], rate_data_SNrE_currtrial, dt())                                                            
+            rateData_Go['Thal'][i, : ] = get_poprate_aligned_onset(mon['Thal'], Thal_spikes, rateData_Go['Thal'][i, : ], rate_data_Thal_currtrial, dt())                         
+            rateData_Go['cortexGo'][i, : ] = get_poprate_aligned_onset(mon['cortexGo'], Cortex_G_spikes, rateData_Go['cortexGo'][i, : ], rate_data_Cortex_G_currtrial, dt())
+            rateData_Go['cortexStop'][i, : ] = get_poprate_aligned_onset(mon['cortexStop'], Cortex_S_spikes, rateData_Go['cortexStop'][i, : ], rate_data_Cortex_S_currtrial, dt())
+            rateData_Go['cortexPause'][i, : ] = get_poprate_aligned_onset(mon['cortexPause'], Stoppinput1_spikes, rateData_Go['cortexPause'][i, : ], rate_data_Stoppinput1_currtrial, dt())            
 
 
             if Integrator.decision == -1 :
@@ -449,24 +431,24 @@ for i_paramname in range(n_param_vars):
         print('save Go trials data...\n')
         np.save('../data/'+paramsS['saveFolder']+'/selection_Go'+netNr+'.npy', selection)
         np.save('../data/'+paramsS['saveFolder']+'/Timeovertrials_Go'+netNr+'.npy', timeovertrial)
-        mInt_go = m_Int_ampa.get('g_ampa')
+        mInt_go = mon['IntegratorGo'].get('g_ampa')
         np.save('../data/'+paramsS['saveFolder']+'/Integrator_ampa_Go_'+netNr+'_id'+str(params['general_id'])+'.npy', mInt_go)
-        spike_times, ranks = m_Int_ampa.raster_plot(m_Int_ampa.get('spike'))
+        spike_times, ranks = mon['IntegratorGo'].raster_plot(mon['IntegratorGo'].get('spike'))
         np.save('../data/'+paramsS['saveFolder']+'/Integrator_spike_Go'+netNr+'_cycle'+str(i_cycle)+'.npy', [spike_times, ranks])
 
-        np.save('../data/'+paramsS['saveFolder']+'/SD1_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_SD1_Go, 0), np.nanstd(rate_data_SD1_Go, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/SD2_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_SD2_Go, 0), np.nanstd(rate_data_SD2_Go, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/FSI_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_FSI_Go, 0), np.nanstd(rate_data_FSI_Go, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_STN_Go, 0), np.nanstd(rate_data_STN_Go, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_GPeProto_Go, 0), np.nanstd(rate_data_GPeProto_Go, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/GPeProto2_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_GPeProto2_Go, 0), np.nanstd(rate_data_GPeProto2_Go, 0)])            
-        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_GPeArky_Go, 0), np.nanstd(rate_data_GPeArky_Go, 0)])        
-        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_SNr_Go, 0), np.nanstd(rate_data_SNr_Go, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/SNrE_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_SNrE_Go, 0), np.nanstd(rate_data_SNrE_Go, 0)])        
-        np.save('../data/'+paramsS['saveFolder']+'/Thal_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_Thal_Go, 0), np.nanstd(rate_data_Thal_Go, 0)])        
-        np.save('../data/'+paramsS['saveFolder']+'/Cortex_G_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_Cortex_G_Go, 0), np.nanstd(rate_data_Cortex_G_Go, 0)])        
-        np.save('../data/'+paramsS['saveFolder']+'/Cortex_S_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_Cortex_S_Go, 0), np.nanstd(rate_data_Cortex_S_Go, 0)])                
-        np.save('../data/'+paramsS['saveFolder']+'/Stoppinput1_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rate_data_Stoppinput1_Go, 0), np.nanstd(rate_data_Stoppinput1_Go, 0)])                        
+        np.save('../data/'+paramsS['saveFolder']+'/SD1_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rateData_Go['StrD1'], 0), np.nanstd(rateData_Go['StrD1'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/SD2_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rateData_Go['StrD2'], 0), np.nanstd(rateData_Go['StrD2'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/FSI_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rateData_Go['StrFSI'], 0), np.nanstd(rateData_Go['StrFSI'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rateData_Go['STN'], 0), np.nanstd(rateData_Go['STN'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rateData_Go['GPeProto'], 0), np.nanstd(rateData_Go['GPeProto'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto2_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rateData_Go['GPeCp'], 0), np.nanstd(rateData_Go['GPeCp'], 0)])            
+        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rateData_Go['GPeArky'], 0), np.nanstd(rateData_Go['GPeArky'], 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rateData_Go['SNr'], 0), np.nanstd(rateData_Go['SNr'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/SNrE_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rateData_Go['SNrE'], 0), np.nanstd(rateData_Go['SNrE'], 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/Thal_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rateData_Go['Thal'], 0), np.nanstd(rateData_Go['Thal'], 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_G_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rateData_Go['cortexGo'], 0), np.nanstd(rateData_Go['cortexGo'], 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_S_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rateData_Go['cortexStop'], 0), np.nanstd(rateData_Go['cortexStop'], 0)])                
+        np.save('../data/'+paramsS['saveFolder']+'/Stoppinput1_rate_Go_mean_std'+netNr+'.npy', [np.nanmean(rateData_Go['cortexPause'], 0), np.nanstd(rateData_Go['cortexPause'], 0)])                        
 
                     
 
@@ -590,49 +572,49 @@ for i_paramname in range(n_param_vars):
             print('TRIAL END, store trial data...')
             
             ### GET SPIKE DATA OF TRIAL
-            SD1_spikes = m_STR_D1.get('spike')
-            SD2_spikes = m_STR_D2.get('spike')
-            FSI_spikes = m_STR_FSI.get('spike')
-            STN_spikes = m_STN.get('spike')
-            Proto_spikes = m_GPe_Proto.get('spike')
-            Proto2_spikes = m_GPe_Proto2.get('spike')
-            Arky_spikes = m_GPe_Arky.get('spike')
-            SNr_spikes = m_SNr.get('spike')
-            SNrE_spikes = m_SNrE.get('spike')
-            Thal_spikes = m_Thal.get('spike')
-            Cortex_G_spikes = m_Cortex_G.get('spike')
-            Cortex_S_spikes = m_Cortex_S.get('spike')
-            Stoppinput1_spikes = m_Stoppinput1.get('spike')
+            SD1_spikes = mon['StrD1'].get('spike')
+            SD2_spikes = mon['StrD2'].get('spike')
+            FSI_spikes = mon['StrFSI'].get('spike')
+            STN_spikes = mon['STN'].get('spike')
+            Proto_spikes = mon['GPeProto'].get('spike')
+            Proto2_spikes = mon['GPeCp'].get('spike')
+            Arky_spikes = mon['GPeArky'].get('spike')
+            SNr_spikes = mon['SNr'].get('spike')
+            SNrE_spikes = mon['SNrE'].get('spike')
+            Thal_spikes = mon['Thal'].get('spike')
+            Cortex_G_spikes = mon['cortexGo'].get('spike')
+            Cortex_S_spikes = mon['cortexStop'].get('spike')
+            Stoppinput1_spikes = mon['cortexPause'].get('spike')
 
             ### GET POPULATIONS RATE DATA OF TRIAL
-            rate_data_SD1_currtrial = custom_poprate(m_STR_D1, SD1_spikes, params['general_msSmooth'])
-            rate_data_SD2_currtrial = custom_poprate(m_STR_D2, SD2_spikes, params['general_msSmooth'])
-            rate_data_FSI_currtrial = custom_poprate(m_STR_FSI, FSI_spikes, params['general_msSmooth'])
-            rate_data_STN_currtrial = custom_poprate(m_STN, STN_spikes, params['general_msSmooth'])
-            rate_data_GPeProto_currtrial = custom_poprate(m_GPe_Proto, Proto_spikes, params['general_msSmooth'])
-            rate_data_GPeProto2_currtrial = custom_poprate(m_GPe_Proto2, Proto2_spikes, params['general_msSmooth'])
-            rate_data_GPeArky_currtrial = custom_poprate(m_GPe_Arky, Arky_spikes, params['general_msSmooth'])
-            rate_data_SNr_currtrial = custom_poprate(m_SNr, SNr_spikes, params['general_msSmooth'])
-            rate_data_SNrE_currtrial = custom_poprate(m_SNrE, SNrE_spikes, params['general_msSmooth'])
-            rate_data_Thal_currtrial = custom_poprate(m_Thal, Thal_spikes, params['general_msSmooth'])
-            rate_data_Cortex_G_currtrial = custom_poprate(m_Cortex_G, Cortex_G_spikes, params['general_msSmooth'])
-            rate_data_Cortex_S_currtrial = custom_poprate(m_Cortex_S, Cortex_S_spikes, params['general_msSmooth'])
-            rate_data_Stoppinput1_currtrial = custom_poprate(m_Stoppinput1, Stoppinput1_spikes, params['general_msSmooth'])            
+            rate_data_SD1_currtrial = custom_poprate(mon['StrD1'], SD1_spikes, params['general_msSmooth'])
+            rate_data_SD2_currtrial = custom_poprate(mon['StrD2'], SD2_spikes, params['general_msSmooth'])
+            rate_data_FSI_currtrial = custom_poprate(mon['StrFSI'], FSI_spikes, params['general_msSmooth'])
+            rate_data_STN_currtrial = custom_poprate(mon['STN'], STN_spikes, params['general_msSmooth'])
+            rate_data_GPeProto_currtrial = custom_poprate(mon['GPeProto'], Proto_spikes, params['general_msSmooth'])
+            rate_data_GPeProto2_currtrial = custom_poprate(mon['GPeCp'], Proto2_spikes, params['general_msSmooth'])
+            rate_data_GPeArky_currtrial = custom_poprate(mon['GPeArky'], Arky_spikes, params['general_msSmooth'])
+            rate_data_SNr_currtrial = custom_poprate(mon['SNr'], SNr_spikes, params['general_msSmooth'])
+            rate_data_SNrE_currtrial = custom_poprate(mon['SNrE'], SNrE_spikes, params['general_msSmooth'])
+            rate_data_Thal_currtrial = custom_poprate(mon['Thal'], Thal_spikes, params['general_msSmooth'])
+            rate_data_Cortex_G_currtrial = custom_poprate(mon['cortexGo'], Cortex_G_spikes, params['general_msSmooth'])
+            rate_data_Cortex_S_currtrial = custom_poprate(mon['cortexStop'], Cortex_S_spikes, params['general_msSmooth'])
+            rate_data_Stoppinput1_currtrial = custom_poprate(mon['cortexPause'], Stoppinput1_spikes, params['general_msSmooth'])            
 
             ### ADD RATE DATA OF TRIAL TO RATE DATA OF ALL STOP TRIALS
-            rate_data_SD1_Stop[i, : ] = get_poprate_aligned_onset(m_STR_D1, SD1_spikes, rate_data_SD1_Stop[i, : ], rate_data_SD1_currtrial, dt())            
-            rate_data_SD2_Stop[i, : ] = get_poprate_aligned_onset(m_STR_D2, SD2_spikes, rate_data_SD2_Stop[i, : ], rate_data_SD2_currtrial, dt())                        
-            rate_data_FSI_Stop[i, : ] = get_poprate_aligned_onset(m_STR_FSI, FSI_spikes, rate_data_FSI_Stop[i, : ], rate_data_FSI_currtrial, dt())                        
-            rate_data_STN_Stop[i, : ] = get_poprate_aligned_onset(m_STN, STN_spikes, rate_data_STN_Stop[i, : ], rate_data_STN_currtrial, dt())                                    
-            rate_data_GPeProto_Stop[i, : ] = get_poprate_aligned_onset(m_GPe_Proto, Proto_spikes, rate_data_GPeProto_Stop[i, : ], rate_data_GPeProto_currtrial, dt())             
-            rate_data_GPeProto2_Stop[i, : ] = get_poprate_aligned_onset(m_GPe_Proto2, Proto2_spikes, rate_data_GPeProto2_Stop[i, : ], rate_data_GPeProto2_currtrial, dt()) 
-            rate_data_GPeArky_Stop[i, : ] = get_poprate_aligned_onset(m_GPe_Arky, Arky_spikes, rate_data_GPeArky_Stop[i, : ], rate_data_GPeArky_currtrial, dt())            
-            rate_data_SNr_Stop[i, : ] = get_poprate_aligned_onset(m_SNr, SNr_spikes, rate_data_SNr_Stop[i, : ], rate_data_SNr_currtrial, dt())                                                
-            rate_data_SNrE_Stop[i, : ] = get_poprate_aligned_onset(m_SNrE, SNrE_spikes, rate_data_SNrE_Stop[i, : ], rate_data_SNrE_currtrial, dt())                                                            
-            rate_data_Thal_Stop[i, : ] = get_poprate_aligned_onset(m_Thal, Thal_spikes, rate_data_Thal_Stop[i, : ], rate_data_Thal_currtrial, dt())                         
-            rate_data_Cortex_G_Stop[i, : ] = get_poprate_aligned_onset(m_Cortex_G, Cortex_G_spikes, rate_data_Cortex_G_Stop[i, : ], rate_data_Cortex_G_currtrial, dt())
-            rate_data_Cortex_S_Stop[i, : ] = get_poprate_aligned_onset(m_Cortex_S, Cortex_S_spikes, rate_data_Cortex_S_Stop[i, : ], rate_data_Cortex_S_currtrial, dt())
-            rate_data_Stoppinput1_Stop[i, : ] = get_poprate_aligned_onset(m_Stoppinput1, Stoppinput1_spikes, rate_data_Stoppinput1_Stop[i, : ], rate_data_Stoppinput1_currtrial, dt())
+            rateData_Stop['StrD1'][i, : ] = get_poprate_aligned_onset(mon['StrD1'], SD1_spikes, rateData_Stop['StrD1'][i, : ], rate_data_SD1_currtrial, dt())            
+            rateData_Stop['StrD2'][i, : ] = get_poprate_aligned_onset(mon['StrD2'], SD2_spikes, rateData_Stop['StrD2'][i, : ], rate_data_SD2_currtrial, dt())                        
+            rateData_Stop['StrFSI'][i, : ] = get_poprate_aligned_onset(mon['StrFSI'], FSI_spikes, rateData_Stop['StrFSI'][i, : ], rate_data_FSI_currtrial, dt())                        
+            rateData_Stop['STN'][i, : ] = get_poprate_aligned_onset(mon['STN'], STN_spikes, rateData_Stop['STN'][i, : ], rate_data_STN_currtrial, dt())                                    
+            rateData_Stop['GPeProto'][i, : ] = get_poprate_aligned_onset(mon['GPeProto'], Proto_spikes, rateData_Stop['GPeProto'][i, : ], rate_data_GPeProto_currtrial, dt())             
+            rateData_Stop['GPeCp'][i, : ] = get_poprate_aligned_onset(mon['GPeCp'], Proto2_spikes, rateData_Stop['GPeCp'][i, : ], rate_data_GPeProto2_currtrial, dt()) 
+            rateData_Stop['GPeArky'][i, : ] = get_poprate_aligned_onset(mon['GPeArky'], Arky_spikes, rateData_Stop['GPeArky'][i, : ], rate_data_GPeArky_currtrial, dt())            
+            rateData_Stop['SNr'][i, : ] = get_poprate_aligned_onset(mon['SNr'], SNr_spikes, rateData_Stop['SNr'][i, : ], rate_data_SNr_currtrial, dt())                                                
+            rateData_Stop['SNrE'][i, : ] = get_poprate_aligned_onset(mon['SNrE'], SNrE_spikes, rateData_Stop['SNrE'][i, : ], rate_data_SNrE_currtrial, dt())                                                            
+            rateData_Stop['Thal'][i, : ] = get_poprate_aligned_onset(mon['Thal'], Thal_spikes, rateData_Stop['Thal'][i, : ], rate_data_Thal_currtrial, dt())                         
+            rateData_Stop['cortexGo'][i, : ] = get_poprate_aligned_onset(mon['cortexGo'], Cortex_G_spikes, rateData_Stop['cortexGo'][i, : ], rate_data_Cortex_G_currtrial, dt())
+            rateData_Stop['cortexStop'][i, : ] = get_poprate_aligned_onset(mon['cortexStop'], Cortex_S_spikes, rateData_Stop['cortexStop'][i, : ], rate_data_Cortex_S_currtrial, dt())
+            rateData_Stop['cortexPause'][i, : ] = get_poprate_aligned_onset(mon['cortexPause'], Stoppinput1_spikes, rateData_Stop['cortexPause'][i, : ], rate_data_Stoppinput1_currtrial, dt())
 
 
             if Integrator.decision == -1 :
@@ -651,51 +633,52 @@ for i_paramname in range(n_param_vars):
         ### SAVE DATA OF STOP TRIALS
         np.save('../data/'+paramsS['saveFolder']+'/selection_Stop'+netNr+'.npy', selection)
         np.save('../data/'+paramsS['saveFolder']+'/Timeovertrials_Stop'+netNr+'.npy', timeovertrial)
-        mInt_stop = m_Int_ampa.get('g_ampa')
+        mInt_stop = mon['IntegratorGo'].get('g_ampa')
         np.save('../data/'+paramsS['saveFolder']+'/Integrator_ampa_Stop_'+netNr+'_id'+str(params['general_id'])+'.npy', mInt_stop)            
-        spike_times, ranks = m_Int_ampa.raster_plot(m_Int_ampa.get('spike'))
+        spike_times, ranks = mon['IntegratorGo'].raster_plot(mon['IntegratorGo'].get('spike'))
         np.save('../data/'+paramsS['saveFolder']+'/Integrator_spike_Stop'+netNr+'_cycle'+str(i_cycle)+'.npy', [spike_times, ranks]) 
 
-        np.save('../data/'+paramsS['saveFolder']+'/SD1_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_SD1_Stop, 0), np.nanstd(rate_data_SD1_Stop, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/SD2_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_SD2_Stop, 0), np.nanstd(rate_data_SD2_Stop, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/FSI_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_FSI_Stop, 0), np.nanstd(rate_data_FSI_Stop, 0)])             
-        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_STN_Stop, 0), np.nanstd(rate_data_STN_Stop, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Stop_mean_std'                                      + netNr                      + '.npy', [np.nanmean(rate_data_GPeProto_Stop, 0), np.nanstd(rate_data_GPeProto_Stop, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/GPeProto2_rate_Stop_mean_std'                                     + netNr                      + '.npy', [np.nanmean(rate_data_GPeProto2_Stop, 0), np.nanstd(rate_data_GPeProto2_Stop, 0)])            
-        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Stop_mean_std'                                       + netNr                      + '.npy', [np.nanmean(rate_data_GPeArky_Stop, 0), np.nanstd(rate_data_GPeArky_Stop, 0)])   
-        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rate_data_SNr_Stop, 0), np.nanstd(rate_data_SNr_Stop, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/SNrE_rate_Stop_mean_std'                                          + netNr                      + '.npy', [np.nanmean(rate_data_SNrE_Stop, 0), np.nanstd(rate_data_SNrE_Stop, 0)])        
-        np.save('../data/'+paramsS['saveFolder']+'/Thal_rate_Stop_mean_std'                                          + netNr                      + '.npy', [np.nanmean(rate_data_Thal_Stop, 0), np.nanstd(rate_data_Thal_Stop, 0)])        
-        np.save('../data/'+paramsS['saveFolder']+'/Cortex_G_rate_Stop_mean_std'                                      + netNr                      + '.npy', [np.nanmean(rate_data_Cortex_G_Stop, 0), np.nanstd(rate_data_Cortex_G_Stop, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/Cortex_S_rate_Stop_mean_std'                                      + netNr                      + '.npy', [np.nanmean(rate_data_Cortex_S_Stop, 0), np.nanstd(rate_data_Cortex_S_Stop, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/Stoppinput1_rate_Stop_mean_std'                                   + netNr                      + '.npy', [np.nanmean(rate_data_Stoppinput1_Stop, 0), np.nanstd(rate_data_Stoppinput1_Stop, 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/SD1_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rateData_Stop['StrD1'], 0), np.nanstd(rateData_Stop['StrD1'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/SD2_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rateData_Stop['StrD2'], 0), np.nanstd(rateData_Stop['StrD2'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/FSI_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rateData_Stop['StrFSI'], 0), np.nanstd(rateData_Stop['StrFSI'], 0)])             
+        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rateData_Stop['STN'], 0), np.nanstd(rateData_Stop['STN'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Stop_mean_std'                                      + netNr                      + '.npy', [np.nanmean(rateData_Stop['GPeProto'], 0), np.nanstd(rateData_Stop['GPeProto'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto2_rate_Stop_mean_std'                                     + netNr                      + '.npy', [np.nanmean(rateData_Stop['GPeCp'], 0), np.nanstd(rateData_Stop['GPeCp'], 0)])            
+        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Stop_mean_std'                                       + netNr                      + '.npy', [np.nanmean(rateData_Stop['GPeArky'], 0), np.nanstd(rateData_Stop['GPeArky'], 0)])   
+        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Stop_mean_std'                                           + netNr                      + '.npy', [np.nanmean(rateData_Stop['SNr'], 0), np.nanstd(rateData_Stop['SNr'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/SNrE_rate_Stop_mean_std'                                          + netNr                      + '.npy', [np.nanmean(rateData_Stop['SNrE'], 0), np.nanstd(rateData_Stop['SNrE'], 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/Thal_rate_Stop_mean_std'                                          + netNr                      + '.npy', [np.nanmean(rateData_Stop['Thal'], 0), np.nanstd(rateData_Stop['Thal'], 0)])        
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_G_rate_Stop_mean_std'                                      + netNr                      + '.npy', [np.nanmean(rateData_Stop['cortexGo'], 0), np.nanstd(rateData_Stop['cortexGo'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_S_rate_Stop_mean_std'                                      + netNr                      + '.npy', [np.nanmean(rateData_Stop['cortexStop'], 0), np.nanstd(rateData_Stop['cortexStop'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/Stoppinput1_rate_Stop_mean_std'                                   + netNr                      + '.npy', [np.nanmean(rateData_Stop['cortexPause'], 0), np.nanstd(rateData_Stop['cortexPause'], 0)])        
 
-        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Stop_mean_std_'        + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_STN_Stop, 0), np.nanstd(rate_data_STN_Stop, 0)])
-        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Stop_mean_std_'   + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_GPeProto_Stop, 0), np.nanstd(rate_data_GPeProto_Stop, 0)])            
-        np.save('../data/'+paramsS['saveFolder']+'/GPeProto2_rate_Stop_mean_std_'  + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_GPeProto2_Stop, 0), np.nanstd(rate_data_GPeProto2_Stop, 0)])                        
-        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Stop_mean_std_'    + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_GPeArky_Stop, 0), np.nanstd(rate_data_GPeArky_Stop, 0)])               
-        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Stop_mean_std_'        + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rate_data_SNr_Stop, 0), np.nanstd(rate_data_SNr_Stop, 0)])            
+        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Stop_mean_std_'        + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rateData_Stop['STN'], 0), np.nanstd(rateData_Stop['STN'], 0)])
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Stop_mean_std_'   + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rateData_Stop['GPeProto'], 0), np.nanstd(rateData_Stop['GPeProto'], 0)])            
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto2_rate_Stop_mean_std_'  + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rateData_Stop['GPeCp'], 0), np.nanstd(rateData_Stop['GPeCp'], 0)])                        
+        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Stop_mean_std_'    + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rateData_Stop['GPeArky'], 0), np.nanstd(rateData_Stop['GPeArky'], 0)])               
+        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Stop_mean_std_'        + str(params['general_id']) + '_' + netNr + '_' + str(i_cycle) + '.npy', [np.nanmean(rateData_Stop['SNr'], 0), np.nanstd(rateData_Stop['SNr'], 0)])            
         
         
-        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Stop_alltrials'+netNr+'.npy', rate_data_STN_Stop)         
-        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Stop_alltrials'+netNr+'.npy', rate_data_SNr_Stop) 
-        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Stop_alltrials'+netNr+'.npy', rate_data_GPeProto_Stop) 
-        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Stop_alltrials'+netNr+'.npy', rate_data_GPeArky_Stop)         
+        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Stop_alltrials'+netNr+'.npy', rateData_Stop['STN'])         
+        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Stop_alltrials'+netNr+'.npy', rateData_Stop['SNr']) 
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Stop_alltrials'+netNr+'.npy', rateData_Stop['GPeProto']) 
+        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Stop_alltrials'+netNr+'.npy', rateData_Stop['GPeArky'])         
+
 
         ### GET AND SAVE CORRECT AND FAILED STOP DATA
-        StrD1_meanrate_FailedStop, StrD1_std_FailedStop, StrD1_meanrate_CorrectStop, StrD1_std_CorrectStop              = calc_meanrate_std_failed_correct(rate_data_SD1_Stop, mInt_stop, Integrator.threshold, paramsS['trials']) 
-        StrD2_meanrate_FailedStop, StrD2_std_FailedStop, StrD2_meanrate_CorrectStop, StrD2_std_CorrectStop              = calc_meanrate_std_failed_correct(rate_data_SD2_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])        
-        StrFSI_meanrate_FailedStop, StrFSI_std_FailedStop, StrFSI_meanrate_CorrectStop, StrFSI_std_CorrectStop          = calc_meanrate_std_failed_correct(rate_data_FSI_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])        
-        STN_meanrate_FailedStop, STN_std_FailedStop, STN_meanrate_CorrectStop, STN_std_CorrectStop                      = calc_meanrate_std_failed_correct(rate_data_STN_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])         
-        Proto_meanrate_FailedStop, Proto_std_FailedStop, Proto_meanrate_CorrectStop, Proto_std_CorrectStop              = calc_meanrate_std_failed_correct(rate_data_GPeProto_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])                 
-        Proto2_meanrate_FailedStop, Proto2_std_FailedStop, Proto2_meanrate_CorrectStop, Proto2_std_CorrectStop          = calc_meanrate_std_failed_correct(rate_data_GPeProto2_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])            
-        Arky_meanrate_FailedStop, Arky_std_FailedStop, Arky_meanrate_CorrectStop, Arky_std_CorrectStop                  = calc_meanrate_std_failed_correct(rate_data_GPeArky_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])
-        SNr_meanrate_FailedStop, SNr_std_FailedStop, SNr_meanrate_CorrectStop, SNr_std_CorrectStop                      = calc_meanrate_std_failed_correct(rate_data_SNr_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])
-        SNrE_meanrate_FailedStop, SNrE_std_FailedStop, SNrE_meanrate_CorrectStop, SNrE_std_CorrectStop                  = calc_meanrate_std_failed_correct(rate_data_SNrE_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])
-        Thal_meanrate_FailedStop, Thal_std_FailedStop, Thal_meanrate_CorrectStop, Thal_std_CorrectStop                  = calc_meanrate_std_failed_correct(rate_data_Thal_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])
-        Cortex_G_meanrate_FailedStop, Cortex_G_std_FailedStop, Cortex_G_meanrate_CorrectStop, Cortex_G_std_CorrectStop  = calc_meanrate_std_failed_correct(rate_data_Cortex_G_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])
-        Cortex_S_meanrate_FailedStop, Cortex_S_std_FailedStop, Cortex_S_meanrate_CorrectStop, Cortex_S_std_CorrectStop  = calc_meanrate_std_failed_correct(rate_data_Cortex_S_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])
-        Stoppinput1_meanrate_FailedStop, Stoppinput1_std_FailedStop, Stoppinput1_meanrate_CorrectStop, Stoppinput1_std_CorrectStop = calc_meanrate_std_failed_correct(rate_data_Stoppinput1_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])        
+        StrD1_meanrate_FailedStop, StrD1_std_FailedStop, StrD1_meanrate_CorrectStop, StrD1_std_CorrectStop              = calc_meanrate_std_failed_correct(rateData_Stop['StrD1'], mInt_stop, Integrator.threshold, paramsS['trials']) 
+        StrD2_meanrate_FailedStop, StrD2_std_FailedStop, StrD2_meanrate_CorrectStop, StrD2_std_CorrectStop              = calc_meanrate_std_failed_correct(rateData_Stop['StrD2'], mInt_stop, Integrator.threshold, paramsS['trials'])        
+        StrFSI_meanrate_FailedStop, StrFSI_std_FailedStop, StrFSI_meanrate_CorrectStop, StrFSI_std_CorrectStop          = calc_meanrate_std_failed_correct(rateData_Stop['StrFSI'], mInt_stop, Integrator.threshold, paramsS['trials'])        
+        STN_meanrate_FailedStop, STN_std_FailedStop, STN_meanrate_CorrectStop, STN_std_CorrectStop                      = calc_meanrate_std_failed_correct(rateData_Stop['STN'], mInt_stop, Integrator.threshold, paramsS['trials'])         
+        Proto_meanrate_FailedStop, Proto_std_FailedStop, Proto_meanrate_CorrectStop, Proto_std_CorrectStop              = calc_meanrate_std_failed_correct(rateData_Stop['GPeProto'], mInt_stop, Integrator.threshold, paramsS['trials'])                 
+        Proto2_meanrate_FailedStop, Proto2_std_FailedStop, Proto2_meanrate_CorrectStop, Proto2_std_CorrectStop          = calc_meanrate_std_failed_correct(rateData_Stop['GPeCp'], mInt_stop, Integrator.threshold, paramsS['trials'])            
+        Arky_meanrate_FailedStop, Arky_std_FailedStop, Arky_meanrate_CorrectStop, Arky_std_CorrectStop                  = calc_meanrate_std_failed_correct(rateData_Stop['GPeArky'], mInt_stop, Integrator.threshold, paramsS['trials'])
+        SNr_meanrate_FailedStop, SNr_std_FailedStop, SNr_meanrate_CorrectStop, SNr_std_CorrectStop                      = calc_meanrate_std_failed_correct(rateData_Stop['SNr'], mInt_stop, Integrator.threshold, paramsS['trials'])
+        SNrE_meanrate_FailedStop, SNrE_std_FailedStop, SNrE_meanrate_CorrectStop, SNrE_std_CorrectStop                  = calc_meanrate_std_failed_correct(rateData_Stop['SNrE'], mInt_stop, Integrator.threshold, paramsS['trials'])
+        Thal_meanrate_FailedStop, Thal_std_FailedStop, Thal_meanrate_CorrectStop, Thal_std_CorrectStop                  = calc_meanrate_std_failed_correct(rateData_Stop['Thal'], mInt_stop, Integrator.threshold, paramsS['trials'])
+        Cortex_G_meanrate_FailedStop, Cortex_G_std_FailedStop, Cortex_G_meanrate_CorrectStop, Cortex_G_std_CorrectStop  = calc_meanrate_std_failed_correct(rateData_Stop['cortexGo'], mInt_stop, Integrator.threshold, paramsS['trials'])
+        Cortex_S_meanrate_FailedStop, Cortex_S_std_FailedStop, Cortex_S_meanrate_CorrectStop, Cortex_S_std_CorrectStop  = calc_meanrate_std_failed_correct(rateData_Stop['cortexStop'], mInt_stop, Integrator.threshold, paramsS['trials'])
+        Stoppinput1_meanrate_FailedStop, Stoppinput1_std_FailedStop, Stoppinput1_meanrate_CorrectStop, Stoppinput1_std_CorrectStop = calc_meanrate_std_failed_correct(rateData_Stop['cortexPause'], mInt_stop, Integrator.threshold, paramsS['trials'])        
 
         np.save('../data/'+paramsS['saveFolder']+'/SD1_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [StrD1_meanrate_FailedStop, StrD1_std_FailedStop, StrD1_meanrate_CorrectStop, StrD1_std_CorrectStop])
         np.save('../data/'+paramsS['saveFolder']+'/SD2_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [StrD2_meanrate_FailedStop, StrD2_std_FailedStop, StrD2_meanrate_CorrectStop, StrD2_std_CorrectStop])
@@ -710,20 +693,21 @@ for i_paramname in range(n_param_vars):
         np.save('../data/'+paramsS['saveFolder']+'/Cortex_G_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Cortex_G_meanrate_FailedStop, Cortex_G_std_FailedStop, Cortex_G_meanrate_CorrectStop, Cortex_G_std_CorrectStop])
         np.save('../data/'+paramsS['saveFolder']+'/Cortex_S_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Cortex_S_meanrate_FailedStop, Cortex_S_std_FailedStop, Cortex_S_meanrate_CorrectStop, Cortex_S_std_CorrectStop])        
         np.save('../data/'+paramsS['saveFolder']+'/Stoppinput1_meanrate_std_Failed_Correct_Stop'+netNr+'.npy', [Stoppinput1_meanrate_FailedStop, Stoppinput1_std_FailedStop, Stoppinput1_meanrate_CorrectStop, Stoppinput1_std_CorrectStop])                
-        
+
+
         ### GET AND SAVE FAST AND SLOW GO DATA
-        GPe_Arky_meanrate_FastGo,   GPe_Arky_std_FastGo,    GPe_Arky_meanrate_SlowGo,   GPe_Arky_std_SlowGo     = calc_meanrate_std_Fast_Slow(rate_data_GPeArky_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        GPe_Proto_meanrate_FastGo,  GPe_Proto_std_FastGo,   GPe_Proto_meanrate_SlowGo,  GPe_Proto_std_SlowGo    = calc_meanrate_std_Fast_Slow(rate_data_GPeProto_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        StrD1_meanrate_FastGo,      StrD1_std_FastGo,       StrD1_meanrate_SlowGo,      StrD1_std_SlowGo        = calc_meanrate_std_Fast_Slow(rate_data_SD1_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])                 
-        StrD2_meanrate_FastGo,      StrD2_std_FastGo,       StrD2_meanrate_SlowGo,      StrD2_std_SlowGo        = calc_meanrate_std_Fast_Slow(rate_data_SD2_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        STN_meanrate_FastGo,        STN_std_FastGo,         STN_meanrate_SlowGo,        STN_std_SlowGo          = calc_meanrate_std_Fast_Slow(rate_data_STN_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        SNr_meanrate_FastGo,        SNr_std_FastGo,         SNr_meanrate_SlowGo,        SNr_std_SlowGo          = calc_meanrate_std_Fast_Slow(rate_data_SNr_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        Thal_meanrate_FastGo,       Thal_std_FastGo,        Thal_meanrate_SlowGo,       Thal_std_SlowGo         = calc_meanrate_std_Fast_Slow(rate_data_Thal_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        Cortex_G_meanrate_FastGo,   Cortex_G_std_FastGo,    Cortex_G_meanrate_SlowGo,   Cortex_G_std_SlowGo     = calc_meanrate_std_Fast_Slow(rate_data_Cortex_G_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        GPe_Proto2_meanrate_FastGo, GPe_Proto2_std_FastGo,  GPe_Proto2_meanrate_SlowGo, GPe_Proto2_std_SlowGo   = calc_meanrate_std_Fast_Slow(rate_data_GPeProto2_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        PauseInput_meanrate_FastGo, PauseInput_std_FastGo,  PauseInput_meanrate_SlowGo, PauseInput_std_SlowGo   = calc_meanrate_std_Fast_Slow(rate_data_Stoppinput1_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        Cortex_S_meanrate_FastGo,   Cortex_S_std_FastGo,    Cortex_S_meanrate_SlowGo,   Cortex_S_std_SlowGo     = calc_meanrate_std_Fast_Slow(rate_data_Cortex_S_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])                
-        StrFSI_meanrate_FastGo,     StrFSI_std_FastGo,      StrFSI_meanrate_SlowGo,     StrFSI_std_SlowGo       = calc_meanrate_std_Fast_Slow(rate_data_FSI_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])                 
+        GPe_Arky_meanrate_FastGo,   GPe_Arky_std_FastGo,    GPe_Arky_meanrate_SlowGo,   GPe_Arky_std_SlowGo     = calc_meanrate_std_Fast_Slow(rateData_Go['GPeArky'], mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
+        GPe_Proto_meanrate_FastGo,  GPe_Proto_std_FastGo,   GPe_Proto_meanrate_SlowGo,  GPe_Proto_std_SlowGo    = calc_meanrate_std_Fast_Slow(rateData_Go['GPeProto'], mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
+        StrD1_meanrate_FastGo,      StrD1_std_FastGo,       StrD1_meanrate_SlowGo,      StrD1_std_SlowGo        = calc_meanrate_std_Fast_Slow(rateData_Go['StrD1'], mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])                 
+        StrD2_meanrate_FastGo,      StrD2_std_FastGo,       StrD2_meanrate_SlowGo,      StrD2_std_SlowGo        = calc_meanrate_std_Fast_Slow(rateData_Go['StrD2'], mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
+        STN_meanrate_FastGo,        STN_std_FastGo,         STN_meanrate_SlowGo,        STN_std_SlowGo          = calc_meanrate_std_Fast_Slow(rateData_Go['STN'], mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
+        SNr_meanrate_FastGo,        SNr_std_FastGo,         SNr_meanrate_SlowGo,        SNr_std_SlowGo          = calc_meanrate_std_Fast_Slow(rateData_Go['SNr'], mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
+        Thal_meanrate_FastGo,       Thal_std_FastGo,        Thal_meanrate_SlowGo,       Thal_std_SlowGo         = calc_meanrate_std_Fast_Slow(rateData_Go['Thal'], mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
+        Cortex_G_meanrate_FastGo,   Cortex_G_std_FastGo,    Cortex_G_meanrate_SlowGo,   Cortex_G_std_SlowGo     = calc_meanrate_std_Fast_Slow(rateData_Go['cortexGo'], mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
+        GPe_Proto2_meanrate_FastGo, GPe_Proto2_std_FastGo,  GPe_Proto2_meanrate_SlowGo, GPe_Proto2_std_SlowGo   = calc_meanrate_std_Fast_Slow(rateData_Go['GPeCp'], mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
+        PauseInput_meanrate_FastGo, PauseInput_std_FastGo,  PauseInput_meanrate_SlowGo, PauseInput_std_SlowGo   = calc_meanrate_std_Fast_Slow(rateData_Go['cortexPause'], mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
+        Cortex_S_meanrate_FastGo,   Cortex_S_std_FastGo,    Cortex_S_meanrate_SlowGo,   Cortex_S_std_SlowGo     = calc_meanrate_std_Fast_Slow(rateData_Go['cortexStop'], mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])                
+        StrFSI_meanrate_FastGo,     StrFSI_std_FastGo,      StrFSI_meanrate_SlowGo,     StrFSI_std_SlowGo       = calc_meanrate_std_Fast_Slow(rateData_Go['StrFSI'], mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])                 
 
         np.save('../data/'+paramsS['saveFolder']+'/GPe_Arky_meanrate_std_Fast-Slow_Go'+netNr+'.npy',   [GPe_Arky_meanrate_FastGo,   GPe_Arky_std_FastGo,    GPe_Arky_meanrate_SlowGo,   GPe_Arky_std_SlowGo])
         np.save('../data/'+paramsS['saveFolder']+'/GPe_Proto_meanrate_std_Fast-Slow_Go'+netNr+'.npy',  [GPe_Proto_meanrate_FastGo,  GPe_Proto_std_FastGo,   GPe_Proto_meanrate_SlowGo,  GPe_Proto_std_SlowGo])
@@ -738,88 +722,65 @@ for i_paramname in range(n_param_vars):
         np.save('../data/'+paramsS['saveFolder']+'/Cortex_S_meanrate_std_Fast-Slow_Go'+netNr+'.npy',   [Cortex_S_meanrate_FastGo,   Cortex_S_std_FastGo,    Cortex_S_meanrate_SlowGo,   Cortex_S_std_SlowGo])                        
         np.save('../data/'+paramsS['saveFolder']+'/FSI_meanrate_std_Fast-Slow_Go'+netNr+'.npy',        [StrFSI_meanrate_FastGo,     StrFSI_std_FastGo,      StrFSI_meanrate_SlowGo,     StrFSI_std_SlowGo])
 
+
         ### GET RATE DATA AND PVALUES FOR FAILED VS CORRECT STOP
+        ## CALCULATE TIMES
         t_stopCue = int(params['t_init'] + params['t_SSD'])
         t_min = int((t_stopCue - params['sigTestRateComparisonFailedCorrect_tMin'])/dt())   
         t_max = int((t_stopCue + params['sigTestRateComparisonFailedCorrect_tMax'])/dt())      
         binsize_ms = int(params['sigTestRateComparisonFailedCorrect_binSize'] / dt())
         pvalue_times = range(t_min, t_max + 1, binsize_ms)
-        SD1_rates_FailedStop, SD1_rates_CorrectStop = get_rates_failed_correct(rate_data_SD1_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])
-        SD2_rates_FailedStop, SD2_rates_CorrectStop = get_rates_failed_correct(rate_data_SD2_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])        
-        STN_rates_FailedStop, STN_rates_CorrectStop = get_rates_failed_correct(rate_data_STN_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])
-        GPe_Proto_rates_FailedStop, GPe_Proto_rates_CorrectStop = get_rates_failed_correct(rate_data_GPeProto_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])
-        GPe_Proto2_rates_FailedStop, GPe_Proto2_rates_CorrectStop = get_rates_failed_correct(rate_data_GPeProto2_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])        
-        GPe_Arky_rates_FailedStop, GPe_Arky_rates_CorrectStop = get_rates_failed_correct(rate_data_GPeArky_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])
-        SNr_rates_FailedStop, SNr_rates_CorrectStop = get_rates_failed_correct(rate_data_SNr_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])        
-        Thal_rates_FailedStop, Thal_rates_CorrectStop = get_rates_failed_correct(rate_data_Thal_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])        
-        CortexG_rates_FailedStop, CortexG_rates_CorrectStop = get_rates_failed_correct(rate_data_Cortex_G_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])                
-        CortexS_rates_FailedStop, CortexS_rates_CorrectStop = get_rates_failed_correct(rate_data_Cortex_S_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])                        
-        FSI_rates_FailedStop, FSI_rates_CorrectStop = get_rates_failed_correct(rate_data_FSI_Stop, mInt_stop, Integrator.threshold, paramsS['trials'])        
-
-        Hstat_all, pval_all = calc_KW_stats_all(GPe_Arky_rates_FailedStop, GPe_Arky_rates_CorrectStop, \
-                                            SD1_rates_FailedStop, SD1_rates_CorrectStop, \
-                                            SD2_rates_FailedStop, SD2_rates_CorrectStop, \
-                                            STN_rates_FailedStop, STN_rates_CorrectStop, \
-                                            GPe_Proto_rates_FailedStop, GPe_Proto_rates_CorrectStop, \
-                                            GPe_Proto2_rates_FailedStop, GPe_Proto2_rates_CorrectStop, \
-                                            SNr_rates_FailedStop, SNr_rates_CorrectStop, \
-                                            Thal_rates_FailedStop, Thal_rates_CorrectStop, \
-                                            CortexG_rates_FailedStop, CortexG_rates_CorrectStop, \
-                                            CortexS_rates_FailedStop, CortexS_rates_CorrectStop, \
-                                            FSI_rates_FailedStop, FSI_rates_CorrectStop, \
-                                            pvalue_times, dt(), 'test')
-  
-        #p_ind_arky, p_ind_SD1, p_ind_STN, p_ind_Proto, p_ind_Proto2, p_ind_SNr, p_ind_thal, p_ind_SD2, p_ind_CortexG, p_ind_CortexS, p_ind_FSI = range(11) TODO: this list is important for the Figures with pvalues it is defined in the function analysis.calc_KW_stats_all
+        ## GET RATES
+        rates_failedStop = {}
+        rates_correctStop = {}
+        for pop in params['Fig7_order']:
+            rates_failedStop[pop], rates_correctStop[pop] = get_rates_failed_correct(rateData_Stop[pop], mInt_stop, Integrator.threshold, paramsS['trials'])
+        ## GET PVALUES
+        dataFig7 = {}
+        for popFig7 in params['Fig7_order']:
+            dataFig7[popFig7] = [rates_failedStop[popFig7], rates_correctStop[popFig7]]
+        Hstat_all, pval_all = calc_KW_stats_all(dataFig7, pvalue_times, 'test')
+        ## SAVE
         np.save('../data/'+paramsS['saveFolder']+'/p_value_list_times_'+str(params['general_id'])+netNr+'.npy', [pval_all, pvalue_times], allow_pickle=True)
 
+
         ### GET RATE DATA AND PVALUES FOR FAILED STOP VS FAST GO
+        ## CALCULATE TIMES
         t_min = int((params['t_init'] - params['sigTestRateComparisonFailedFast_tMin'])/dt())   
         t_max = int((params['t_init'] + params['sigTestRateComparisonFailedFast_tMax'])/dt())
-        SD1_rates_allGo,        SD1_rates_fastGo,           SD1_rates_slowGo        = get_rates_allGo_fastGo_slowGo(rate_data_SD1_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        SD2_rates_allGo,        SD2_rates_fastGo,           SD2_rates_slowGo        = get_rates_allGo_fastGo_slowGo(rate_data_SD2_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        STN_rates_allGo,        STN_rates_fastGo,           STN_rates_slowGo        = get_rates_allGo_fastGo_slowGo(rate_data_STN_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        GPe_Proto_rates_allGo,  GPe_Proto_rates_fastGo,     GPe_Proto_rates_slowGo  = get_rates_allGo_fastGo_slowGo(rate_data_GPeProto_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        GPe_Proto2_rates_allGo, GPe_Proto2_rates_fastGo,    GPe_Proto2_rates_slowGo = get_rates_allGo_fastGo_slowGo(rate_data_GPeProto2_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        GPe_Arky_rates_allGo,   GPe_Arky_rates_fastGo,      GPe_Arky_rates_slowGo   = get_rates_allGo_fastGo_slowGo(rate_data_GPeArky_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        SNr_rates_allGo,        SNr_rates_fastGo,           SNr_rates_slowGo        = get_rates_allGo_fastGo_slowGo(rate_data_SNr_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        Thal_rates_allGo,       Thal_rates_fastGo,          Thal_rates_slowGo       = get_rates_allGo_fastGo_slowGo(rate_data_Thal_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        CortexG_rates_allGo,    CortexG_rates_fastGo,       CortexG_rates_slowGo    = get_rates_allGo_fastGo_slowGo(rate_data_Cortex_G_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        CortexS_rates_allGo,    CortexS_rates_fastGo,       CortexS_rates_slowGo    = get_rates_allGo_fastGo_slowGo(rate_data_Cortex_S_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
-        FSI_rates_allGo,        FSI_rates_fastGo,           FSI_rates_slowGo        = get_rates_allGo_fastGo_slowGo(rate_data_FSI_Go, mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])        
-
-        failedStopList  = [GPe_Arky_rates_FailedStop, SD1_rates_FailedStop, SD2_rates_FailedStop, STN_rates_FailedStop, GPe_Proto_rates_FailedStop, GPe_Proto2_rates_FailedStop, SNr_rates_FailedStop, Thal_rates_FailedStop, CortexG_rates_FailedStop, CortexS_rates_FailedStop, FSI_rates_FailedStop]
-        allGoList       = [GPe_Arky_rates_allGo, SD1_rates_allGo, SD2_rates_allGo, STN_rates_allGo, GPe_Proto_rates_allGo, GPe_Proto2_rates_allGo, SNr_rates_allGo, Thal_rates_allGo, CortexG_rates_allGo, CortexS_rates_allGo, FSI_rates_allGo]
-        fastGoList      = [GPe_Arky_rates_fastGo, SD1_rates_fastGo, SD2_rates_fastGo, STN_rates_fastGo, GPe_Proto_rates_fastGo, GPe_Proto2_rates_fastGo, SNr_rates_fastGo, Thal_rates_fastGo, CortexG_rates_fastGo, CortexS_rates_fastGo, FSI_rates_fastGo]
-        slowGoList      = [GPe_Arky_rates_slowGo, SD1_rates_slowGo, SD2_rates_slowGo, STN_rates_slowGo, GPe_Proto_rates_slowGo, GPe_Proto2_rates_slowGo, SNr_rates_slowGo, Thal_rates_slowGo, CortexG_rates_slowGo, CortexS_rates_slowGo, FSI_rates_slowGo]
+        ## GET RATES
+        rates_allGo  = {}
+        rates_fastGo = {}
+        rates_slowGo = {}
+        for pop in params['Fig7_order']:
+            rates_allGo[pop], rates_fastGo[pop], rates_slowGo[pop] = get_rates_allGo_fastGo_slowGo(rateData_Go[pop], mInt_go, mInt_stop, Integrator.threshold, paramsS['trials'])
+        ## PREPARE 3 DIFFERENT COMPARISONS
+        dataFig11_failed_vs_all = {}
+        dataFig11_failed_vs_fast = {}
+        dataFig11_failed_vs_slow = {}
+        for popFig11 in params['Fig7_order']:
+            dataFig11_failed_vs_all[popFig11]  = [rates_failedStop[popFig11], rates_allGo[popFig11]]
+            dataFig11_failed_vs_fast[popFig11] = [rates_failedStop[popFig11], rates_fastGo[popFig11]]
+            dataFig11_failed_vs_slow[popFig11] = [rates_failedStop[popFig11], rates_slowGo[popFig11]]
         nameList = ['failedStop_vs_allGo', 'failedStop_vs_fastGo', 'failedStop_vs_slowGo']
-        for Groups_Idx, Groups_Val in enumerate([[failedStopList, allGoList], [failedStopList, fastGoList], [failedStopList, slowGoList]]):
-            GroupA = Groups_Val[0]
-            GroupB = Groups_Val[1]
-            Hstat_all, pval_all = calc_KW_stats_all(GroupA[0], GroupB[0], \
-                                                    GroupA[1], GroupB[1], \
-                                                    GroupA[2], GroupB[2], \
-                                                    GroupA[3], GroupB[3], \
-                                                    GroupA[4], GroupB[4], \
-                                                    GroupA[5], GroupB[5], \
-                                                    GroupA[6], GroupB[6], \
-                                                    GroupA[7], GroupB[7], \
-                                                    GroupA[8], GroupB[8], \
-                                                    GroupA[9], GroupB[9], \
-                                                    GroupA[10], GroupB[10], \
-                                                    pvalue_times, dt(), nameList[Groups_Idx])
-
+        dataList = [dataFig11_failed_vs_all, dataFig11_failed_vs_fast, dataFig11_failed_vs_slow]
+        ## GET PVALUES
+        for Groups_Idx, Groups_Name in enumerate(nameList):
+            Hstat_all, pval_all = calc_KW_stats_all(dataList[Groups_Idx], pvalue_times, nameList[Groups_Idx])
             np.save('../data/'+paramsS['saveFolder']+'/p_value_list_'+nameList[Groups_Idx]+'_times_'+str(params['general_id'])+netNr+'.npy', [pval_all, pvalue_times], allow_pickle=True)
 
+
         ### SAVE MEAN RATES 200ms AFTER STOP CUE TODO: is this needed anymore?
-        np.save('../data/'+paramsS['saveFolder']+'/SD1_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_SD1_Stop[:, t_stopCue : t_stopCue + 200], 1))
-        np.save('../data/'+paramsS['saveFolder']+'/SD2_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_SD2_Stop[:, t_stopCue : t_stopCue + 200], 1))
-        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_STN_Stop[:, t_stopCue : t_stopCue + 200], 1))
-        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_GPeProto_Stop[:, t_stopCue : t_stopCue + 200], 1))        
-        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_GPeArky_Stop[:, t_stopCue : t_stopCue + 200], 1))        
-        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_SNr_Stop[:, t_stopCue : t_stopCue + 200], 1))
-        np.save('../data/'+paramsS['saveFolder']+'/Thal_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_Thal_Stop[:, t_stopCue : t_stopCue + 200], 1))        
-        np.save('../data/'+paramsS['saveFolder']+'/Cortex_G_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_Cortex_G_Stop[:, t_stopCue : t_stopCue + 200], 1))        
-        np.save('../data/'+paramsS['saveFolder']+'/Cortex_S_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rate_data_Cortex_S_Stop[:, t_stopCue : t_stopCue + 200], 1))                
+        np.save('../data/'+paramsS['saveFolder']+'/SD1_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rateData_Stop['StrD1'][:, t_stopCue : t_stopCue + 200], 1))
+        np.save('../data/'+paramsS['saveFolder']+'/SD2_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rateData_Stop['StrD2'][:, t_stopCue : t_stopCue + 200], 1))
+        np.save('../data/'+paramsS['saveFolder']+'/STN_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rateData_Stop['STN'][:, t_stopCue : t_stopCue + 200], 1))
+        np.save('../data/'+paramsS['saveFolder']+'/GPeProto_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rateData_Stop['GPeProto'][:, t_stopCue : t_stopCue + 200], 1))        
+        np.save('../data/'+paramsS['saveFolder']+'/GPeArky_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rateData_Stop['GPeArky'][:, t_stopCue : t_stopCue + 200], 1))        
+        np.save('../data/'+paramsS['saveFolder']+'/SNr_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rateData_Stop['SNr'][:, t_stopCue : t_stopCue + 200], 1))
+        np.save('../data/'+paramsS['saveFolder']+'/Thal_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rateData_Stop['Thal'][:, t_stopCue : t_stopCue + 200], 1))        
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_G_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rateData_Stop['cortexGo'][:, t_stopCue : t_stopCue + 200], 1))        
+        np.save('../data/'+paramsS['saveFolder']+'/Cortex_S_rate_Stop_tempmean_'+str(params['general_id'])+netNr+'.npy', np.nanmean(rateData_Stop['cortexStop'][:, t_stopCue : t_stopCue + 200], 1))                
+
 
         ### GET FAILED AND CORRECT GO AND STOP TRIALS, SAVE REAKTION TIME DATA
         print("Calculating reaction times...")
@@ -858,6 +819,7 @@ for i_paramname in range(n_param_vars):
         results_RT['meanRT_FailedStop'] = mean_FailedStop
 
         np.save('../data/'+paramsS['saveFolder']+'/resultsRT_'+netNr+'_param_'+paramname+'_cycle'+str(i_cycle)+'id'+str(params['general_id'])+'.npy', results_RT) 
+
 
         ### RESET ALL MODIFIED PARAMETERS BEFOR NEW CYCLE
         params['cortexGo_rates'] = params_orig_CortexGo

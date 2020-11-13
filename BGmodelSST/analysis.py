@@ -4,82 +4,31 @@ from scipy.signal import argrelmin
 import scipy.stats as st
 from ANNarchy import population_rate
 import matplotlib.lines as mlines
+from BGmodelSST.sim_params import params
 
 
-def calc_KW_stats_all(GPe_Arky_rates_FailedStop, GPe_Arky_rates_CorrectStop, \
-                      SD1_rates_FailedStop, SD1_rates_CorrectStop, \
-                      SD2_rates_FailedStop, SD2_rates_CorrectStop, \
-                      STN_rates_FailedStop, STN_rates_CorrectStop, \
-                      GPe_Proto_rates_FailedStop, GPe_Proto_rates_CorrectStop, \
-                      GPe_Proto2_rates_FailedStop, GPe_Proto2_rates_CorrectStop, \
-                      SNr_rates_FailedStop, SNr_rates_CorrectStop, \
-                      Thal_rates_FailedStop, Thal_rates_CorrectStop, \
-                      CortexG_rates_FailedStop, CortexG_rates_CorrectStop, \
-                      CortexS_rates_FailedStop, CortexS_rates_CorrectStop, \
-                      FSI_rates_FailedStop, FSI_rates_CorrectStop, \
-                      pvalue_times, dt, name=''):
-                          
+def calc_KW_stats_all(data, pvalue_times, name=''):
     # Input: Raw population rates across trials. Dims: [trials, timesteps]
-                          
-    Hstat_all = [] # np.nan * np.ones(2)
-    pval_all = [] # np.nan * np.ones(2)    
 
-    H, p = calc_KruskalWallis(GPe_Arky_rates_FailedStop, GPe_Arky_rates_CorrectStop, pvalue_times, dt, 0, name)
-    Hstat_all.append(H)
-    pval_all.append(p)  
+    Hstat_all = []
+    pval_all = []
 
-    H, p = calc_KruskalWallis(SD1_rates_FailedStop, SD1_rates_CorrectStop, pvalue_times, dt, 1, name)
-    Hstat_all.append(H)
-    pval_all.append(p)    
-
-    H, p = calc_KruskalWallis(STN_rates_FailedStop, STN_rates_CorrectStop, pvalue_times, dt, 2, name)
-    Hstat_all.append(H)
-    pval_all.append(p) 
-
-    H, p = calc_KruskalWallis(GPe_Proto_rates_FailedStop, GPe_Proto_rates_CorrectStop, pvalue_times, dt, 3, name)
-    Hstat_all.append(H)
-    pval_all.append(p)  
-
-    H, p = calc_KruskalWallis(GPe_Proto2_rates_FailedStop, GPe_Proto2_rates_CorrectStop, pvalue_times, dt, 4, name)
-    Hstat_all.append(H)
-    pval_all.append(p) 
-
-    H, p = calc_KruskalWallis(SNr_rates_FailedStop, SNr_rates_CorrectStop, pvalue_times, dt, 5, name)
-    Hstat_all.append(H)
-    pval_all.append(p) 
-
-    H, p = calc_KruskalWallis(Thal_rates_FailedStop, Thal_rates_CorrectStop, pvalue_times, dt, 6, name)
-    Hstat_all.append(H)
-    pval_all.append(p)        
-    
-    H, p = calc_KruskalWallis(SD2_rates_FailedStop, SD2_rates_CorrectStop, pvalue_times, dt, 7, name)
-    Hstat_all.append(H)
-    pval_all.append(p)
-    
-    H, p = calc_KruskalWallis(CortexG_rates_FailedStop, CortexG_rates_CorrectStop, pvalue_times, dt, 8, name)
-    Hstat_all.append(H)
-    pval_all.append(p)        
-
-    H, p = calc_KruskalWallis(CortexS_rates_FailedStop, CortexS_rates_CorrectStop, pvalue_times, dt, 9, name)
-    Hstat_all.append(H)
-    pval_all.append(p)        
-    
-    H, p = calc_KruskalWallis(FSI_rates_FailedStop, FSI_rates_CorrectStop, pvalue_times, dt, 10, name)
-    Hstat_all.append(H)
-    pval_all.append(p)     
+    for pop, rates in data.items():
+        H, p = calc_KruskalWallis(rates[0], rates[1], pvalue_times, 0, name)
+        Hstat_all.append(H)
+        pval_all.append(p)
 
     return Hstat_all, pval_all
 
 
-def calc_KruskalWallis(rates_FailedStop, rates_CorrectStop, pvalue_times, dt, number, name, printout = True):
+def calc_KruskalWallis(rates_FailedStop, rates_CorrectStop, pvalue_times, number, name, printout = False):
     # Input:
     # rates_FailedStop, rates_CorrectStop:
     # Raw population rates across trials in ALL time bins
-    # I would need an AVERAGE across TIME STEPS withion each bin, not an average across TRIALS!
     n_bins = len(pvalue_times) - 1    
     Hstat = np.nan * np.ones(n_bins)
     pval = np.nan * np.ones(n_bins)      
-    boxlen = int(1.0 / dt)
+    boxlen = int(1.0 / params['general_dt'])
     if printout: print(name, number)
     for i_bin in range(n_bins):
         meanrate_FailedStop_bin = np.nanmean(rates_FailedStop[:, pvalue_times[i_bin] : pvalue_times[i_bin+1]], 1) # Average across time steps
@@ -320,28 +269,15 @@ def plot_zscore_stopVsGo_five_NewData(STN_mean_Stop, STN_mean_Go, SNr_mean_Stop,
     plt.show()
 
 
-def plot_meanrate_All_FailedVsCorrectStop(saveFolderPlots, \
-                                          GPe_Arky_mean_FailedStop, GPe_Arky_mean_CorrectStop, GPe_Arky_std_FailedStop, GPe_Arky_std_CorrectStop, \
-                                          GPe_Proto_mean_FailedStop, GPe_Proto_mean_CorrectStop, \
-                                          SD1_mean_FailedStop, SD1_mean_CorrectStop, \
-                                          SD2_mean_FailedStop, SD2_mean_CorrectStop, \
-                                          STN_mean_FailedStop, STN_mean_CorrectStop, \
-                                          SNr_mean_FailedStop, SNr_mean_CorrectStop, \
-                                          Thal_mean_FailedStop, Thal_mean_CorrectStop, \
+def plot_meanrate_All_FailedVsCorrectStop(resultsFolder, \
+                                          data, \
                                           rsp_mInt_stop, nz_FailedStop, nz_CorrectStop, thresh, \
-                                          Cortex_G_mean_FailedStop, Cortex_G_mean_CorrectStop, \
-                                          GPe_Proto2_mean_FailedStop, GPe_Proto2_mean_CorrectStop, \
-                                          PauseInput_mean_FailedStop, PauseInput_mean_CorrectStop, \
-                                          Cortex_S_mean_FailedStop, Cortex_S_mean_CorrectStop, \
-                                          SNrE_mean_FailedStop, SNrE_mean_CorrectStop, \
-                                          FSI_mean_FailedStop, FSI_mean_CorrectStop, \
                                           t_init, t_SSD, param_id, trials, dt, pvalue_list=[], pvalue_times=[]):
 
-    p_ind_arky, p_ind_SD1, p_ind_STN, p_ind_Proto, p_ind_Proto2, p_ind_SNr, p_ind_thal, p_ind_SD2, p_ind_CortexG, p_ind_CortexS, p_ind_FSI = range(11)    
-    
+
     alpha = 0.01 # 0.05 
     pvalue_list = FDR_correction(pvalue_list, alpha) 
- # 
+
     '''#    
     # Bonferroni correction:
     n_pvals = np.sum(np.isnan(pvalue_list)==False) 
@@ -353,6 +289,8 @@ def plot_meanrate_All_FailedVsCorrectStop(saveFolderPlots, \
     print('pvalues, after: max, min = ', np.nanmax(pvalue_list), np.nanmin(pvalue_list))    
     '''
 
+
+    ### CONFIGURE FIGURE
     plt.figure(figsize=(6,4), dpi=300)
     linew = 1 # 0.5 # 1 # 2
     fsize = 6
@@ -366,203 +304,54 @@ def plot_meanrate_All_FailedVsCorrectStop(saveFolderPlots, \
     t200 = (t_init + t_SSD + 200)/dt    
     t_stopCue = (t_init + t_SSD)/dt
 
-    maxRate = {'GPe-Arky':60, 'StrD1':105, 'StrD2':70, 'STN':80, 'Cortex-Go':320, 'GPe-cp':75, 'GPe-Proto':50, 'SNr':130, 'Thalamus':45, 'Cortex-Stop':430, 'StrFSI':50, 'Integrator':0.25}
-
-
-    Int_stop_mean_failed = np.nanmean(rsp_mInt_stop[:, nz_FailedStop], 1)
-    nz_Int_failed = np.nonzero(Int_stop_mean_failed > thresh)[0]
-
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,1))
-    ax=plt.gca()
-    if smoothing:
-        plt.plot(box_smooth(GPe_Arky_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label='failed Stop')
-        plt.plot(box_smooth(GPe_Arky_mean_CorrectStop, boxlen), color='purple', lw=linew, label='correct Stop')
-    else:
-        plt.plot(GPe_Arky_mean_FailedStop, color='tomato', ls='--', lw=linew, label='failed Stop')
-        #plt.fill_between(range(0,GPe_Arky_mean_FailedStop.size), GPe_Arky_mean_FailedStop-GPe_Arky_std_FailedStop, GPe_Arky_mean_FailedStop+GPe_Arky_std_FailedStop, color='tomato')
-        plt.plot(GPe_Arky_mean_CorrectStop, color='purple', lw=linew, label='correct Stop')
-        #plt.fill_between(range(0,GPe_Arky_mean_CorrectStop.size), GPe_Arky_mean_CorrectStop-GPe_Arky_std_CorrectStop, GPe_Arky_mean_CorrectStop+GPe_Arky_std_CorrectStop, color='purple')
-    #if len(nz_Int_failed)>0: 
-    #    plt.plot( (nz_Int_failed[0]) * np.ones(2), [0, 100], '--' )
-    plt.title('GPe-Arky', fontsize=fsize)
-    plt.ylabel('Firing rate [Hz]', fontsize=fsize)
-    ax.axis([tmin, tmax, 0, maxRate['GPe-Arky']]) # 70 # np.max(np.nanmax(GPe_Arky_mean_FailedStop), np.nanmax(GPe_Arky_mean_CorrectStop))
-    #ax.axis([tmin, tmax, 0, ax.axis()[3]])
-    ax.set_xticks([tn200, t_stopCue, t200])
-    ax.set_xticklabels([-0.2, 0, 0.2])
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    #p_ind_arky = 0
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_arky)            
-
-
-    #'''#
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,ny+1))    
-    ax=plt.gca()
-    if smoothing:
-        plt.plot(box_smooth(GPe_Proto_mean_CorrectStop, boxlen), color='purple', lw=linew, label='Correct stop')
-        plt.plot(box_smooth(GPe_Proto_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label='Failed stop')
-    else:
-        plt.plot(GPe_Proto_mean_CorrectStop, color='purple', lw=linew, label='Correct stop')
-        plt.plot(GPe_Proto_mean_FailedStop, color='tomato', ls='--', lw=linew, label='Failed stop')
-    plt.title('GPe-Proto', fontsize=fsize)
-    plt.ylabel('Firing rate [Hz]', fontsize=fsize)  
-    #ax.axis([tmin, tmax, 0, 50])
-    ax.axis([tmin, tmax, 0, maxRate['GPe-Proto']])
-    ax.set_xticks([tn200, t_stopCue, t200])
-    ax.set_xticklabels([-0.2, 0, 0.2])
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    #p_ind_proto = 3
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_Proto)                    
-    #'''
-
-    #'''#
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,2))
-    ax=plt.gca()
-    if smoothing:
-        plt.plot(box_smooth(SD1_mean_CorrectStop, boxlen), color='purple', lw=linew, label='Correct stop')
-        plt.plot(box_smooth(SD1_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label='Failed stop')
-    else:
-        plt.plot(SD1_mean_CorrectStop, color='purple', lw=linew, label='Correct stop')
-        plt.plot(SD1_mean_FailedStop, color='tomato', ls='--', lw=linew, label='Failed stop')
-    #if len(nz_Int_failed)>0: 
-    #    plt.plot( (nz_Int_failed[0]) * np.ones(2), [0, 40], '--' )
-    plt.title('StrD1', fontsize=fsize)
-    #ax.axis([tmin, tmax, 0, 50])
-    ax.axis([tmin, tmax, 0, maxRate['StrD1']])
-    ax.set_xticks([tn200, t_stopCue, t200])
-    ax.set_xticklabels([-0.2, 0, 0.2])
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_SD1)            
-
-    #'''
-
-    #'''#
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,3))        
-    ax=plt.gca()
-    if smoothing:
-        plt.plot(box_smooth(SD2_mean_CorrectStop, boxlen), color='purple', lw=linew, label='Correct stop')
-        plt.plot(box_smooth(SD2_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label='Failed stop')
-    else:
-       plt.plot(SD2_mean_CorrectStop, color='purple', lw=linew, label='Correct stop')
-       plt.plot(SD2_mean_FailedStop, color='tomato', ls='--', lw=linew, label='Failed stop')
-    plt.title('StrD2', fontsize=fsize)
-    #ax.axis([tmin, tmax, 0, 10])
-    ax.axis([tmin, tmax, 0, maxRate['StrD2']])
-    ax.set_xticks([tn200, t_stopCue, t200])
-    ax.set_xticklabels([-0.2, 0, 0.2])
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_SD2)                
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    #'''
-
-    #'''#
-    #plt.subplot(nx,ny,3)
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,4))
-    ax=plt.gca()
-    if smoothing:
-        plt.plot(box_smooth(STN_mean_FailedStop, boxlen),  color='tomato', ls='--', lw=linew, label='Failed stop')
-        plt.plot(box_smooth(STN_mean_CorrectStop, boxlen), color='purple', lw=linew, label='Correct stop')
-    else:
-        plt.plot(STN_mean_CorrectStop, color='purple', lw=linew, label='Correct stop')
-        plt.plot(STN_mean_FailedStop, '--', color='tomato', ls='--', lw=linew, label='Failed stop')
-    plt.title('STN', fontsize=fsize)
-    ax.axis([tmin, tmax, 0, maxRate['STN']])
-    ax.set_xticks([tn200, t_stopCue, t200])
-    ax.set_xticklabels([-0.2, 0, 0.2])
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    #p_ind_STN = 2
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_STN)            
-
     
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,ny+2))    
-    ax=plt.gca()
-    if smoothing:
-        plt.plot(box_smooth(SNr_mean_CorrectStop, boxlen), color='purple', lw=linew, label='Correct stop')
-        plt.plot(box_smooth(SNr_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label='Failed stop')
-        #plt.plot(box_smooth(FSI_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label='Failed stop')
-        #plt.plot(box_smooth(FSI_mean_CorrectStop, boxlen), color='purple', ls='--', lw=linew, label='Correct stop')
-    else:
-        plt.plot(SNr_mean_CorrectStop, color='purple', lw=linew, label='Correct stop')
-        plt.plot(SNr_mean_FailedStop, color='tomato', ls='--', lw=linew, label='Failed stop')
-        #plt.plot(box_smooth(FSI_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label='Failed stop')
-        #plt.plot(box_smooth(FSI_mean_CorrectStop, boxlen), color='purple', ls='--', lw=linew, label='Correct stop')
-    plt.title('SNr', fontsize=fsize)
-    #ax.axis([tmin, tmax, 0, ax.axis()[3]])
-    ax.axis([tmin, tmax, 0, maxRate['SNr']]) # 300
-    ax.set_xticks([tn200, t_stopCue, t200])
-    ax.set_xticklabels([-0.2, 0, 0.2])
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    #p_ind_SNr = 4
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_SNr)            
+    ### PLOT ALL RATES IN SUBPLOTS
+    popIdx = 0
+    for pop, rates in data.items():
+        ## CREATE SUBPLOT
+        ax_wrapper = []    
+        ax_wrapper.append(plt.subplot(nx,ny,popIdx+1))
+        ax=plt.gca()
+        ## RATES SMOOTHED OR NOT SMOOTHED
+        if smoothing:
+            plt.plot(box_smooth(rates[0], boxlen), color='tomato', ls='--', lw=linew, label='failed Stop')
+            plt.plot(box_smooth(rates[1], boxlen), color='purple', lw=linew, label='correct Stop')
+        else:
+            plt.plot(rates[0], color='tomato', ls='--', lw=linew, label='failed Stop')
+            plt.plot(rates[1], color='purple', lw=linew, label='correct Stop')
+        ## TITLE AND LABEL
+        plt.title(params['titles_Code_to_Script'][pop], fontsize=fsize)
+        if popIdx==0 or popIdx==ny: plt.ylabel('Firing rate [Hz]', fontsize=fsize)
+        ## AXIS
+        ax.axis([tmin, tmax, 0, params['Fig7_maxRates'][pop]])
+        ax.set_xticks([tn200, t_stopCue, t200])
+        ax.set_xticklabels([-0.2, 0, 0.2])
+        for label in ax.get_xticklabels() + ax.get_yticklabels():
+            label.set_fontsize(fsize)
+        ## PVALUES
+        plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, popIdx)
+        popIdx += 1
 
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,2*ny-1))    
-    ax=plt.gca()
-    if smoothing:
-        plt.plot(box_smooth(FSI_mean_CorrectStop, boxlen), color='purple', ls='solid', lw=linew, label='Correct stop')
-        plt.plot(box_smooth(FSI_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label='Failed stop')
-    else:
-        plt.plot(box_smooth(FSI_mean_CorrectStop, boxlen), color='purple', ls='solid', lw=linew, label='Correct stop')
-        plt.plot(box_smooth(FSI_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label='Failed stop')
-    plt.title('StrFSI', fontsize=fsize)
-    ax.axis([tmin, tmax, 0, maxRate['StrFSI']])
-    #ax.axis([tmin, tmax, 0, 150]) # 300
-    ax.set_xticks([tn200, t_stopCue, t200])
-    ax.set_xticklabels([-0.2, 0, 0.2])
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_FSI)                        
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
 
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,ny+3))    
-    ax=plt.gca()
-    if smoothing:
-        plt.plot(box_smooth(Thal_mean_CorrectStop, boxlen), color='purple', lw=linew, label='Correct stop')
-        plt.plot(box_smooth(Thal_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label='Failed stop')
-    else:
-        plt.plot(Thal_mean_CorrectStop, color='purple', lw=linew, label='Correct stop')
-        plt.plot(Thal_mean_FailedStop, color='tomato', ls='--', lw=linew, label='Failed stop')
-    plt.title('thalamus', fontsize=fsize)
-    ax.axis([tmin, tmax, 0, maxRate['Thalamus']])
-    #ax.axis([tmin, tmax, 0, ax.axis()[3]])
-    ax.set_xticks([tn200, t_stopCue, t200])
-    ax.set_xticklabels([-0.2, 0, 0.2])
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_thal)    
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-
-    #plt.subplot(nx,ny,2*ny)
+    ### INTEGRATOR IN LAST SUBPLOT
     ax_wrapper = []    
     ax_wrapper.append(plt.subplot(nx,ny,2*ny))    
     ax=plt.gca()        
     ax.set_yticks([])    
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)    
-    ax_wrapper.append(ax_wrapper[0].twinx())            
-    int_mean_failedStop = np.nanmean(rsp_mInt_stop[:, nz_FailedStop], 1)    
-    int_std_failedStop = np.nanstd(rsp_mInt_stop[:, nz_FailedStop], 1)   
-    plt.plot(np.nanmean(rsp_mInt_stop[:, nz_CorrectStop], 1), color='purple', lw=linew, label='Correct stop')     
+    ax_wrapper.append(ax_wrapper[0].twinx())
+    ## CALCULATE AND PLOT INTEGRATOR LINES
+    int_mean_failedStop  = np.nanmean(rsp_mInt_stop[:, nz_FailedStop], 1)
+    int_mean_correctStop = np.nanmean(rsp_mInt_stop[:, nz_CorrectStop], 1)
+    plt.plot(int_mean_correctStop, color='purple', lw=linew, label='Correct stop')     
     plt.plot(int_mean_failedStop, color='tomato', ls='--', lw=linew, label='Failed stop')
-    int_times = range(len(rsp_mInt_stop[:, 0]))
-    #thresh = Integrator.threshold
+    ## THRESHOLD MARKER
     plt.plot([0, rsp_mInt_stop.shape[0]], thresh * np.ones(2), 'k--', lw=linew)
-    Int_stop_mean_failed = np.nanmean(rsp_mInt_stop[:, nz_FailedStop], 1)
-    nz_Int_failed = np.nonzero(Int_stop_mean_failed > thresh)[0]
+    ## TITLE, LABELS, AXIS
     plt.title('Integrator-Go', fontsize=fsize)
-    ax=plt.gca()    
-    #ax.fill_between(int_times, int_mean_failedStop - int_std_failedStop, int_mean_failedStop + int_std_failedStop, color='tomato', alpha=0.4, edgecolor='None')                
-    ax.axis([tmin, tmax, 0, maxRate['Integrator']]) # 0.16
+    ax=plt.gca()
+    ax.axis([tmin, tmax, 0, params['Fig7_maxRates']['IntegratorGo']])
     ax.set_xticks([tn200, t_stopCue, t200])
     ax.set_xticklabels([-0.2, 0, 0.2])
     plt.ylabel('$g_{AMPA}$', fontsize=fsize)           
@@ -572,86 +361,25 @@ def plot_meanrate_All_FailedVsCorrectStop(saveFolderPlots, \
         label.set_fontsize(fsize)    
      
 
-    #'''#
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,5))        
-    ax=plt.gca()
-    if smoothing:
-        plt.plot(box_smooth(Cortex_G_mean_CorrectStop, boxlen), color='purple', ls='solid', lw=linew, label='Correct stop')
-        plt.plot(box_smooth(Cortex_G_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label='Failed stop')
-    else:
-        plt.plot(Cortex_G_mean_CorrectStop, color='purple', ls='solid', lw=linew, label='Correct stop')
-        plt.plot(Cortex_G_mean_FailedStop, color='tomato', ls='--', lw=linew, label='Failed stop')
-    plt.title('cortex-Go', fontsize=fsize)
-    #ax.axis([tmin, tmax, 0, 200])
-    ax.axis([tmin, tmax, 0, maxRate['Cortex-Go']])
-    ax.set_xticks([tn200, t_stopCue, t200])
-    ax.set_xticklabels([-0.2, 0, 0.2])
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_CortexG)                    
-    #'''
-
-
-    #'''#
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,6))        
-    ax=plt.gca()
-    if smoothing:
-        plt.plot(box_smooth(GPe_Proto2_mean_CorrectStop, boxlen), color='purple', ls='solid', lw=linew, label='Correct stop')
-        plt.plot(box_smooth(GPe_Proto2_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label='Failed stop')
-    else:
-        plt.plot(GPe_Proto2_mean_CorrectStop, color='purple', ls='solid', lw=linew, label='Correct stop')
-        plt.plot(GPe_Proto2_mean_FailedStop, color='tomato', ls='--', lw=linew, label='Failed stop')
-    plt.title('GPe-Cp', fontsize=fsize)
-    #ax.axis([tmin, tmax, 0, 200])
-    ax.axis([tmin, tmax, 0, maxRate['GPe-cp']])
-    ax.set_xticks([tn200, t_stopCue, t200])
-    ax.set_xticklabels([-0.2, 0, 0.2])
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_Proto2)                    
-    #'''
-
-
-    #'''#
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,10))        
-    ax=plt.gca()
-    if smoothing:
-        plt.plot(box_smooth(Cortex_S_mean_CorrectStop, boxlen), color='purple', ls='solid', lw=linew, label='Correct stop')
-        plt.plot(box_smooth(Cortex_S_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label='Failed stop')
-    else:
-        plt.plot(Cortex_S_mean_CorrectStop, color='purple', lw=linew, label='Correct stop')
-        plt.plot(Cortex_S_mean_FailedStop, color='tomato', ls='--', lw=linew, label='Failed stop')
-    plt.title('cortex-Stop', fontsize=fsize)
-    #ax.axis([tmin, tmax, 0, 200])
-    ax.axis([tmin, tmax, 0, maxRate['Cortex-Stop']])
-    ax.set_xticks([tn200, t_stopCue, t200])
-    ax.set_xticklabels([-0.2, 0, 0.2])
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_CortexS)            
-    #'''
-
-
-
+    ### GENERAL XLABEL
     fig=plt.gcf()
     fig.text(0.4, 0.12, 'Time from Stop cue [sec]', fontsize=fsize)
 
+
+    ### LEGEND
     normalLine = mlines.Line2D([], [], color='purple', label='correct Stop')
     dashedLine = mlines.Line2D([], [], color='tomato', ls='--', label='failed Stop')
     xLegend = 0.5
     yLegend = 0.06
     leg = plt.legend(handles=[normalLine,dashedLine], bbox_to_anchor=(xLegend,yLegend), bbox_transform=plt.gcf().transFigure, fontsize=fsize, loc='center', ncol=2) 
 
-    #plt.tight_layout()
-    plt.subplots_adjust(bottom=0.2, top=0.95, wspace=0.5, hspace=0.4, left=0.08, right=0.9) # wspace = 0.5, right=0.98
 
+    ### SAVE
+    plt.subplots_adjust(bottom=0.2, top=0.95, wspace=0.5, hspace=0.4, left=0.08, right=0.9)
     if smoothing:
-        plt.savefig(saveFolderPlots+'meanrate_All_FailedVsCorrectStop_rate_paramsid'+str(int(param_id))+'_'+str(trials)+'trials_smoothed.svg', dpi=300)
+        plt.savefig(resultsFolder+'/meanrate_All_FailedVsCorrectStop_rate_paramsid'+str(int(param_id))+'_'+str(trials)+'trials_smoothed.svg', dpi=300)
     else:
-        plt.savefig(saveFolderPlots+'meanrate_All_FailedVsCorrectStop_rate_paramsid'+str(int(param_id))+'_'+str(trials)+'trials.svg', dpi=300)
+        plt.savefig(resultsFolder+'/meanrate_All_FailedVsCorrectStop_rate_paramsid'+str(int(param_id))+'_'+str(trials)+'trials.svg', dpi=300)
     plt.ioff()
     plt.show()
 
@@ -673,7 +401,7 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
                                           thresh, \
                                           t_init, t_SSD, param_id, trials, dt, pvalue_list=[], pvalue_times=[], GO_Mode=''):
 
-    p_ind_arky, p_ind_SD1, p_ind_STN, p_ind_Proto, p_ind_Proto2, p_ind_SNr, p_ind_thal, p_ind_SD2, p_ind_CortexG, p_ind_CortexS, p_ind_FSI = range(11)  
+    p_ind_arky, p_ind_SD1, p_ind_STN, p_ind_Proto, p_ind_Proto2, p_ind_SNr, p_ind_thal, p_ind_SD2, p_ind_CortexG, p_ind_CortexS, p_ind_FSI = range(11)#TODO: generalize pIdx
 
     nz_FastGo, nz_SlowGo = get_fast_slow_go_trials(mInt_go, mInt_stop, thresh, trials)
     nz_CorrectGo = np.concatenate([nz_FastGo, nz_SlowGo])
@@ -754,7 +482,7 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)
     #p_ind_arky = 0
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_arky)
+    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_arky)
 
 
     #'''#
@@ -779,7 +507,7 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)
     #p_ind_proto = 3
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_Proto)                    
+    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_Proto)                    
     #'''
 
     #'''#
@@ -802,7 +530,7 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
     ax.set_xticklabels(xTickLabels)
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_SD1)            
+    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_SD1)            
 
     #'''
 
@@ -824,7 +552,7 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
     ax.axis([tmin, tmax, 0, maxRate['StrD2']])
     ax.set_xticks(xTickValues)
     ax.set_xticklabels(xTickLabels)
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_SD2)                
+    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_SD2)                
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)
     #'''
@@ -850,7 +578,7 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)
     #p_ind_STN = 2
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_STN)            
+    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_STN)            
 
     
     ax_wrapper = []    
@@ -873,7 +601,7 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)
     #p_ind_SNr = 4
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_SNr)            
+    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_SNr)            
 
     ax_wrapper = []    
     ax_wrapper.append(plt.subplot(nx,ny,2*ny-1))    
@@ -892,7 +620,7 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
     #ax.axis([tmin, tmax, 0, 150]) # 300
     ax.set_xticks(xTickValues)
     ax.set_xticklabels(xTickLabels)
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_FSI)                        
+    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_FSI)                        
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)
 
@@ -913,7 +641,7 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
     #ax.axis([tmin, tmax, 0, ax.axis()[3]])
     ax.set_xticks(xTickValues)
     ax.set_xticklabels(xTickLabels)
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_thal)    
+    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_thal)    
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)
 
@@ -969,7 +697,7 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
     ax.set_xticklabels(xTickLabels)
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_CortexG)                    
+    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_CortexG)                    
     #'''
 
 
@@ -993,7 +721,7 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
     ax.set_xticklabels(xTickLabels)
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_Proto2)                    
+    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_Proto2)                    
     #'''
 
 
@@ -1017,7 +745,7 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
     ax.set_xticklabels(xTickLabels)
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)
-    plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_CortexS)            
+    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_CortexS)            
     #'''
 
 
@@ -1040,6 +768,67 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
         plt.savefig(saveFolderPlots+'meanrate_All_FailedStopVsCorrectGo_rate_paramsid'+str(int(param_id))+'_'+str(trials)+'trials.svg', dpi=300)
     plt.ioff()
     plt.show()
+
+
+def plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, pval_ind=0, show_axis=True):
+
+    with open('../results/'+resultsFolder+'/PVALUES', 'a') as f:
+        print('\n',file=f)
+        NamesList= ['p_ind_arky', 'p_ind_SD1', 'p_ind_STN', 'p_ind_Proto', 'p_ind_Proto2', 'p_ind_SNr', 'p_ind_thal', 'p_ind_SD2', 'p_ind_CortexG', 'p_ind_CortexS', 'p_ind_FSI']
+        print(NamesList[pval_ind],file=f)
+        #print(np.array([i/10. for i in pvalue_times])[np.logical_not(np.isnan(pvalue_list[pval_ind])][0],file=f)
+        #print(pvalue_list[pval_ind][np.logical_not(np.isnan(pvalue_list[pval_ind])][0]),file=f)
+
+        IDX=np.logical_not(np.isnan(pvalue_list[pval_ind]))
+        test=pvalue_list[pval_ind,IDX]
+        test2=np.array([i/10. for i in pvalue_times[:-1]])[IDX]
+        #print(pvalue_list[pval_ind],file=f)
+        #print(np.array([i/10. for i in pvalue_times]),file=f)
+        if len(test)>0:
+            print(test[0],file=f)
+            print(test2[0],file=f)
+
+
+    fsize=6    
+    if len(pvalue_list) > 0:            
+        if len(pvalue_list[pval_ind]) > 0:
+            if np.sum( pvalue_list[pval_ind] < alpha ) > 0:                
+                for i_pv in range(len(pvalue_list[pval_ind])):
+                    if pvalue_list[pval_ind][i_pv] < alpha:                    
+                        plt.axvspan(pvalue_times[i_pv], pvalue_times[i_pv+1], ymax=0.05, facecolor='lightgray')
+
+
+def FDR_correction(pvalue_list, alpha):
+    len_pv = len(pvalue_list)
+    len_pv_0 = len(pvalue_list[0])    
+    print('len_pv, len_pv_0 = ', len_pv, len_pv_0)   
+    rsp_pval_list = np.reshape(pvalue_list, (len_pv * len_pv_0))
+    sortind = np.argsort(rsp_pval_list)
+    rsp_pval_list_sorted = rsp_pval_list[sortind]        
+    m = len(sortind)
+    k_list = range(1, m+1)
+    #thresh_pOverk = alpha / float(m)  # Benjamini-Hochberg
+    thresh_pOverk = alpha / (float(m) *  Benjamini_Yekutieli_c(m))  # Benjamini-Yekutieli    
+    accept_sorted =  (np.array(rsp_pval_list_sorted) / k_list) <= thresh_pOverk
+    
+    pvals_corrected_rsp = np.nan * np.ones(len(rsp_pval_list))
+    for i in range(len(accept_sorted)):
+        if accept_sorted[i]: 
+            pvals_corrected_rsp[sortind[i]] = rsp_pval_list[sortind[i]]
+        else:
+            pvals_corrected_rsp[sortind[i]] = np.nan
+    return np.reshape(pvals_corrected_rsp, (len_pv, len_pv_0))       
+
+
+def Benjamini_Yekutieli_c(m):
+    # Benjamini, Y., Yekutieli, D. (2001). 
+    #"The control of the false discovery rate in multiple testing under dependency". 
+    # Annals of Statistics. 29 (4): 1165-1188. doi:10.1214/aos/1013699998.
+    c = np.zeros(m)
+    c[0] = 1    
+    for i in range(1,m):
+        c[i] = c[i-1] + 1.0/i
+    return c[-1]
 
 
 #####################################################################################################################################################
@@ -1701,82 +1490,9 @@ def plot_correl_rates_Intmax(GPe_Arky_ratepertrial_Stop, GPe_Proto_ratepertrial_
 
 
 
-def plot_pvalues(alpha, dt, ax_wrapper, pvalue_list, pvalue_times, pval_ind=0, show_axis=True):
-
-    with open('PVALUES', 'a') as f:
-        print('\n',file=f)
-        NamesList= ['p_ind_arky', 'p_ind_SD1', 'p_ind_STN', 'p_ind_Proto', 'p_ind_Proto2', 'p_ind_SNr', 'p_ind_thal', 'p_ind_SD2', 'p_ind_CortexG', 'p_ind_CortexS', 'p_ind_FSI']
-        print(NamesList[pval_ind],file=f)
-        #print(np.array([i/10. for i in pvalue_times])[np.logical_not(np.isnan(pvalue_list[pval_ind])][0],file=f)
-        #print(pvalue_list[pval_ind][np.logical_not(np.isnan(pvalue_list[pval_ind])][0]),file=f)
-
-        IDX=np.logical_not(np.isnan(pvalue_list[pval_ind]))
-        test=pvalue_list[pval_ind,IDX]
-        test2=np.array([i/10. for i in pvalue_times[:-1]])[IDX]
-        #print(pvalue_list[pval_ind],file=f)
-        #print(np.array([i/10. for i in pvalue_times]),file=f)
-        if len(test)>0:
-            print(test[0],file=f)
-            print(test2[0],file=f)
 
 
-    fsize=6    
-    if len(pvalue_list) > 0:            
-        if len(pvalue_list[pval_ind]) > 0:
-            if np.sum( pvalue_list[pval_ind] < alpha ) > 0:                
-                for i_pv in range(len(pvalue_list[pval_ind])):
-                    if pvalue_list[pval_ind][i_pv] < alpha:                    
-                        plt.axvspan(pvalue_times[i_pv], pvalue_times[i_pv+1], ymax=0.05, facecolor='lightgray')
-
-def FDR_correction(pvalue_list, alpha): # testing only - very liberal?!
-    len_pv = len(pvalue_list)
-    len_pv_0 = len(pvalue_list[0])    
-    print('len_pv, len_pv_0 = ', len_pv, len_pv_0)   
-    rsp_pval_list = np.reshape(pvalue_list, (len_pv * len_pv_0))
-    sortind = np.argsort(rsp_pval_list)
-    rsp_pval_list_sorted = rsp_pval_list[sortind]        
-    m = len(sortind)
-    k_list = range(1, m+1)
-    #thresh_pOverk = alpha / float(m)  # Benjamini-Hochberg
-    thresh_pOverk = alpha / (float(m) *  Benjamini_Yekutieli_c(m))  # Benjamini-Yekutieli    
-    accept_sorted =  (np.array(rsp_pval_list_sorted) / k_list) <= thresh_pOverk     
-    #print('np.array(rsp_pval_list_sorted) / k_list= ', np.array(rsp_pval_list_sorted) / k_list)    
-    #print('len(accept_sorted) = ', len(accept_sorted))    
-    #print('accept_sorted = ', accept_sorted)
-    
-    pvals_corrected_rsp = np.nan * np.ones(len(rsp_pval_list))
-    for i in range(len(accept_sorted)):
-        if accept_sorted[i]: 
-            pvals_corrected_rsp[sortind[i]] = rsp_pval_list[sortind[i]]
-        else:
-            pvals_corrected_rsp[sortind[i]] = np.nan
-    return np.reshape(pvals_corrected_rsp, (len_pv, len_pv_0))
-  
-    
-    
-    #rereshape_pvals = np.reshape(rsp_pval_list, (len_pv, len_pv_0))    
-    #print('len_rersp, len_rersp[0,:], len_rersp[:,0] = ', len(rereshape_pvals), len(rereshape_pvals[0,:]), len(rereshape_pvals[:,0]))       
-    '''#    
-    # test for correct re-reshaping:
-    diff = np.nan * np.ones([len_pv, len_pv_0])
-    for i_nuclei in range(len_pv):
-        for it in range(len_pv_0):
-            diff[i_nuclei, it] = pvalue_list[i_nuclei][it] - rereshape_pvals[i_nuclei, it]
-    print('nansum(diff) = ', np.nansum(diff)) 
-    print('pvalue_list[0], rereshape_pvals[0] = ', pvalue_list[0], rereshape_pvals[0])   
-    print('pvalue_list[-1], rereshape_pvals[-1] = ', pvalue_list[-1], rereshape_pvals[-1])    
-    return pvalue_list
-    '''         
-
-def Benjamini_Yekutieli_c(m):
-    # Benjamini, Y., Yekutieli, D. (2001). 
-    #"The control of the false discovery rate in multiple testing under dependency". 
-    # Annals of Statistics. 29 (4): 1165-1188. doi:10.1214/aos/1013699998.
-    c = np.zeros(m)
-    c[0] = 1    
-    for i in range(1,m):
-        c[i] = c[i-1] + 1.0/i
-    return c[-1]   
+   
 
 
 

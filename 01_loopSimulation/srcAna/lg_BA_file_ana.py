@@ -40,15 +40,17 @@ except:
 if abfrage_loop == 'STR':
     
     ### LOAD FAILED/CORRECT STOP RATES
-    SD1_mean_FailedStop,        SD1_std_FailedStop,        SD1_mean_CorrectStop,        SD1_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/SD1_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
-    SD2_mean_FailedStop,        SD2_std_FailedStop,        SD2_mean_CorrectStop,        SD2_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/SD2_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
-    FSI_mean_FailedStop,        FSI_std_FailedStop,        FSI_mean_CorrectStop,        FSI_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/FSI_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')        
-    STN_mean_FailedStop,        STN_std_FailedStop,        STN_mean_CorrectStop,        STN_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/STN_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
-    GPe_Proto_mean_FailedStop,  GPe_Proto_std_FailedStop,  GPe_Proto_mean_CorrectStop,  GPe_Proto_std_CorrectStop  = np.load('../data/'+paramsA['loadFolder']+'/Proto_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
-    GPe_Proto2_mean_FailedStop, GPe_Proto2_std_FailedStop, GPe_Proto2_mean_CorrectStop, GPe_Proto2_std_CorrectStop = np.load('../data/'+paramsA['loadFolder']+'/Proto2_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
-    GPe_Arky_mean_FailedStop,   GPe_Arky_std_FailedStop,   GPe_Arky_mean_CorrectStop,   GPe_Arky_std_CorrectStop   = np.load('../data/'+paramsA['loadFolder']+'/Arky_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')        
-    SNr_mean_FailedStop,        SNr_std_FailedStop,        SNr_mean_CorrectStop,        SNr_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/SNr_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
-    Thal_mean_FailedStop,       Thal_std_FailedStop,       Thal_mean_CorrectStop,       Thal_std_CorrectStop       = np.load('../data/'+paramsA['loadFolder']+'/Thal_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
+    meanRates_failedStop = {}
+    meanRates_correctStop = {}
+    meanRates_failedStop['StrD1'],        SD1_std_FailedStop,        meanRates_correctStop['StrD1'],        SD1_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/SD1_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
+    meanRates_failedStop['StrD2'],        SD2_std_FailedStop,        meanRates_correctStop['StrD2'],        SD2_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/SD2_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
+    meanRates_failedStop['StrFSI'],        FSI_std_FailedStop,        meanRates_correctStop['StrFSI'],        FSI_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/FSI_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')        
+    meanRates_failedStop['STN'],        STN_std_FailedStop,        meanRates_correctStop['STN'],        STN_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/STN_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
+    meanRates_failedStop['GPeProto'],  GPe_Proto_std_FailedStop,  meanRates_correctStop['GPeProto'],  GPe_Proto_std_CorrectStop  = np.load('../data/'+paramsA['loadFolder']+'/Proto_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
+    meanRates_failedStop['GPeCp'], GPe_Proto2_std_FailedStop, meanRates_correctStop['GPeCp'], GPe_Proto2_std_CorrectStop = np.load('../data/'+paramsA['loadFolder']+'/Proto2_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
+    meanRates_failedStop['GPeArky'],   GPe_Arky_std_FailedStop,   meanRates_correctStop['GPeArky'],   GPe_Arky_std_CorrectStop   = np.load('../data/'+paramsA['loadFolder']+'/Arky_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')        
+    meanRates_failedStop['SNr'],        SNr_std_FailedStop,        meanRates_correctStop['SNr'],        SNr_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/SNr_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
+    meanRates_failedStop['Thal'],       Thal_std_FailedStop,       meanRates_correctStop['Thal'],       Thal_std_CorrectStop       = np.load('../data/'+paramsA['loadFolder']+'/Thal_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
 
     ### LOAD FAST/SLOW GO RATES
     StrD1_meanrate_FastGo,      StrD1_std_FastGo,       StrD1_meanrate_SlowGo,      StrD1_std_SlowGo        = np.load('../data/'+paramsA['loadFolder']+'/SD1_meanrate_std_Fast-Slow_Go'+netNr+'.npy')            
@@ -66,9 +68,9 @@ if abfrage_loop == 'STR':
     STRD2_all_mean = StrD2_meanrate_SlowGo
     STRFSI_all_mean = StrFSI_meanrate_SlowGo
     ## PLOT MEAN RATES
-    plt.plot(custom_zscore_start0(SD2_mean_CorrectStop, tStart, STRD2_all_mean), color=params['toRGB']['purple'], lw=3)
+    plt.plot(custom_zscore_start0(meanRates_correctStop['StrD2'], tStart, STRD2_all_mean), color=params['toRGB']['purple'], lw=3)
     plt.plot(custom_zscore_start0(StrD2_meanrate_SlowGo, tStart, STRD2_all_mean), dash_capstyle='round', dashes=(0.05,2), color=params['toRGB']['purple']*0.7, lw=3) 
-    plt.plot(custom_zscore_start0(FSI_mean_CorrectStop, tStart, STRFSI_all_mean), color=params['toRGB']['grey'], lw=3)     
+    plt.plot(custom_zscore_start0(meanRates_correctStop['StrFSI'], tStart, STRFSI_all_mean), color=params['toRGB']['grey'], lw=3)     
     plt.plot(custom_zscore_start0(StrFSI_meanrate_SlowGo, tStart, STRFSI_all_mean), dash_capstyle='round', dashes=(0.05,2), color=params['toRGB']['grey']*0.7, lw=3) 
     ## STOP CUE MARKER
     plt.axvline((params['t_init'] + params['t_SSD'])/params['general_dt'], color='grey', lw=0.5)
@@ -102,11 +104,11 @@ if abfrage_loop == 'STR':
     GPe_Arky_all_mean   = GPe_Arky_meanrate_SlowGo
     GPe_Proto_all_mean  = GPe_Proto_meanrate_SlowGo
     ## PLOT MEAN RATES
-    plt.plot(custom_zscore_start0(SD1_mean_CorrectStop, tStart, STR_all_mean), color=params['toRGB']['red'], lw=3)     
+    plt.plot(custom_zscore_start0(meanRates_correctStop['StrD1'], tStart, STR_all_mean), color=params['toRGB']['red'], lw=3)     
     plt.plot(custom_zscore_start0(StrD1_meanrate_SlowGo, tStart, STR_all_mean), dash_capstyle='round', dashes=(0.05,2), color=params['toRGB']['red']*0.7, lw=3)         
-    plt.plot(custom_zscore_start0(GPe_Arky_mean_CorrectStop, tStart, GPe_Arky_all_mean), color=params['toRGB']['cyan'], lw=3)
+    plt.plot(custom_zscore_start0(meanRates_correctStop['GPeArky'], tStart, GPe_Arky_all_mean), color=params['toRGB']['cyan'], lw=3)
     plt.plot(custom_zscore_start0(GPe_Arky_meanrate_SlowGo, tStart, GPe_Arky_all_mean), dash_capstyle='round', dashes=(0.05,2), color=params['toRGB']['cyan']*0.7, lw=3)
-    plt.plot(custom_zscore_start0(GPe_Proto_mean_CorrectStop, tStart, GPe_Proto_all_mean), color=params['toRGB']['blue'], lw=3) 
+    plt.plot(custom_zscore_start0(meanRates_correctStop['GPeProto'], tStart, GPe_Proto_all_mean), color=params['toRGB']['blue'], lw=3) 
     plt.plot(custom_zscore_start0(GPe_Proto_meanrate_SlowGo, tStart, GPe_Proto_all_mean), dash_capstyle='round', dashes=(0.05,2), color=params['toRGB']['blue']*0.7, lw=3)
     ## STOP CUE MARKER
     plt.axvline((params['t_init'] + params['t_SSD'])/params['general_dt'], color='grey', lw=0.5)
@@ -138,10 +140,10 @@ if abfrage_loop == 'STR':
     plt.figure(figsize=(3.5,4), dpi=300)
     ax=plt.gca()
     ## PLOT MEAN RATES
-    plt.plot(custom_zscore_start0(STN_mean_CorrectStop, tStart, STN_mean_CorrectStop), color=params['toRGB']['gold'], lw=3) 
-    plt.plot(custom_zscore_start0(SNr_mean_CorrectStop, tStart, SNr_mean_CorrectStop), color=params['toRGB']['orange'], lw=3) 
-    plt.plot(custom_zscore_start0(GPe_Arky_mean_CorrectStop, tStart, GPe_Arky_mean_CorrectStop), color=params['toRGB']['cyan'], lw=3) 
-    plt.plot(custom_zscore_start0(GPe_Proto_mean_CorrectStop, tStart, GPe_Proto_mean_CorrectStop), color=params['toRGB']['blue'], lw=3) 
+    plt.plot(custom_zscore_start0(meanRates_correctStop['STN'], tStart, meanRates_correctStop['STN']), color=params['toRGB']['gold'], lw=3) 
+    plt.plot(custom_zscore_start0(meanRates_correctStop['SNr'], tStart, meanRates_correctStop['SNr']), color=params['toRGB']['orange'], lw=3) 
+    plt.plot(custom_zscore_start0(meanRates_correctStop['GPeArky'], tStart, meanRates_correctStop['GPeArky']), color=params['toRGB']['cyan'], lw=3) 
+    plt.plot(custom_zscore_start0(meanRates_correctStop['GPeProto'], tStart, meanRates_correctStop['GPeProto']), color=params['toRGB']['blue'], lw=3) 
     ## STOP CUE MARKER
     plt.axvline((params['t_init'] + params['t_SSD'])/params['general_dt'], color='grey', lw=0.5)
     ## LABELS
@@ -162,8 +164,8 @@ if abfrage_loop == 'STR':
     
     
     ### FIGURE D: Z-SCORES, GO AND STOP CUE RESPONSES OF MULTIPLE POPS DURING CORRECT_STOP
-    plot_zscore_stopVsGo_NewData(STN_mean_CorrectStop, STN_mean_CorrectStop, SNr_mean_CorrectStop, SNr_mean_CorrectStop, GPe_Arky_mean_CorrectStop, GPe_Arky_mean_CorrectStop, GPe_Proto_mean_CorrectStop, GPe_Proto_mean_CorrectStop, params['t_init'], params['t_SSD'], params['general_id'], paramsS['trials'], params['general_dt'], resultsDir+'/', labels = ['STN', 'SNr', 'GPe-Arky', 'GPe-Proto'], linecol = [[params['toRGB']['gold'], params['toRGB']['gold']*0.7], [params['toRGB']['orange'], params['toRGB']['orange']*0.7], [params['toRGB']['cyan'],params['toRGB']['cyan']*0.7], [params['toRGB']['blue'],params['toRGB']['blue']*0.7]])
-    plot_zscore_stopVsGo_five_NewData(SD1_mean_CorrectStop, SD1_mean_CorrectStop, SD2_mean_CorrectStop, SD2_mean_CorrectStop, FSI_mean_CorrectStop, FSI_mean_CorrectStop, GPe_Proto2_mean_CorrectStop, GPe_Proto2_mean_CorrectStop, Thal_mean_CorrectStop, Thal_mean_CorrectStop, params['t_init'], params['t_SSD'], params['general_id'], paramsS['trials'], params['general_dt'], resultsDir+'/', labels=['StrD1', 'StrD2', 'StrFSI', 'GPe-Cp', 'Thalamus'], linecol=[[params['toRGB']['red'], params['toRGB']['red']*0.7], [params['toRGB']['purple'], params['toRGB']['purple']*0.7], [params['toRGB']['grey'], params['toRGB']['grey']*0.7], [params['toRGB']['light brown'], params['toRGB']['light brown']*0.7], [params['toRGB']['lime'], params['toRGB']['lime']*0.7]])                             
+    plot_zscore_stopVsGo_NewData(meanRates_correctStop['STN'], meanRates_correctStop['STN'], meanRates_correctStop['SNr'], meanRates_correctStop['SNr'], meanRates_correctStop['GPeArky'], meanRates_correctStop['GPeArky'], meanRates_correctStop['GPeProto'], meanRates_correctStop['GPeProto'], params['t_init'], params['t_SSD'], params['general_id'], paramsS['trials'], params['general_dt'], resultsDir+'/', labels = ['STN', 'SNr', 'GPe-Arky', 'GPe-Proto'], linecol = [[params['toRGB']['gold'], params['toRGB']['gold']*0.7], [params['toRGB']['orange'], params['toRGB']['orange']*0.7], [params['toRGB']['cyan'],params['toRGB']['cyan']*0.7], [params['toRGB']['blue'],params['toRGB']['blue']*0.7]])
+    plot_zscore_stopVsGo_five_NewData(meanRates_correctStop['StrD1'], meanRates_correctStop['StrD1'], meanRates_correctStop['StrD2'], meanRates_correctStop['StrD2'], meanRates_correctStop['StrFSI'], meanRates_correctStop['StrFSI'], meanRates_correctStop['GPeCp'], meanRates_correctStop['GPeCp'], meanRates_correctStop['Thal'], meanRates_correctStop['Thal'], params['t_init'], params['t_SSD'], params['general_id'], paramsS['trials'], params['general_dt'], resultsDir+'/', labels=['StrD1', 'StrD2', 'StrFSI', 'GPe-Cp', 'Thalamus'], linecol=[[params['toRGB']['red'], params['toRGB']['red']*0.7], [params['toRGB']['purple'], params['toRGB']['purple']*0.7], [params['toRGB']['grey'], params['toRGB']['grey']*0.7], [params['toRGB']['light brown'], params['toRGB']['light brown']*0.7], [params['toRGB']['lime'], params['toRGB']['lime']*0.7]])                             
 
 
 ##############################################################################################
@@ -176,19 +178,21 @@ if abfrage_loop == 'extra':
     nz_FailedStop, nz_CorrectStop = get_correct_failed_stop_trials(mInt_stop, params['IntegratorNeuron_threshold'], paramsS['trials'])
 
     ### LOAD FAILED/CORRECT STOP RATES
-    SD1_mean_FailedStop,        SD1_std_FailedStop,        SD1_mean_CorrectStop,        SD1_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/SD1_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
-    SD2_mean_FailedStop,        SD2_std_FailedStop,        SD2_mean_CorrectStop,        SD2_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/SD2_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
-    FSI_mean_FailedStop,        FSI_std_FailedStop,        FSI_mean_CorrectStop,        FSI_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/FSI_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')        
-    STN_mean_FailedStop,        STN_std_FailedStop,        STN_mean_CorrectStop,        STN_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/STN_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
-    GPe_Proto_mean_FailedStop,  GPe_Proto_std_FailedStop,  GPe_Proto_mean_CorrectStop,  GPe_Proto_std_CorrectStop  = np.load('../data/'+paramsA['loadFolder']+'/Proto_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
-    GPe_Proto2_mean_FailedStop, GPe_Proto2_std_FailedStop, GPe_Proto2_mean_CorrectStop, GPe_Proto2_std_CorrectStop = np.load('../data/'+paramsA['loadFolder']+'/Proto2_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')        
-    GPe_Arky_mean_FailedStop,   GPe_Arky_std_FailedStop,   GPe_Arky_mean_CorrectStop,   GPe_Arky_std_CorrectStop   = np.load('../data/'+paramsA['loadFolder']+'/Arky_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')        
-    SNr_mean_FailedStop,        SNr_std_FailedStop,        SNr_mean_CorrectStop,        SNr_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/SNr_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
-    Thal_mean_FailedStop,       Thal_std_FailedStop,       Thal_mean_CorrectStop,       Thal_std_CorrectStop       = np.load('../data/'+paramsA['loadFolder']+'/Thal_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
-    SNrE_mean_FailedStop,       SNrE_std_FailedStop,       SNrE_mean_CorrectStop,       SNrE_std_CorrectStop       = np.load('../data/'+paramsA['loadFolder']+'/SNrE_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
-    Cortex_G_mean_FailedStop,   Cortex_G_std_FailedStop,   Cortex_G_mean_CorrectStop,   Cortex_G_std_CorrectStop   = np.load('../data/'+paramsA['loadFolder']+'/Cortex_G_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
-    Cortex_S_mean_FailedStop,   Cortex_S_std_FailedStop,   Cortex_S_mean_CorrectStop,   Cortex_S_std_CorrectStop   = np.load('../data/'+paramsA['loadFolder']+'/Cortex_S_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
-    PauseInput_mean_FailedStop, PauseInput_std_FailedStop, PauseInput_mean_CorrectStop, PauseInput_std_CorrectStop = np.load('../data/'+paramsA['loadFolder']+'/Stoppinput1_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
+    meanRates_failedStop = {}
+    meanRates_correctStop = {}
+    meanRates_failedStop['StrD1'],        SD1_std_FailedStop,        meanRates_correctStop['StrD1'],        SD1_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/SD1_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
+    meanRates_failedStop['StrD2'],        SD2_std_FailedStop,        meanRates_correctStop['StrD2'],        SD2_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/SD2_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
+    meanRates_failedStop['StrFSI'],        FSI_std_FailedStop,        meanRates_correctStop['StrFSI'],        FSI_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/FSI_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')        
+    meanRates_failedStop['STN'],        STN_std_FailedStop,        meanRates_correctStop['STN'],        STN_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/STN_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
+    meanRates_failedStop['GPeProto'],  GPe_Proto_std_FailedStop,  meanRates_correctStop['GPeProto'],  GPe_Proto_std_CorrectStop  = np.load('../data/'+paramsA['loadFolder']+'/Proto_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
+    meanRates_failedStop['GPeCp'], GPe_Proto2_std_FailedStop, meanRates_correctStop['GPeCp'], GPe_Proto2_std_CorrectStop = np.load('../data/'+paramsA['loadFolder']+'/Proto2_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')        
+    meanRates_failedStop['GPeArky'],   GPe_Arky_std_FailedStop,   meanRates_correctStop['GPeArky'],   GPe_Arky_std_CorrectStop   = np.load('../data/'+paramsA['loadFolder']+'/Arky_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')        
+    meanRates_failedStop['SNr'],        SNr_std_FailedStop,        meanRates_correctStop['SNr'],        SNr_std_CorrectStop        = np.load('../data/'+paramsA['loadFolder']+'/SNr_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
+    meanRates_failedStop['Thal'],       Thal_std_FailedStop,       meanRates_correctStop['Thal'],       Thal_std_CorrectStop       = np.load('../data/'+paramsA['loadFolder']+'/Thal_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
+    meanRates_failedStop['SNrE'],       SNrE_std_FailedStop,       SNrE_mean_CorrectStop,       SNrE_std_CorrectStop       = np.load('../data/'+paramsA['loadFolder']+'/SNrE_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')
+    meanRates_failedStop['cortexGo'],   Cortex_G_std_FailedStop,   meanRates_correctStop['cortexGo'],   Cortex_G_std_CorrectStop   = np.load('../data/'+paramsA['loadFolder']+'/Cortex_G_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
+    meanRates_failedStop['cortexStop'],   Cortex_S_std_FailedStop,   meanRates_correctStop['cortexStop'],   Cortex_S_std_CorrectStop   = np.load('../data/'+paramsA['loadFolder']+'/Cortex_S_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
+    meanRates_failedStop['cortexPause'], PauseInput_std_FailedStop, PauseInput_mean_CorrectStop, PauseInput_std_CorrectStop = np.load('../data/'+paramsA['loadFolder']+'/Stoppinput1_meanrate_std_Failed_Correct_Stop'+netNr+'.npy')    
 
     ### LOAD PVALUES
     pvalue_list, pvalue_times = np.load('../data/'+paramsA['loadFolder']+'/p_value_list_times_'+str(params['general_id'])+netNr+'.npy', allow_pickle=True)
@@ -225,46 +229,38 @@ if abfrage_loop == 'extra':
     Cortex_S_meanrate_FastGo,   Cortex_S_std_FastGo,    Cortex_S_meanrate_SlowGo,   Cortex_S_std_SlowGo     = np.load('../data/'+paramsA['loadFolder']+'/Cortex_S_meanrate_std_Fast-Slow_Go'+netNr+'.npy')                        
     STR_FSI_meanrate_FastGo,    STR_FSI_std_FastGo,     STR_FSI_meanrate_SlowGo,    STR_FSI_std_SlowGo      = np.load('../data/'+paramsA['loadFolder']+'/FSI_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
 
-    ###TODO: PVALUES (generated in next functions) files is saved in srcAna
+    dataFig7 = {}
+    for popFig7 in params['Fig7_order']:
+        dataFig7[popFig7] = [meanRates_failedStop[popFig7], meanRates_correctStop[popFig7]]
+
+
     ###TODO: CLEAN THESE FUNCTIONS
     ### FIGURE A: FAILED VS CORRECT STOPS
-    plot_meanrate_All_FailedVsCorrectStop(resultsDir+'/', \
-                                          GPe_Arky_mean_FailedStop, GPe_Arky_mean_CorrectStop, GPe_Arky_std_FailedStop, GPe_Arky_std_CorrectStop, \
-                                          GPe_Proto_mean_FailedStop, GPe_Proto_mean_CorrectStop, \
-                                          SD1_mean_FailedStop, SD1_mean_CorrectStop, \
-                                          SD2_mean_FailedStop, SD2_mean_CorrectStop, \
-                                          STN_mean_FailedStop, STN_mean_CorrectStop, \
-                                          SNr_mean_FailedStop, SNr_mean_CorrectStop, \
-                                          Thal_mean_FailedStop, Thal_mean_CorrectStop, \
+    plot_meanrate_All_FailedVsCorrectStop(resultsDir, \
+                                          dataFig7, \
                                           rsp_mInt_stop, nz_FailedStop, nz_CorrectStop, \
                                           params['IntegratorNeuron_threshold'], \
-                                          Cortex_G_mean_FailedStop, Cortex_G_mean_CorrectStop, \
-                                          GPe_Proto2_mean_FailedStop, GPe_Proto2_mean_CorrectStop, \
-                                          PauseInput_mean_FailedStop, PauseInput_mean_CorrectStop, \
-                                          Cortex_S_mean_FailedStop, Cortex_S_mean_CorrectStop, \
-                                          SNrE_mean_FailedStop, SNrE_mean_CorrectStop, \
-                                          FSI_mean_FailedStop, FSI_mean_CorrectStop, \
                                           params['t_init'], params['t_SSD'], params['general_id'], paramsS['trials'], params['general_dt'], pvalue_list, pvalue_times)
 
 
-    ### FIGURE B: FAILED STOP VS GO
-    plot_meanrate_All_FailedStopVsCorrectGo(resultsDir+'/', \
-                                          GPe_Arky_mean_FailedStop,     GPe_Arky_mean_Go,   GPe_Arky_meanrate_FastGo,   GPe_Arky_meanrate_SlowGo,  \
-                                          GPe_Proto_mean_FailedStop,    GPe_Proto_mean_Go,  GPe_Proto_meanrate_FastGo,  GPe_Proto_meanrate_SlowGo,  \
-                                          SD1_mean_FailedStop,          STR_D1_mean_Go,     STR_D1_meanrate_FastGo,     STR_D1_meanrate_SlowGo,  \
-                                          SD2_mean_FailedStop,          STR_D2_mean_Go,     STR_D2_meanrate_FastGo,     STR_D2_meanrate_SlowGo,  \
-                                          STN_mean_FailedStop,          STN_mean_Go,        STN_meanrate_FastGo,        STN_meanrate_SlowGo,  \
-                                          SNr_mean_FailedStop,          SNr_mean_Go,        SNr_meanrate_FastGo,        SNr_meanrate_SlowGo,  \
-                                          Thal_mean_FailedStop,         Thal_mean_Go,       Thal_meanrate_FastGo,       Thal_meanrate_SlowGo,  \
-                                          Cortex_G_mean_FailedStop,     Cortex_G_mean_Go,   Cortex_G_meanrate_FastGo,   Cortex_G_meanrate_SlowGo,  \
-                                          GPe_Proto2_mean_FailedStop,   GPe_Proto2_mean_Go, GPe_Proto2_meanrate_FastGo, GPe_Proto2_meanrate_SlowGo,  \
-                                          Cortex_S_mean_FailedStop,     Cortex_S_mean_Go,   Cortex_S_meanrate_FastGo,   Cortex_S_meanrate_SlowGo,  \
-                                          FSI_mean_FailedStop,          STR_FSI_mean_Go,    STR_FSI_meanrate_FastGo,    STR_FSI_meanrate_SlowGo,  \
+    ### FIGURE B: FAILED STOP VS GO TODO: Adjust this like previous function
+    """plot_meanrate_All_FailedStopVsCorrectGo(resultsDir+'/', \
+                                          meanRates_failedStop['GPeArky'],     GPe_Arky_mean_Go,   GPe_Arky_meanrate_FastGo,   GPe_Arky_meanrate_SlowGo,  \
+                                          meanRates_failedStop['GPeProto'],    GPe_Proto_mean_Go,  GPe_Proto_meanrate_FastGo,  GPe_Proto_meanrate_SlowGo,  \
+                                          meanRates_failedStop['StrD1'],          STR_D1_mean_Go,     STR_D1_meanrate_FastGo,     STR_D1_meanrate_SlowGo,  \
+                                          meanRates_failedStop['StrD2'],          STR_D2_mean_Go,     STR_D2_meanrate_FastGo,     STR_D2_meanrate_SlowGo,  \
+                                          meanRates_failedStop['STN'],          STN_mean_Go,        STN_meanrate_FastGo,        STN_meanrate_SlowGo,  \
+                                          meanRates_failedStop['SNr'],          SNr_mean_Go,        SNr_meanrate_FastGo,        SNr_meanrate_SlowGo,  \
+                                          meanRates_failedStop['Thal'],         Thal_mean_Go,       Thal_meanrate_FastGo,       Thal_meanrate_SlowGo,  \
+                                          meanRates_failedStop['cortexGo'],     Cortex_G_mean_Go,   Cortex_G_meanrate_FastGo,   Cortex_G_meanrate_SlowGo,  \
+                                          meanRates_failedStop['GPeCp'],   GPe_Proto2_mean_Go, GPe_Proto2_meanrate_FastGo, GPe_Proto2_meanrate_SlowGo,  \
+                                          meanRates_failedStop['cortexStop'],     Cortex_S_mean_Go,   Cortex_S_meanrate_FastGo,   Cortex_S_meanrate_SlowGo,  \
+                                          meanRates_failedStop['StrFSI'],          STR_FSI_mean_Go,    STR_FSI_meanrate_FastGo,    STR_FSI_meanrate_SlowGo,  \
                                           nz_FailedStop, nz_CorrectStop, \
                                           mInt_Go, mInt_stop, \
                                           params['IntegratorNeuron_threshold'], \
                                           params['t_init'], params['t_SSD'], params['general_id'], paramsS['trials'], params['general_dt'], pvalue_list2, pvalue_times, GO_Mode='fast')
-
+"""
 
 
 ##############################################################################################

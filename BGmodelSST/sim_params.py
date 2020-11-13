@@ -58,8 +58,11 @@ csvfilePath = dir_path+'/new_params.csv'
 params = readParams(csvfilePath,curr_ID,integerParams)
 
 ### ADD SPECIFIC PARAMETERS
-params['toRGB'] = {'blue':np.array([3,67,223])/255., 'cyan':np.array([0,255,255])/255., 'gold':np.array([219,180,12])/255., 'orange':np.array([249,115,6])/255., 'red':np.array([229,0,0])/255., 'purple':np.array([126,30,156])/255., 'grey':np.array([146,149,145])/255., 'light brown':np.array([173,129,80])/255., 'lime':np.array([170,255,50])/255., 'green':np.array([21,176,26])/255., 'yellow':np.array([255,255,20])/255., 'lightgrey':np.array([216,220,214])/255.}
-
+params['toRGB']                 = {'blue':np.array([3,67,223])/255., 'cyan':np.array([0,255,255])/255., 'gold':np.array([219,180,12])/255., 'orange':np.array([249,115,6])/255., 'red':np.array([229,0,0])/255., 'purple':np.array([126,30,156])/255., 'grey':np.array([146,149,145])/255., 'light brown':np.array([173,129,80])/255., 'lime':np.array([170,255,50])/255., 'green':np.array([21,176,26])/255., 'yellow':np.array([255,255,20])/255., 'lightgrey':np.array([216,220,214])/255.}
+params['Fig7_order']            = ['GPeArky', 'StrD1', 'StrD2', 'STN', 'cortexGo', 'GPeCp', 'GPeProto', 'SNr', 'Thal', 'cortexStop', 'StrFSI']
+params['titles_Code_to_Script'] = {'cortexGo':'cortex-Go', 'cortexStop':'cortex-Stop', 'cortexPause':'cortex-Pause', 'StrD1':'StrD1', 'StrD2':'StrD2', 'StrFSI':'StrFSI', 'GPeProto':'GPe-Proto', 'GPeArky':'GPe-Arky', 'GPeCp':'GPe-Cp', 'STN':'STN', 'SNr':'SNr', 'Thal':'thalamus', 'IntegratorGo':'Integrator-Go', 'IntegratorStop':'Integrator-Stop'}
+params['Fig7_maxRates']         = {'GPeArky':60, 'StrD1':105, 'StrD2':70, 'STN':80, 'cortexGo':320, 'GPeCp':75, 'GPeProto':50, 'SNr':130, 'Thal':45, 'cortexStop':430, 'StrFSI':50, 'IntegratorGo':0.25}
+    
 ### SOME OUTDATED PARAMETERS TODO: remove them
 #params['tau_syn_factor'] = 1.0
 #params['TrialType'] = 2.0
