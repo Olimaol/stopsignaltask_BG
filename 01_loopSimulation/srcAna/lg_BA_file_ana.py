@@ -37,7 +37,7 @@ except:
         quit()
 
 ##############################################################################################
-if abfrage_loop == 'STR':
+if abfrage_loop == 'STR':#FIGURE 5 AND 6
     
     ### LOAD FAILED/CORRECT STOP RATES
     meanRates_failedStop = {}
@@ -169,7 +169,7 @@ if abfrage_loop == 'STR':
 
 
 ##############################################################################################
-if abfrage_loop == 'extra':
+if abfrage_loop == 'extra':#Figure 7 and 11
 
     ### LOAD INTEGRATOR, CALCULATE FAILED/CORRECT STOP IDX
     mInt_Go = np.load('../data/'+paramsA['loadFolder']+'/Integrator_ampa_Go_'+netNr+'_id'+str(params['general_id'])+'.npy')
@@ -202,65 +202,63 @@ if abfrage_loop == 'extra':
         pvalue_list2[name], pvalue_times = np.load('../data/'+paramsA['loadFolder']+'/p_value_list_'+name+'_times_'+str(params['general_id'])+netNr+'.npy', allow_pickle=True)
 
     ### LOAD GO RATES
-    GPe_Arky_mean_Go,   GPe_Arky_std_Go     = np.load('../data/'+paramsA['loadFolder']+'/GPeArky_rate_Go_mean_std'+netNr+'.npy')
-    GPe_Proto_mean_Go,  GPe_Proto_std_Go    = np.load('../data/'+paramsA['loadFolder']+'/GPeProto_rate_Go_mean_std'+netNr+'.npy')  
-    STR_D1_mean_Go,     STR_D1_std_Go       = np.load('../data/'+paramsA['loadFolder']+'/SD1_rate_Go_mean_std'+netNr+'.npy')     
-    STR_D2_mean_Go,     STR_D2_std_Go       = np.load('../data/'+paramsA['loadFolder']+'/SD2_rate_Go_mean_std'+netNr+'.npy')        
-    STN_mean_Go,        STN_std_Go          = np.load('../data/'+paramsA['loadFolder']+'/STN_rate_Go_mean_std'+netNr+'.npy')
-    SNr_mean_Go,        SNr_std_Go          = np.load('../data/'+paramsA['loadFolder']+'/SNr_rate_Go_mean_std'+netNr+'.npy')            
-    Thal_mean_Go,       Thal_std_Go         = np.load('../data/'+paramsA['loadFolder']+'/Thal_rate_Go_mean_std'+netNr+'.npy')
-    Cortex_G_mean_Go,   Cortex_G_std_Go     = np.load('../data/'+paramsA['loadFolder']+'/Cortex_G_rate_Go_mean_std'+netNr+'.npy')
-    GPe_Proto2_mean_Go, GPe_Proto2_std_Go   = np.load('../data/'+paramsA['loadFolder']+'/GPeProto2_rate_Go_mean_std'+netNr+'.npy')
-    PauseInput_mean_Go, PauseInput_std_Go   = np.load('../data/'+paramsA['loadFolder']+'/Stoppinput1_rate_Go_mean_std'+netNr+'.npy')
-    Cortex_S_mean_Go,   Cortex_S_std_Go     = np.load('../data/'+paramsA['loadFolder']+'/Cortex_S_rate_Go_mean_std'+netNr+'.npy')
-    STR_FSI_mean_Go,    STR_FSI_std_Go      = np.load('../data/'+paramsA['loadFolder']+'/FSI_rate_Go_mean_std'+netNr+'.npy')            
+    meanRates_Go = {}
+    meanRates_Go['GPeArky'],   GPe_Arky_std_Go     = np.load('../data/'+paramsA['loadFolder']+'/GPeArky_rate_Go_mean_std'+netNr+'.npy')
+    meanRates_Go['GPeProto'],  GPe_Proto_std_Go    = np.load('../data/'+paramsA['loadFolder']+'/GPeProto_rate_Go_mean_std'+netNr+'.npy')  
+    meanRates_Go['StrD1'],     STR_D1_std_Go       = np.load('../data/'+paramsA['loadFolder']+'/SD1_rate_Go_mean_std'+netNr+'.npy')     
+    meanRates_Go['StrD2'],     STR_D2_std_Go       = np.load('../data/'+paramsA['loadFolder']+'/SD2_rate_Go_mean_std'+netNr+'.npy')        
+    meanRates_Go['STN'],        STN_std_Go          = np.load('../data/'+paramsA['loadFolder']+'/STN_rate_Go_mean_std'+netNr+'.npy')
+    meanRates_Go['SNr'],        SNr_std_Go          = np.load('../data/'+paramsA['loadFolder']+'/SNr_rate_Go_mean_std'+netNr+'.npy')            
+    meanRates_Go['Thal'],       Thal_std_Go         = np.load('../data/'+paramsA['loadFolder']+'/Thal_rate_Go_mean_std'+netNr+'.npy')
+    meanRates_Go['cortexGo'],   Cortex_G_std_Go     = np.load('../data/'+paramsA['loadFolder']+'/Cortex_G_rate_Go_mean_std'+netNr+'.npy')
+    meanRates_Go['GPeCp'], GPe_Proto2_std_Go   = np.load('../data/'+paramsA['loadFolder']+'/GPeProto2_rate_Go_mean_std'+netNr+'.npy')
+    meanRates_Go['cortexPause'], PauseInput_std_Go   = np.load('../data/'+paramsA['loadFolder']+'/Stoppinput1_rate_Go_mean_std'+netNr+'.npy')
+    meanRates_Go['cortexStop'],   Cortex_S_std_Go     = np.load('../data/'+paramsA['loadFolder']+'/Cortex_S_rate_Go_mean_std'+netNr+'.npy')
+    meanRates_Go['StrFSI'],    STR_FSI_std_Go      = np.load('../data/'+paramsA['loadFolder']+'/FSI_rate_Go_mean_std'+netNr+'.npy')            
 
     ### LOAD FAST/SLOW GO RATES
-    GPe_Arky_meanrate_FastGo,   GPe_Arky_std_FastGo,    GPe_Arky_meanrate_SlowGo,   GPe_Arky_std_SlowGo     = np.load('../data/'+paramsA['loadFolder']+'/GPe_Arky_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
-    GPe_Proto_meanrate_FastGo,  GPe_Proto_std_FastGo,   GPe_Proto_meanrate_SlowGo,  GPe_Proto_std_SlowGo    = np.load('../data/'+paramsA['loadFolder']+'/GPe_Proto_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
-    STR_D1_meanrate_FastGo,     STR_D1_std_FastGo,      STR_D1_meanrate_SlowGo,     STR_D1_std_SlowGo       = np.load('../data/'+paramsA['loadFolder']+'/SD1_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
-    STR_D2_meanrate_FastGo,     STR_D2_std_FastGo,      STR_D2_meanrate_SlowGo,     STR_D2_std_SlowGo       = np.load('../data/'+paramsA['loadFolder']+'/SD2_meanrate_std_Fast-Slow_Go'+netNr+'.npy')            
-    STN_meanrate_FastGo,        STN_std_FastGo,         STN_meanrate_SlowGo,        STN_std_SlowGo          = np.load('../data/'+paramsA['loadFolder']+'/STN_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
-    SNr_meanrate_FastGo,        SNr_std_FastGo,         SNr_meanrate_SlowGo,        SNr_std_SlowGo          = np.load('../data/'+paramsA['loadFolder']+'/SNr_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
-    Thal_meanrate_FastGo,       Thal_std_FastGo,        Thal_meanrate_SlowGo,       Thal_std_SlowGo         = np.load('../data/'+paramsA['loadFolder']+'/Thal_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
-    Cortex_G_meanrate_FastGo,   Cortex_G_std_FastGo,    Cortex_G_meanrate_SlowGo,   Cortex_G_std_SlowGo     = np.load('../data/'+paramsA['loadFolder']+'/Cortex_G_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
-    GPe_Proto2_meanrate_FastGo, GPe_Proto2_std_FastGo,  GPe_Proto2_meanrate_SlowGo, GPe_Proto2_std_SlowGo   = np.load('../data/'+paramsA['loadFolder']+'/GPe_Proto2_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
-    PauseInput_meanrate_FastGo, PauseInput_std_FastGo,  PauseInput_meanrate_SlowGo, PauseInput_std_SlowGo   = np.load('../data/'+paramsA['loadFolder']+'/PauseInput_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
-    Cortex_S_meanrate_FastGo,   Cortex_S_std_FastGo,    Cortex_S_meanrate_SlowGo,   Cortex_S_std_SlowGo     = np.load('../data/'+paramsA['loadFolder']+'/Cortex_S_meanrate_std_Fast-Slow_Go'+netNr+'.npy')                        
-    STR_FSI_meanrate_FastGo,    STR_FSI_std_FastGo,     STR_FSI_meanrate_SlowGo,    STR_FSI_std_SlowGo      = np.load('../data/'+paramsA['loadFolder']+'/FSI_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
+    meanRates_fastGo = {}
+    meanRates_slowGo = {}
+    meanRates_fastGo['GPeArky'],   GPe_Arky_std_FastGo,    meanRates_slowGo['GPeArky'],   GPe_Arky_std_SlowGo     = np.load('../data/'+paramsA['loadFolder']+'/GPe_Arky_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
+    meanRates_fastGo['GPeProto'],  GPe_Proto_std_FastGo,   meanRates_slowGo['GPeProto'],  GPe_Proto_std_SlowGo    = np.load('../data/'+paramsA['loadFolder']+'/GPe_Proto_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
+    meanRates_fastGo['StrD1'],     STR_D1_std_FastGo,      meanRates_slowGo['StrD1'],     STR_D1_std_SlowGo       = np.load('../data/'+paramsA['loadFolder']+'/SD1_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
+    meanRates_fastGo['StrD2'],     STR_D2_std_FastGo,      meanRates_slowGo['StrD2'],     STR_D2_std_SlowGo       = np.load('../data/'+paramsA['loadFolder']+'/SD2_meanrate_std_Fast-Slow_Go'+netNr+'.npy')            
+    meanRates_fastGo['STN'],        STN_std_FastGo,         meanRates_slowGo['STN'],        STN_std_SlowGo          = np.load('../data/'+paramsA['loadFolder']+'/STN_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
+    meanRates_fastGo['SNr'],        SNr_std_FastGo,         meanRates_slowGo['SNr'],        SNr_std_SlowGo          = np.load('../data/'+paramsA['loadFolder']+'/SNr_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
+    meanRates_fastGo['Thal'],       Thal_std_FastGo,        meanRates_slowGo['Thal'],       Thal_std_SlowGo         = np.load('../data/'+paramsA['loadFolder']+'/Thal_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
+    meanRates_fastGo['cortexGo'],   Cortex_G_std_FastGo,    meanRates_slowGo['cortexGo'],   Cortex_G_std_SlowGo     = np.load('../data/'+paramsA['loadFolder']+'/Cortex_G_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
+    meanRates_fastGo['GPeCp'], GPe_Proto2_std_FastGo,  meanRates_slowGo['GPeCp'], GPe_Proto2_std_SlowGo   = np.load('../data/'+paramsA['loadFolder']+'/GPe_Proto2_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
+    meanRates_fastGo['cortexPause'], PauseInput_std_FastGo,  meanRates_slowGo['cortexPause'], PauseInput_std_SlowGo   = np.load('../data/'+paramsA['loadFolder']+'/PauseInput_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
+    meanRates_fastGo['cortexStop'],   Cortex_S_std_FastGo,    meanRates_slowGo['cortexStop'],   Cortex_S_std_SlowGo     = np.load('../data/'+paramsA['loadFolder']+'/Cortex_S_meanrate_std_Fast-Slow_Go'+netNr+'.npy')                        
+    meanRates_fastGo['StrFSI'],    STR_FSI_std_FastGo,     meanRates_slowGo['StrFSI'],    STR_FSI_std_SlowGo      = np.load('../data/'+paramsA['loadFolder']+'/FSI_meanrate_std_Fast-Slow_Go'+netNr+'.npy')
 
     dataFig7 = {}
     for popFig7 in params['Fig7_order']:
         dataFig7[popFig7] = [meanRates_failedStop[popFig7], meanRates_correctStop[popFig7]]
+        
+    dataFig11 = {}
+    for popFig11 in params['Fig7_order']:
+        dataFig11['all_'+popFig11]  = [meanRates_failedStop[popFig11], meanRates_Go[popFig11]]
+        dataFig11['fast_'+popFig11] = [meanRates_failedStop[popFig11], meanRates_fastGo[popFig11]]
+        dataFig11['slow_'+popFig11] = [meanRates_failedStop[popFig11], meanRates_slowGo[popFig11]]
 
 
-    ###TODO: CLEAN THESE FUNCTIONS
     ### FIGURE A: FAILED VS CORRECT STOPS
     plot_meanrate_All_FailedVsCorrectStop(resultsDir, \
                                           dataFig7, \
-                                          rsp_mInt_stop, nz_FailedStop, nz_CorrectStop, \
-                                          params['IntegratorNeuron_threshold'], \
+                                          rsp_mInt_stop, nz_FailedStop, nz_CorrectStop, params['IntegratorNeuron_threshold'], \
+                                          paramsA, \
                                           params['t_init'], params['t_SSD'], params['general_id'], paramsS['trials'], params['general_dt'], pvalue_list, pvalue_times)
 
 
     ### FIGURE B: FAILED STOP VS GO TODO: Adjust this like previous function
-    """plot_meanrate_All_FailedStopVsCorrectGo(resultsDir+'/', \
-                                          meanRates_failedStop['GPeArky'],     GPe_Arky_mean_Go,   GPe_Arky_meanrate_FastGo,   GPe_Arky_meanrate_SlowGo,  \
-                                          meanRates_failedStop['GPeProto'],    GPe_Proto_mean_Go,  GPe_Proto_meanrate_FastGo,  GPe_Proto_meanrate_SlowGo,  \
-                                          meanRates_failedStop['StrD1'],          STR_D1_mean_Go,     STR_D1_meanrate_FastGo,     STR_D1_meanrate_SlowGo,  \
-                                          meanRates_failedStop['StrD2'],          STR_D2_mean_Go,     STR_D2_meanrate_FastGo,     STR_D2_meanrate_SlowGo,  \
-                                          meanRates_failedStop['STN'],          STN_mean_Go,        STN_meanrate_FastGo,        STN_meanrate_SlowGo,  \
-                                          meanRates_failedStop['SNr'],          SNr_mean_Go,        SNr_meanrate_FastGo,        SNr_meanrate_SlowGo,  \
-                                          meanRates_failedStop['Thal'],         Thal_mean_Go,       Thal_meanrate_FastGo,       Thal_meanrate_SlowGo,  \
-                                          meanRates_failedStop['cortexGo'],     Cortex_G_mean_Go,   Cortex_G_meanrate_FastGo,   Cortex_G_meanrate_SlowGo,  \
-                                          meanRates_failedStop['GPeCp'],   GPe_Proto2_mean_Go, GPe_Proto2_meanrate_FastGo, GPe_Proto2_meanrate_SlowGo,  \
-                                          meanRates_failedStop['cortexStop'],     Cortex_S_mean_Go,   Cortex_S_meanrate_FastGo,   Cortex_S_meanrate_SlowGo,  \
-                                          meanRates_failedStop['StrFSI'],          STR_FSI_mean_Go,    STR_FSI_meanrate_FastGo,    STR_FSI_meanrate_SlowGo,  \
+    plot_meanrate_All_FailedStopVsCorrectGo(resultsDir+'/', \
+                                          dataFig11, \
                                           nz_FailedStop, nz_CorrectStop, \
-                                          mInt_Go, mInt_stop, \
-                                          params['IntegratorNeuron_threshold'], \
+                                          mInt_Go, mInt_stop, params['IntegratorNeuron_threshold'], \
+                                          paramsA, \
                                           params['t_init'], params['t_SSD'], params['general_id'], paramsS['trials'], params['general_dt'], pvalue_list2, pvalue_times, GO_Mode='fast')
-"""
+
 
 
 ##############################################################################################

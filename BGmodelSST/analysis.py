@@ -272,10 +272,10 @@ def plot_zscore_stopVsGo_five_NewData(STN_mean_Stop, STN_mean_Go, SNr_mean_Stop,
 def plot_meanrate_All_FailedVsCorrectStop(resultsFolder, \
                                           data, \
                                           rsp_mInt_stop, nz_FailedStop, nz_CorrectStop, thresh, \
-                                          t_init, t_SSD, param_id, trials, dt, pvalue_list=[], pvalue_times=[]):
+                                          paramsA, \
+                                          t_init, t_SSD, param_id, trials, dt, pvalue_list=[], pvalue_times=[], alpha=0.01):
 
 
-    alpha = 0.01 # 0.05 
     pvalue_list = FDR_correction(pvalue_list, alpha) 
 
     '''#    
@@ -312,7 +312,7 @@ def plot_meanrate_All_FailedVsCorrectStop(resultsFolder, \
         ax_wrapper = []    
         ax_wrapper.append(plt.subplot(nx,ny,popIdx+1))
         ax=plt.gca()
-        ## RATES SMOOTHED OR NOT SMOOTHED
+        ## PLOT RATES SMOOTHED OR NOT SMOOTHED
         if smoothing:
             plt.plot(box_smooth(rates[0], boxlen), color='tomato', ls='--', lw=linew, label='failed Stop')
             plt.plot(box_smooth(rates[1], boxlen), color='purple', lw=linew, label='correct Stop')
@@ -323,7 +323,7 @@ def plot_meanrate_All_FailedVsCorrectStop(resultsFolder, \
         plt.title(params['titles_Code_to_Script'][pop], fontsize=fsize)
         if popIdx==0 or popIdx==ny: plt.ylabel('Firing rate [Hz]', fontsize=fsize)
         ## AXIS
-        ax.axis([tmin, tmax, 0, params['Fig7_maxRates'][pop]])
+        ax.axis([tmin, tmax, 0, paramsA['Fig7_maxRates'][pop]])
         ax.set_xticks([tn200, t_stopCue, t200])
         ax.set_xticklabels([-0.2, 0, 0.2])
         for label in ax.get_xticklabels() + ax.get_yticklabels():
@@ -351,7 +351,7 @@ def plot_meanrate_All_FailedVsCorrectStop(resultsFolder, \
     ## TITLE, LABELS, AXIS
     plt.title('Integrator-Go', fontsize=fsize)
     ax=plt.gca()
-    ax.axis([tmin, tmax, 0, params['Fig7_maxRates']['IntegratorGo']])
+    ax.axis([tmin, tmax, 0, paramsA['Fig7_maxRates']['IntegratorGo']])
     ax.set_xticks([tn200, t_stopCue, t200])
     ax.set_xticklabels([-0.2, 0, 0.2])
     plt.ylabel('$g_{AMPA}$', fontsize=fsize)           
@@ -384,25 +384,14 @@ def plot_meanrate_All_FailedVsCorrectStop(resultsFolder, \
     plt.show()
 
 
-def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
-                                          GPe_Arky_mean_FailedStop,     GPe_Arky_mean_Go,   GPe_Arky_meanrate_FastGo,   GPe_Arky_meanrate_SlowGo,  \
-                                          GPe_Proto_mean_FailedStop,    GPe_Proto_mean_Go,  GPe_Proto_meanrate_FastGo,  GPe_Proto_meanrate_SlowGo,  \
-                                          SD1_mean_FailedStop,          STR_D1_mean_Go,     STR_D1_meanrate_FastGo,     STR_D1_meanrate_SlowGo,  \
-                                          SD2_mean_FailedStop,          STR_D2_mean_Go,     STR_D2_meanrate_FastGo,     STR_D2_meanrate_SlowGo,  \
-                                          STN_mean_FailedStop,          STN_mean_Go,        STN_meanrate_FastGo,        STN_meanrate_SlowGo,  \
-                                          SNr_mean_FailedStop,          SNr_mean_Go,        SNr_meanrate_FastGo,        SNr_meanrate_SlowGo,  \
-                                          Thal_mean_FailedStop,         Thal_mean_Go,       Thal_meanrate_FastGo,       Thal_meanrate_SlowGo,  \
-                                          Cortex_G_mean_FailedStop,     Cortex_G_mean_Go,   Cortex_G_meanrate_FastGo,   Cortex_G_meanrate_SlowGo,  \
-                                          GPe_Proto2_mean_FailedStop,   GPe_Proto2_mean_Go, GPe_Proto2_meanrate_FastGo, GPe_Proto2_meanrate_SlowGo,  \
-                                          Cortex_S_mean_FailedStop,     Cortex_S_mean_Go,   Cortex_S_meanrate_FastGo,   Cortex_S_meanrate_SlowGo,  \
-                                          FSI_mean_FailedStop,          STR_FSI_mean_Go,    STR_FSI_meanrate_FastGo,    STR_FSI_meanrate_SlowGo,  \
+def plot_meanrate_All_FailedStopVsCorrectGo(resultsFolder, \
+                                          data, \
                                           nz_FailedStop, nz_CorrectStop, \
-                                          mInt_go, mInt_stop, \
-                                          thresh, \
-                                          t_init, t_SSD, param_id, trials, dt, pvalue_list=[], pvalue_times=[], GO_Mode=''):
-
-    p_ind_arky, p_ind_SD1, p_ind_STN, p_ind_Proto, p_ind_Proto2, p_ind_SNr, p_ind_thal, p_ind_SD2, p_ind_CortexG, p_ind_CortexS, p_ind_FSI = range(11)#TODO: generalize pIdx
-
+                                          mInt_go, mInt_stop, thresh, \
+                                          paramsA, \
+                                          t_init, t_SSD, param_id, trials, dt, pvalue_list=[], pvalue_times=[], GO_Mode='all', alpha=0.01):
+    
+    
     nz_FastGo, nz_SlowGo = get_fast_slow_go_trials(mInt_go, mInt_stop, thresh, trials)
     nz_CorrectGo = np.concatenate([nz_FastGo, nz_SlowGo])
 
@@ -412,18 +401,16 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
     if GO_Mode=='fast':
         pvalue_list = pvalue_list['failedStop_vs_fastGo']
         nz_Go = nz_FastGo
-        GPe_Arky_mean_Go, GPe_Proto_mean_Go, STR_D1_mean_Go, STR_D2_mean_Go, STN_mean_Go, SNr_mean_Go, Thal_mean_Go, Cortex_G_mean_Go, GPe_Proto2_mean_Go, Cortex_S_mean_Go, STR_FSI_mean_Go = GPe_Arky_meanrate_FastGo, GPe_Proto_meanrate_FastGo, STR_D1_meanrate_FastGo, STR_D2_meanrate_FastGo, STN_meanrate_FastGo, SNr_meanrate_FastGo, Thal_meanrate_FastGo, Cortex_G_meanrate_FastGo, GPe_Proto2_meanrate_FastGo, Cortex_S_meanrate_FastGo, STR_FSI_meanrate_FastGo
     elif GO_Mode=='slow':
         pvalue_list = pvalue_list['failedStop_vs_slowGo']
         nz_Go = nz_SlowGo
-        GPe_Arky_mean_Go, GPe_Proto_mean_Go, STR_D1_mean_Go, STR_D2_mean_Go, STN_mean_Go, SNr_mean_Go, Thal_mean_Go, Cortex_G_mean_Go, GPe_Proto2_mean_Go, Cortex_S_mean_Go, STR_FSI_mean_Go = GPe_Arky_meanrate_SlowGo, GPe_Proto_meanrate_SlowGo, STR_D1_meanrate_SlowGo, STR_D2_meanrate_SlowGo, STN_meanrate_SlowGo, SNr_meanrate_SlowGo, Thal_meanrate_SlowGo, Cortex_G_meanrate_SlowGo, GPe_Proto2_meanrate_SlowGo, Cortex_S_meanrate_SlowGo, STR_FSI_meanrate_SlowGo
-    else:
+    elif GO_Mode=='all':
         pvalue_list = pvalue_list['failedStop_vs_allGo']
         nz_Go = nz_CorrectGo
 
-    alpha = 0.01 # 0.05
     pvalue_list = FDR_correction(pvalue_list, alpha)
 
+    ### EARLIEST AND LATEST RESPONSE
     t_action0, t_action1 = [], []
     for mInt, nz in [[mInt_go, nz_Go], [mInt_stop, nz_FailedStop]]:
         a, b = get_fastest_slowest_action(mInt, nz, trials, thresh)
@@ -443,329 +430,109 @@ def plot_meanrate_All_FailedStopVsCorrectGo(saveFolderPlots, \
     print('pvalues, after: max, min = ', np.nanmax(pvalue_list), np.nanmin(pvalue_list))    
     '''
 
+    ### CONFIGURE FIGURE
     plt.figure(figsize=(6,4), dpi=300)
-    linew = 1 # 0.5 # 1 # 2
+    linew = 1
     fsize = 6
     boxlen = int(10 / dt)
-    smoothing = False#True # False # 
-    nx = 2 # 3
-    ny = 6 # 4 # 6
-    tmin = (t_init - 50)/dt #(t_init + t_SSD - 300)/dt
-    tmax = (t_init + 550)/dt #(t_init + t_SSD + 300)/dt
+    smoothing = False
+    nx = 2
+    ny = 6
+    tmin = (t_init - 50)/dt
+    tmax = (t_init + 550)/dt
     t_goCue = t_init/dt
     t_stopCue = (t_init + t_SSD)/dt
     xTickValues = [t_init/dt, (t_init+250)/dt, (t_init+500)/dt]
     xTickLabels = [0, 0.25, 0.5]
-
-    maxRate = {'GPe-Arky':60, 'StrD1':105, 'StrD2':70, 'STN':80, 'Cortex-Go':320, 'GPe-cp':75, 'GPe-Proto':50, 'SNr':130, 'Thalamus':50, 'Cortex-Stop':430, 'StrFSI':50, 'Integrator':0.32}
-
     labelList = ['failed Stop', GO_Mode+' Go']
 
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,1))
-    ax=plt.gca()
-    plt.axvspan(t_action0, t_action1, ymin=0, facecolor='g', alpha=0.1)
-    plt.axvline(t_goCue, color='g', linestyle='dotted', linewidth=linew)
-    plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)
-    if smoothing:
-        plt.plot(box_smooth(GPe_Arky_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label=labelList[0])
-        plt.plot(box_smooth(GPe_Arky_mean_Go, boxlen), color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-    else:
-        plt.plot(GPe_Arky_mean_FailedStop, color='tomato', ls='--', lw=linew, label=labelList[0])
-        plt.plot(GPe_Arky_mean_Go, color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-    plt.title('GPe-Arky', fontsize=fsize)
-    plt.ylabel('Firing rate [Hz]', fontsize=fsize)
-    ax.axis([tmin, tmax, 0, maxRate['GPe-Arky']])
-    #ax.axis([tmin, tmax, 0, ax.axis()[3]])
-    ax.set_xticks(xTickValues)
-    ax.set_xticklabels(xTickLabels)
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    #p_ind_arky = 0
-    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_arky)
+
+    ### PLOT ALL RATES IN SUBPLOTS
+    popIdx = 0
+    for pop in params['Fig7_order']:
+        ### SELECT RATES
+        rates = data[GO_Mode+'_'+pop]
+        ### CREATE SUBPLOT
+        ax_wrapper = []    
+        ax_wrapper.append(plt.subplot(nx,ny,popIdx+1))
+        ax=plt.gca()
+        ### MARK RESPONSE REGION
+        plt.axvspan(t_action0, t_action1, ymin=0, facecolor='g', alpha=0.1)
+        ### MARK GOU CUE AND STOP CUE
+        plt.axvline(t_goCue, color='g', linestyle='dotted', linewidth=linew)
+        plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)
+        ### PLOT RATES
+        if smoothing:
+            plt.plot(box_smooth(rates[0], boxlen), color='tomato', ls='--', lw=linew, label=labelList[0])
+            plt.plot(box_smooth(rates[1], boxlen), color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
+        else:
+            plt.plot(rates[0], color='tomato', ls='--', lw=linew, label=labelList[0])
+            plt.plot(rates[1], color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
+        ## TITLE AND LABEL
+        plt.title(params['titles_Code_to_Script'][pop], fontsize=fsize)
+        if popIdx==0 or popIdx==ny: plt.ylabel('Firing rate [Hz]', fontsize=fsize)
+        ## AXIS
+        ax.axis([tmin, tmax, 0, paramsA['Fig7_maxRates'][pop]])
+        ax.set_xticks(xTickValues)
+        ax.set_xticklabels(xTickLabels)
+        for label in ax.get_xticklabels() + ax.get_yticklabels():
+            label.set_fontsize(fsize)
+        ## PVALUES
+        plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, popIdx)
+        popIdx += 1
 
 
-    #'''#
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,ny+1))    
-    ax=plt.gca()
-    plt.axvspan(t_action0, t_action1, ymin=0, facecolor='g', alpha=0.1)
-    plt.axvline(t_goCue, color='g', linestyle='dotted', linewidth=linew)
-    plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)
-    if smoothing:
-        plt.plot(box_smooth(GPe_Proto_mean_Go, boxlen), color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-        plt.plot(box_smooth(GPe_Proto_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label=labelList[0])
-    else:
-        plt.plot(GPe_Proto_mean_Go, color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-        plt.plot(GPe_Proto_mean_FailedStop, color='tomato', ls='--', lw=linew, label=labelList[0])
-    plt.title('GPe-Proto', fontsize=fsize)
-    plt.ylabel('Firing rate [Hz]', fontsize=fsize)  
-    #ax.axis([tmin, tmax, 0, 50])
-    ax.axis([tmin, tmax, 0, maxRate['GPe-Proto']])
-    ax.set_xticks(xTickValues)
-    ax.set_xticklabels(xTickLabels)
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    #p_ind_proto = 3
-    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_Proto)                    
-    #'''
-
-    #'''#
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,2))
-    ax=plt.gca()
-    plt.axvspan(t_action0, t_action1, ymin=0, facecolor='g', alpha=0.1)
-    plt.axvline(t_goCue, color='g', linestyle='dotted', linewidth=linew)
-    plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)
-    if smoothing:
-        plt.plot(box_smooth(STR_D1_mean_Go, boxlen), color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-        plt.plot(box_smooth(SD1_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label=labelList[0])
-    else:
-        plt.plot(STR_D1_mean_Go, color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-        plt.plot(SD1_mean_FailedStop, color='tomato', ls='--', lw=linew, label=labelList[0])
-    plt.title('StrD1', fontsize=fsize)
-    #ax.axis([tmin, tmax, 0, 50])
-    ax.axis([tmin, tmax, 0, maxRate['StrD1']])
-    ax.set_xticks(xTickValues)
-    ax.set_xticklabels(xTickLabels)
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_SD1)            
-
-    #'''
-
-    #'''#
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,3))        
-    ax=plt.gca()
-    plt.axvspan(t_action0, t_action1, ymin=0, facecolor='g', alpha=0.1)
-    plt.axvline(t_goCue, color='g', linestyle='dotted', linewidth=linew)
-    plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)
-    if smoothing:
-        plt.plot(box_smooth(STR_D2_mean_Go, boxlen), color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-        plt.plot(box_smooth(SD2_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label=labelList[0])
-    else:
-       plt.plot(STR_D2_mean_Go, color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-       plt.plot(SD2_mean_FailedStop, color='tomato', ls='--', lw=linew, label=labelList[0])
-    plt.title('StrD2', fontsize=fsize)
-    #ax.axis([tmin, tmax, 0, 10])
-    ax.axis([tmin, tmax, 0, maxRate['StrD2']])
-    ax.set_xticks(xTickValues)
-    ax.set_xticklabels(xTickLabels)
-    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_SD2)                
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    #'''
-
-    #'''#
-    #plt.subplot(nx,ny,3)
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,4))
-    ax=plt.gca()
-    plt.axvspan(t_action0, t_action1, ymin=0, facecolor='g', alpha=0.1)
-    plt.axvline(t_goCue, color='g', linestyle='dotted', linewidth=linew)
-    plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)
-    if smoothing:
-        plt.plot(box_smooth(STN_mean_FailedStop, boxlen),  color='tomato', ls='--', lw=linew, label=labelList[0])
-        plt.plot(box_smooth(STN_mean_Go, boxlen), color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-    else:
-        plt.plot(STN_mean_Go, color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-        plt.plot(STN_mean_FailedStop, '--', color='tomato', ls='--', lw=linew, label=labelList[0])
-    plt.title('STN', fontsize=fsize)
-    ax.axis([tmin, tmax, 0, maxRate['STN']])
-    ax.set_xticks(xTickValues)
-    ax.set_xticklabels(xTickLabels)
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    #p_ind_STN = 2
-    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_STN)            
-
-    
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,ny+2))    
-    ax=plt.gca()
-    plt.axvspan(t_action0, t_action1, ymin=0, facecolor='g', alpha=0.1)
-    plt.axvline(t_goCue, color='g', linestyle='dotted', linewidth=linew)
-    plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)
-    if smoothing:
-        plt.plot(box_smooth(SNr_mean_Go, boxlen), color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-        plt.plot(box_smooth(SNr_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label=labelList[0])
-    else:
-        plt.plot(SNr_mean_Go, color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-        plt.plot(SNr_mean_FailedStop, color='tomato', ls='--', lw=linew, label=labelList[0])
-    plt.title('SNr', fontsize=fsize)
-    #ax.axis([tmin, tmax, 0, ax.axis()[3]])
-    ax.axis([tmin, tmax, 0, maxRate['SNr']]) # 300
-    ax.set_xticks(xTickValues)
-    ax.set_xticklabels(xTickLabels)
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    #p_ind_SNr = 4
-    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_SNr)            
-
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,2*ny-1))    
-    ax=plt.gca()
-    plt.axvspan(t_action0, t_action1, ymin=0, facecolor='g', alpha=0.1)
-    plt.axvline(t_goCue, color='g', linestyle='dotted', linewidth=linew)
-    plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)
-    if smoothing:
-        plt.plot(box_smooth(STR_FSI_mean_Go, boxlen), color=np.array([107,139,164])/255., ls='solid', lw=linew, label=labelList[1])
-        plt.plot(box_smooth(FSI_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label=labelList[0])
-    else:
-        plt.plot(box_smooth(STR_FSI_mean_Go, boxlen), color=np.array([107,139,164])/255., ls='solid', lw=linew, label=labelList[1])
-        plt.plot(box_smooth(FSI_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label=labelList[0])
-    plt.title('StrFSI', fontsize=fsize)
-    ax.axis([tmin, tmax, 0, maxRate['StrFSI']])
-    #ax.axis([tmin, tmax, 0, 150]) # 300
-    ax.set_xticks(xTickValues)
-    ax.set_xticklabels(xTickLabels)
-    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_FSI)                        
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,ny+3))    
-    ax=plt.gca()
-    plt.axvspan(t_action0, t_action1, ymin=0, facecolor='g', alpha=0.1)
-    plt.axvline(t_goCue, color='g', linestyle='dotted', linewidth=linew)
-    plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)
-    if smoothing:
-        plt.plot(box_smooth(Thal_mean_Go, boxlen), color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-        plt.plot(box_smooth(Thal_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label=labelList[0])
-    else:
-        plt.plot(Thal_mean_Go, color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-        plt.plot(Thal_mean_FailedStop, color='tomato', ls='--', lw=linew, label=labelList[0])
-    plt.title('thalamus', fontsize=fsize)
-    ax.axis([tmin, tmax, 0, maxRate['Thalamus']])
-    #ax.axis([tmin, tmax, 0, ax.axis()[3]])
-    ax.set_xticks(xTickValues)
-    ax.set_xticklabels(xTickLabels)
-    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_thal)    
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-
-    #plt.subplot(nx,ny,2*ny)
+    ### INTEGRATOR IN LAST SUBPLOT
     ax_wrapper = []    
     ax_wrapper.append(plt.subplot(nx,ny,2*ny))    
-    ax=plt.gca()
+    ax=plt.gca() 
+    ### MARKER FOR RESPONSES TIME AND GO CUE AND STOP CUE
     plt.axvspan(t_action0, t_action1, ymin=0, facecolor='g', alpha=0.1)
     plt.axvline(t_goCue, color='g', linestyle='dotted', linewidth=linew)
-    plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)        
+    plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)       
     ax.set_yticks([])    
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(fsize)    
-    ax_wrapper.append(ax_wrapper[0].twinx())            
-    int_mean_failedStop = np.nanmean(rsp_mInt_stop[:, nz_FailedStop], 1)    
-    int_std_failedStop = np.nanstd(rsp_mInt_stop[:, nz_FailedStop], 1)            
+    ax_wrapper.append(ax_wrapper[0].twinx())
+    ## CALCULATE AND PLOT INTEGRATOR LINES
+    int_mean_failedStop = np.nanmean(rsp_mInt_stop[:, nz_FailedStop], 1)
     int_mean_correctGo = np.nanmean(rsp_mInt_go[:, nz_Go], 1)
-    int_std_correctGo = np.nanstd(rsp_mInt_go[:, nz_Go], 1)
-    plt.plot(int_mean_correctGo, color=np.array([107,139,164])/255., lw=linew, label=labelList[1])     
     plt.plot(int_mean_failedStop, color='tomato', ls='--', lw=linew, label=labelList[0])
-    int_times = range(len(rsp_mInt_stop[:, 0]))
-    #thresh = Integrator.threshold
+    plt.plot(int_mean_correctGo, color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
+    ## THRESHOLD MARKER
     plt.plot([0, rsp_mInt_stop.shape[0]], thresh * np.ones(2), 'k--', lw=linew)
+    ## TITLE, LABELS, AXIS
     plt.title('Integrator-Go', fontsize=fsize)
-    ax=plt.gca()               
-    ax.axis([tmin, tmax, 0, maxRate['Integrator']]) # 0.16
+    ax=plt.gca()
+    ax.axis([tmin, tmax, 0, paramsA['Fig7_maxRates']['IntegratorGo']])
     ax.set_xticks(xTickValues)
     ax.set_xticklabels(xTickLabels)
     plt.ylabel('$g_{AMPA}$', fontsize=fsize)           
     ax_twin = plt.gca()
     ax_twin.set_ylabel('Integrator value', fontsize=fsize)
     for label in ax_twin.get_xticklabels() + ax_twin.get_yticklabels():
-        label.set_fontsize(fsize)    
+        label.set_fontsize(fsize)   
      
-
-    #'''#
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,5))        
-    ax=plt.gca()
-    plt.axvspan(t_action0, t_action1, ymin=0, facecolor='g', alpha=0.1)
-    plt.axvline(t_goCue, color='g', linestyle='dotted', linewidth=linew)
-    plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)
-    if smoothing:
-        plt.plot(box_smooth(Cortex_G_mean_Go, boxlen), color=np.array([107,139,164])/255., ls='solid', lw=linew, label=labelList[1])
-        plt.plot(box_smooth(Cortex_G_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label=labelList[0])
-    else:
-        plt.plot(Cortex_G_mean_Go, color=np.array([107,139,164])/255., ls='solid', lw=linew, label=labelList[1])
-        plt.plot(Cortex_G_mean_FailedStop, color='tomato', ls='--', lw=linew, label=labelList[0])
-    plt.title('cortex-Go', fontsize=fsize)
-    #ax.axis([tmin, tmax, 0, 200])
-    ax.axis([tmin, tmax, 0, maxRate['Cortex-Go']])
-    ax.set_xticks(xTickValues)
-    ax.set_xticklabels(xTickLabels)
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_CortexG)                    
-    #'''
-
-
-    #'''#
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,6))        
-    ax=plt.gca()
-    plt.axvspan(t_action0, t_action1, ymin=0, facecolor='g', alpha=0.1)
-    plt.axvline(t_goCue, color='g', linestyle='dotted', linewidth=linew)
-    plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)
-    if smoothing:
-        plt.plot(box_smooth(GPe_Proto2_mean_Go, boxlen), color=np.array([107,139,164])/255., ls='solid', lw=linew, label=labelList[1])
-        plt.plot(box_smooth(GPe_Proto2_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label=labelList[0])
-    else:
-        plt.plot(GPe_Proto2_mean_Go, color=np.array([107,139,164])/255., ls='solid', lw=linew, label=labelList[1])
-        plt.plot(GPe_Proto2_mean_FailedStop, color='tomato', ls='--', lw=linew, label=labelList[0])
-    plt.title('GPe-Cp', fontsize=fsize)
-    #ax.axis([tmin, tmax, 0, 200])
-    ax.axis([tmin, tmax, 0, maxRate['GPe-cp']])
-    ax.set_xticks(xTickValues)
-    ax.set_xticklabels(xTickLabels)
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_Proto2)                    
-    #'''
-
-
-    #'''#
-    ax_wrapper = []    
-    ax_wrapper.append(plt.subplot(nx,ny,10))        
-    ax=plt.gca()
-    plt.axvspan(t_action0, t_action1, ymin=0, facecolor='g', alpha=0.1)
-    plt.axvline(t_goCue, color='g', linestyle='dotted', linewidth=linew)
-    plt.axvline(t_stopCue, color='r', linestyle='dotted', linewidth=linew)
-    if smoothing:
-        plt.plot(box_smooth(Cortex_S_mean_Go, boxlen), color=np.array([107,139,164])/255., ls='solid', lw=linew, label=labelList[1])
-        plt.plot(box_smooth(Cortex_S_mean_FailedStop, boxlen), color='tomato', ls='--', lw=linew, label=labelList[0])
-    else:
-        plt.plot(Cortex_S_mean_Go, color=np.array([107,139,164])/255., lw=linew, label=labelList[1])
-        plt.plot(Cortex_S_mean_FailedStop, color='tomato', ls='--', lw=linew, label=labelList[0])
-    plt.title('cortex-Stop', fontsize=fsize)
-    #ax.axis([tmin, tmax, 0, 200])
-    ax.axis([tmin, tmax, 0, maxRate['Cortex-Stop']])
-    ax.set_xticks(xTickValues)
-    ax.set_xticklabels(xTickLabels)
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(fsize)
-    plot_pvalues(resultsFolder, alpha, dt, ax_wrapper, pvalue_list, pvalue_times, p_ind_CortexS)            
-    #'''
-
-
-
+        
+    ### GENERAL XLABEL
     fig=plt.gcf()
-    fig.text(0.4, 0.12, 'Time from Go cue [sec]', fontsize=fsize)
+    fig.text(0.4, 0.12, 'Time from Stop cue [sec]', fontsize=fsize)
 
+
+    ### LEGEND
     normalLine = mlines.Line2D([], [], color=np.array([107,139,164])/255., label=labelList[1])
     dashedLine = mlines.Line2D([], [], color='tomato', ls='--', label=labelList[0])
     xLegend = 0.5
     yLegend = 0.06
-    leg = plt.legend(handles=[normalLine,dashedLine], bbox_to_anchor=(xLegend,yLegend), bbox_transform=plt.gcf().transFigure, fontsize=fsize, loc='center', ncol=2) 
+    leg = plt.legend(handles=[normalLine,dashedLine], bbox_to_anchor=(xLegend,yLegend), bbox_transform=plt.gcf().transFigure, fontsize=fsize, loc='center', ncol=2)
+    
 
-    #plt.tight_layout()
+    ### SAVE
     plt.subplots_adjust(bottom=0.2, top=0.95, wspace=0.5, hspace=0.4, left=0.08, right=0.9) # wspace = 0.5, right=0.98
-
     if smoothing:
-        plt.savefig(saveFolderPlots+'meanrate_All_FailedStopVsCorrectGo_rate_paramsid'+str(int(param_id))+'_'+str(trials)+'trials_smoothed.svg', dpi=300)
+        plt.savefig(resultsFolder+'meanrate_All_FailedStopVsCorrectGo_rate_paramsid'+str(int(param_id))+'_'+str(trials)+'trials_smoothed.svg', dpi=300)
     else:
-        plt.savefig(saveFolderPlots+'meanrate_All_FailedStopVsCorrectGo_rate_paramsid'+str(int(param_id))+'_'+str(trials)+'trials.svg', dpi=300)
+        plt.savefig(resultsFolder+'meanrate_All_FailedStopVsCorrectGo_rate_paramsid'+str(int(param_id))+'_'+str(trials)+'trials.svg', dpi=300)
     plt.ioff()
     plt.show()
 

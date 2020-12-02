@@ -71,7 +71,7 @@ for pop in ['StrD1', 'StrD2', 'StrFSI', 'STN', 'GPeProto', 'GPeCp', 'GPeArky', '
 ### MONITORS ###
 mon = {}
 for pop in ['IntegratorGo', 'StrD1', 'StrD2', 'StrFSI', 'STN', 'GPeProto', 'GPeCp', 'GPeArky', 'SNr', 'SNrE', 'Thal', 'cortexGo', 'cortexStop', 'cortexPause']:
-    devineMonitorsHereAfterPopulationNamesChecked = None
+    defineMonitorsHereAfterPopulationNamesChecked = None
 mon['IntegratorGo']    = Monitor(Integrator, ['g_ampa', 'spike'])
 mon['StrD1']      = Monitor(STR_D1, ['spike'])
 mon['StrD2']      = Monitor(STR_D2, ['spike'])

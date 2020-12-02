@@ -1,8 +1,8 @@
 import numpy as np
 import pylab as plt
-from sim_params import params, wf
 import glob
 import matplotlib as mtl
+import os
 
 ### functions
 def sizedArrow(x0, y0, x1, y1, width, color, style):
@@ -12,9 +12,9 @@ def sizedArrow(x0, y0, x1, y1, width, color, style):
 
 ### Parameters
 p = {}
-p['loadFolder'] = 'data/'
-p['plotFolder'] = 'plots/multiloops/'
-p['networkIDs'] = np.arange(1,19)
+p['loadFolder'] = 'testSim2'
+p['plotFolder'] = '../results/'+p['loadFolder']
+p['networkIDs'] = [1,2,3,4,5]
 p['paramID']    = 8007
 p['oneFile']    = False
 fig = {}
@@ -52,6 +52,19 @@ font["axTicks"] = {'labelsize': 9}
 font["legend1"]  = {'fontsize': 9, 'fontweight' : 'normal'}
 font["legend2"]  = {'size': 9, 'weight' : 'normal'}
 
+### FOLDER CREATION
+dataDir=p['plotFolder']
+print(dataDir)
+quit()
+try:
+    os.makedirs(dataDir)
+except:
+    if os.path.isdir(dataDir):
+        print(dataDir+' already exists')
+    else:
+        print('could not create '+dataDir+' folder')
+        quit()
+
 ### Results
 stoppingPerformance = []
 lessionList = []
@@ -60,14 +73,14 @@ t_SSD_List = []
 ### Load
 if p['oneFile']:
     for i_netw_rep in p['networkIDs']:
-        container=np.load(p['loadFolder']+'SSD_variation_stoppingPerformance_paramId'+str(p['paramID'])+'_netID'+str(i_netw_rep)+'.npz')
+        container=np.load('../data/'+p['loadFolder']+'/SSD_variation_stoppingPerformance_paramId'+str(p['paramID'])+'_netID'+str(i_netw_rep)+'.npz')
         stoppingPerformance.append(container['stoppingPerformance'])
         lessionList=container['lessionList']
         t_SSD_List=container['t_SSD_List']
     stoppingPerformance = np.array(stoppingPerformance)
 else:
 ### single files
-    files=glob.glob(p['loadFolder']+'SSD_variation_stoppingPerformance*_paramId'+str(p['paramID'])+'*')
+    files=glob.glob('../data/'+p['loadFolder']+'/SSD_variation_stoppingPerformance*_paramId'+str(p['paramID'])+'*')
     for f in files:
         if 'Arky' in f or 'STN' in f or 'Proto2' in f or 'None' in f:
             stoppingPerformance.append(np.load(f))
@@ -131,7 +144,7 @@ leg=ax.legend((line[lession] for lession in fig['legend_order']), (fig['legend_n
 leg._legend_box.align = "left"
 
 ### save
-plt.savefig(p['plotFolder']+'SSD_variation_paramID'+str(p['paramID'])+'.svg')
+plt.savefig(p['plotFolder']+'/SSD_variation_paramID'+str(p['paramID'])+'.svg')
 
 
 

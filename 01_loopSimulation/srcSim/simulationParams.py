@@ -1,5 +1,5 @@
 paramsS = {}
 
-paramsS['trials'] = 5
+paramsS['trials'] = 50
 paramsS['makeParameterVariations'] = 0
-paramsS['saveFolder'] = 'testSim'
+paramsS['saveFolder'] = 'longertestSim'
