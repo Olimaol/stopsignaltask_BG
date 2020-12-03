@@ -100,7 +100,7 @@ for lession_Idx, lession in enumerate(paramsS['lesionList']):
 
             ### calculate all eventTIMES
             GOCUE     = np.round(get_time(),1)
-            STOPCUE   = GOCUE + params['t_SSD']
+            STOPCUE   = GOCUE + t_SSD
             STN1ON    = GOCUE
             STN1OFF   = STN1ON + params['t_cortexPauseDuration']
             GOON      = GOCUE + params['t_delayGo'] + int(np.clip(params['t_delayGoSD'] * np.random.randn(),-params['t_delayGo'],None))

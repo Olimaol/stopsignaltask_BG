@@ -12,7 +12,7 @@ def sizedArrow(x0, y0, x1, y1, width, color, style):
 
 ### Parameters
 p = {}
-p['loadFolder'] = 'testSim2'
+p['loadFolder'] = 'testSim'
 p['plotFolder'] = '../results/'+p['loadFolder']
 p['networkIDs'] = [1,2,3,4,5]
 p['paramID']    = 8007
@@ -54,8 +54,6 @@ font["legend2"]  = {'size': 9, 'weight' : 'normal'}
 
 ### FOLDER CREATION
 dataDir=p['plotFolder']
-print(dataDir)
-quit()
 try:
     os.makedirs(dataDir)
 except:
