@@ -45,8 +45,8 @@ def read_arky_data_Bogacz2016():
     sem_Arky_Hz = np.nan * np.ones(32)    
     sem_Proto_Hz = np.nan * np.ones(32)    
 
-    #with open('data/Bogacz_etal_2016_S1data.csv', 'rb') as csvfile:    # Python2
-    with open('data/Bogacz_etal_2016_S1data.csv', newline='') as csvfile:    # Python3
+    #with open('../experimental/Bogacz_etal_2016_S1data.csv', 'rb') as csvfile:    # Python2
+    with open('../experimental/Bogacz_etal_2016_S1data.csv', newline='') as csvfile:    # Python3
         reader = csv.reader(csvfile, delimiter=',')
         for row in reader:
             i_line = int(reader.line_num)

@@ -466,7 +466,16 @@ plt.title('Responses to step currents', fontsize=1.2*fsize)
 plt.subplots_adjust(bottom=0.08, top=0.9, wspace=0.3, hspace=0.35, left=0.12)#, right=0.85 )
 
 #plt.savefig('plots/compare_proto_arky_paramset'+str(paramset)+'.png')#, dpi=300)
-plt.savefig('plots/compare_proto_arky_fit_expdata_dt.svg', dpi=300)
+resultsDir='../results'
+try:
+    os.makedirs(resultsDir)
+except:
+    if os.path.isdir(resultsDir):
+        print(resultsDir+' already exists')
+    else:
+        print('could not create '+resultsDir+' folder')
+        quit()
+plt.savefig(resultsDir+'/compare_proto_arky_fit_expdata_dt.svg', dpi=300)
 
 plt.ioff()
 plt.show()

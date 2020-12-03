@@ -112,16 +112,14 @@ if p['oneFile']:
     for lessionIdx, lession in enumerate(lessionList):
         ax.errorbar(t_SSD_List, stoppingPerformance_mean[lessionIdx], yerr=stoppingPerformance_sd[lessionIdx], label=str(lession), alpha=0.7)
 else:
-    line = {}
+    line = {lession:mtl.lines.Line2D([], [], alpha=0) for lession in fig['legend_order']}
     for lessionIdx, lession in enumerate(np.unique(data[1])):
         mean = plotData[lession+'_mean']
         sd = plotData[lession+'_sd']
         time = np.sort(np.unique(data[2].astype(int)))[:len(mean)]
-        #ax.errorbar(time, mean, yerr=sd, label=str(lession), alpha=0.7, linewidth=fig['linewidth'], color=fig['colors'][lession], linestyle=fig['linestyles'][lession])
         ax.fill_between(time, np.array(mean)-np.array(sd), np.array(mean)+np.array(sd), color=fig['colors'][lession], alpha=0.4, linewidth=0)
         line[lession], = ax.plot(time, mean, label=fig['legend_names'][lession], linewidth=fig['linewidth'], color=fig['colors'][lession], linestyle=fig['linestyles'][lession])
-            
-        #ax.scatter(data[2,data[1]==lession].astype(int), data[0,data[1]==lession].astype(float), label=str(lession), linewidths=0, s=1)
+
 plt.xlim(fig['xlim'][0],fig['xlim'][1])
 plt.xticks(fig['xtickVals'],fig['xtickNames'])
 plt.yticks(fig['ytickVals'],fig['ytickNames'])
@@ -130,14 +128,6 @@ ax.set_xlabel(fig['xlabel'], **font["axLabel"])
 ax.set_ylabel(fig['ylabel'], **font["axLabel"])
 plt.subplots_adjust(bottom = fig['bottom'], top = fig['top'], right = fig['right'], left = fig['left'])
 ### legend
-"""legendField=mtl.patches.FancyBboxPatch(xy=(fig['legend_left'],fig['legend_bottom']),width=fig['legend_width'],height=fig['legend_height'],boxstyle=mtl.patches.BoxStyle.Round(pad=fig['legend_pad']),bbox_transmuter=None,mutation_scale=1,mutation_aspect=None,transform=ax.transAxes,**dict(linewidth=2, fc='w',ec='k',clip_on=False))
-ax.add_patch(legendField)
-for Idx in range(len(fig['legend_order'])):
-    lession = fig['legend_order'][Idx]
-    x0 ,y0 = fig['legend_left']+fig['legend_freespace'], fig['legend_bottom']+fig['legend_height']/2.+(fig['legend_betweenspace']/2.)*(3-2*Idx)
-    x1 ,y1 = x0+fig['legend_linelength'], y0
-    sizedArrow(x0, y0, x1, y1, fig['linewidth'], fig['colors'][lession], fig['linestyles'][lession])
-    plt.text(x1+fig['legend_freespace'],y1,fig['legend_names'][lession],ha='left',va='center',transform=ax.transAxes, **font["legend1"])"""
 leg=ax.legend((line[lession] for lession in fig['legend_order']), (fig['legend_names'][lession] for lession in fig['legend_order']), prop=font["legend2"], title=fig['legend_title'])
 leg._legend_box.align = "left"
 

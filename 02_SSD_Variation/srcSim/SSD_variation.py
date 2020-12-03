@@ -15,14 +15,8 @@ import sys
 import os
 import numpy as np
 
-#from BGmodelSST.populations import Stoppinput1, Cortex_S, Cortex_G, Integrator, IntegratorStop
-#from BGmodelSST.projections import STNSNr, STNGPe_Proto, STNESTN, GPe_ArkySTR_D1, GPe_ArkySTR_D2, GPe_ArkySTR_FSI, GPe_ArkyGPe_Proto, STNGPe_Arky, GPe_Proto2GPe_Proto, STNGPe_Proto2, GPe_ArkyGPe_Proto2, GPe_Proto2STR_D1, GPe_Proto2STR_D2, GPe_Proto2STR_FSI, GPe_Proto2GPe_Arky, GPe_Proto2IntegratorStop, STNGPe_Arky2, GPe_Proto2GPe_Arky2
-
-from BGmodelSST.analysis import calc_KW_stats_all, calc_meanrate_std_failed_correct, get_rates_failed_correct, get_poprate_aligned_onset, custom_poprate, calc_meanrate_std_Fast_Slow, get_rates_allGo_fastGo_slowGo
-from BGmodelSST.neuronmodels import Izhikevich_neuron, Izhikevich_STR_neuron, STR_FSI_neuron, Integrator_neuron
-from BGmodelSST.populations import Stoppinput1, Cortex_S, Cortex_G, STR_D1, STR_D2, STN, SNr, GPe_Proto, Thal, Integrator, IntegratorStop, GPeE, SNrE, STNE, STR_FSI, STRE, GPe_Arky, TestThalnoise, GPe_Proto2
-from BGmodelSST.projections import Stoppinput1STN, Cortex_GSTR_D1, Cortex_GSTR_D2, Cortex_GSTR_FSI, Cortex_GThal, Cortex_SGPe_Arky, STR_D1SNr, STR_D2GPe_Proto, STNSNr, STNGPe_Proto, GPe_ProtoSTN, GPe_ProtoSNr, SNrThal, ThalIntegrator, GPeEGPe_Proto, GPEGPe_Arky, SNrESNr, STNESTN, STR_FSISTR_D1, STR_FSISTR_D2, STRESTR_D1, STRESTR_D2, GPe_ArkySTR_D1, GPe_ArkySTR_D2, TestThalnoiseThal,STRESTR_FSI, STR_FSISTR_FSI, GPe_ArkySTR_FSI, GPe_ArkyGPe_Proto, GPe_ProtoGPe_Arky, STR_D2GPe_Arky, GPe_ProtoSTR_FSI, STR_D1STR_D1, STR_D1STR_D2, STR_D2STR_D1, STR_D2STR_D2, Cortex_GSTR_D2, Cortex_SGPe_Proto, STNGPe_Arky, ThalSD1, ThalSD2, ThalFSI, GPe_ProtoGPe_Proto2, GPe_Proto2GPe_Proto, STR_D2GPe_Proto2, STR_D1GPe_Proto2, STNGPe_Proto2, Cortex_SGPe_Proto2, GPe_ArkyGPe_Proto2, GPe_Proto2STR_D1, GPe_Proto2STR_D2, GPe_Proto2STR_FSI, GPe_Proto2GPe_Arky, GPe_Proto2IntegratorStop, EProto1GPe_Proto, EProto2GPe_Proto2, EArkyGPe_Arky, Cortex_SGPe_Arky2, STR_D2GPe_Arky2, GPe_ProtoGPe_Arky2, STNGPe_Arky2, GPe_Proto2GPe_Arky2, EArkyGPe_Arky2, GPe_Arky2STR_D1, GPe_Arky2STR_D2, GPe_Arky2STR_FSI
-
+from BGmodelSST.populations import Stoppinput1, Cortex_S, Cortex_G, Integrator, IntegratorStop
+from BGmodelSST.projections import STNSNr, STNGPe_Proto, STNESTN, GPe_ArkySTR_D1, GPe_ArkySTR_D2, GPe_ArkySTR_FSI, GPe_ArkyGPe_Proto, STNGPe_Arky, GPe_Proto2GPe_Proto, STNGPe_Proto2, GPe_ArkyGPe_Proto2, GPe_Proto2STR_D1, GPe_Proto2STR_D2, GPe_Proto2STR_FSI, GPe_Proto2GPe_Arky, GPe_Proto2IntegratorStop, STNGPe_Arky2, GPe_Proto2GPe_Arky2
 
 from simulationParams import paramsS
 

@@ -62,14 +62,3 @@ params['toRGB']                 = {'blue':np.array([3,67,223])/255., 'cyan':np.a
 params['Fig7_order']            = ['GPeArky', 'StrD1', 'StrD2', 'STN', 'cortexGo', 'GPeCp', 'GPeProto', 'SNr', 'Thal', 'cortexStop', 'StrFSI']
 params['titles_Code_to_Script'] = {'cortexGo':'cortex-Go', 'cortexStop':'cortex-Stop', 'cortexPause':'cortex-Pause', 'StrD1':'StrD1', 'StrD2':'StrD2', 'StrFSI':'StrFSI', 'GPeProto':'GPe-Proto', 'GPeArky':'GPe-Arky', 'GPeCp':'GPe-Cp', 'STN':'STN', 'SNr':'SNr', 'Thal':'thalamus', 'IntegratorGo':'Integrator-Go', 'IntegratorStop':'Integrator-Stop'}
 
-    
-### SOME OUTDATED PARAMETERS TODO: remove them
-#params['tau_syn_factor'] = 1.0
-#params['TrialType'] = 2.0
-#params['ratesProto1vs2'] = 0.7
-#params['t_StopDuration'] = 500.0
-params['Stop_Proto'] = 0.0
-params['Arky_CortexGo'] = 0.0
-params['Arky_Int'] = -10000.0
-params['Gpe_Proto2_Int'] = -10000.0
-params['Int_init'] = -10000.0
